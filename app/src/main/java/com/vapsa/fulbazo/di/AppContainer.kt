@@ -1,7 +1,9 @@
 package com.vapsa.fulbazo.di
 
 import com.vapsa.fulbazo.data.repository.FakeAuthRepository
+import com.vapsa.fulbazo.data.repository.FakeStatsRepository
 import com.vapsa.fulbazo.domain.repository.AuthRepository
+import com.vapsa.fulbazo.domain.repository.StatsRepository
 
 /**
  * Contenedor simple de dependencias compartidas por toda la app.
@@ -12,4 +14,5 @@ import com.vapsa.fulbazo.domain.repository.AuthRepository
  */
 object AppContainer {
     val authRepository: AuthRepository by lazy { FakeAuthRepository() }
+    val statsRepository: StatsRepository by lazy { FakeStatsRepository() }
 }
