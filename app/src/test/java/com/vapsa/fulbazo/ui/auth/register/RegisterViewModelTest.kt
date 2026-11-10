@@ -11,6 +11,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import java.time.LocalDate
 
 class RegisterViewModelTest {
 
@@ -18,12 +19,14 @@ class RegisterViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val repository = FakeAuthRepository(latencyMillis = 0)
-    private val viewModel = RegisterViewModel(repository)
+    private val today = LocalDate.of(2026, 11, 10)
+    private val viewModel = RegisterViewModel(repository, today = { today })
 
     private fun fillValidForm(email: String = "nuevo@fulbazo.com", nickname: String = "nuevo10") {
         viewModel.onFirstNameChange("Lucía")
         viewModel.onLastNameChange("Quispe")
         viewModel.onNicknameChange(nickname)
+        viewModel.onBirthDateChange(LocalDate.of(2004, 5, 20))
         viewModel.onPhoneChange("912345678")
         viewModel.onEmailChange(email)
         viewModel.onPasswordChange("secreto1")
@@ -40,6 +43,15 @@ class RegisterViewModelTest {
         assertEquals(FieldError.REQUIRED, errors.phone)
         assertEquals(FieldError.REQUIRED, errors.email)
         assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun under13_showsTooYoung() {
+        fillValidForm()
+        viewModel.onBirthDateChange(today.minusYears(12))
+        viewModel.register()
+
+        assertEquals(FieldError.TOO_YOUNG, viewModel.uiState.value.errors.birthDate)
     }
 
     @Test

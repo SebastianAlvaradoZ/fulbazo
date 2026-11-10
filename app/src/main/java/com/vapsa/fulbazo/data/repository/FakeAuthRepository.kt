@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.time.LocalDate
 import java.util.UUID
 
 /**
@@ -33,6 +34,7 @@ class FakeAuthRepository(
             nickname = "demo",
             phone = "987654321",
             email = "demo@fulbazo.com",
+            birthDate = LocalDate.of(2000, 1, 1),
         )
         put(demo.email, StoredUser(demo, "demo123"))
     }
@@ -67,6 +69,7 @@ class FakeAuthRepository(
                 nickname = newUser.nickname,
                 phone = newUser.phone,
                 email = email,
+                birthDate = newUser.birthDate,
             ).also { users[email] = StoredUser(it, newUser.password) }
         }
         _currentUser.value = user

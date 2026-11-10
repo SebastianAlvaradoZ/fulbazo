@@ -23,6 +23,10 @@
     <string name="register_last_name">Apellido</string>
     <string name="register_nickname">Apodo</string>
     <string name="register_nickname_hint">Es el nombre que verán los demás jugadores</string>
+    <string name="register_birth_date">Fecha de nacimiento</string>
+    <string name="register_pick_date">Elegir fecha</string>
+    <string name="dialog_accept">Aceptar</string>
+    <string name="dialog_cancel">Cancelar</string>
     <string name="register_phone">Celular</string>
     <string name="register_phone_prefix">+51 </string>
     <string name="register_password_hint">Mínimo %1$d caracteres</string>
@@ -38,6 +42,8 @@
     <string name="error_invalid_email">Ingresa un correo válido</string>
     <string name="error_password_too_short">La contraseña debe tener al menos %1$d caracteres</string>
     <string name="error_password_mismatch">Las contraseñas no coinciden</string>
+    <string name="error_birth_date_in_future">La fecha no puede ser futura</string>
+    <string name="error_too_young">Debes tener al menos %1$d años</string>
 
     <!-- Errores de autenticación -->
     <string name="error_invalid_credentials">Correo o contraseña incorrectos</string>

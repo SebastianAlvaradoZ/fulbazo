@@ -15,9 +15,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class RegisterViewModel(
     private val authRepository: AuthRepository,
+    private val today: () -> LocalDate = { LocalDate.now() },
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterUiState())
@@ -33,6 +35,10 @@ class RegisterViewModel(
 
     fun onNicknameChange(value: String) = updateField {
         copy(nickname = value, errors = errors.copy(nickname = null))
+    }
+
+    fun onBirthDateChange(value: LocalDate) = updateField {
+        copy(birthDate = value, errors = errors.copy(birthDate = null))
     }
 
     fun onPhoneChange(value: String) = updateField {
@@ -71,6 +77,7 @@ class RegisterViewModel(
                     nickname = state.nickname.trim(),
                     phone = UserValidator.normalizePhone(state.phone),
                     email = state.email.trim(),
+                    birthDate = requireNotNull(state.birthDate),
                     password = state.password,
                 ),
             )
@@ -92,6 +99,7 @@ class RegisterViewModel(
         firstName = UserValidator.validateName(state.firstName),
         lastName = UserValidator.validateName(state.lastName),
         nickname = UserValidator.validateNickname(state.nickname),
+        birthDate = UserValidator.validateBirthDate(state.birthDate, today()),
         phone = UserValidator.validatePhone(state.phone),
         email = UserValidator.validateEmail(state.email),
         password = UserValidator.validatePassword(state.password),

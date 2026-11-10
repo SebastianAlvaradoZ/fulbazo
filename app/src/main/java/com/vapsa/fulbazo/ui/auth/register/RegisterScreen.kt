@@ -41,10 +41,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.validation.UserValidator
 import com.vapsa.fulbazo.ui.auth.message
+import com.vapsa.fulbazo.ui.components.DateField
 import com.vapsa.fulbazo.ui.components.ErrorBanner
 import com.vapsa.fulbazo.ui.components.FormTextField
 import com.vapsa.fulbazo.ui.components.PasswordTextField
 import com.vapsa.fulbazo.ui.theme.FulbazoTheme
+import java.time.LocalDate
 
 /**
  * Punto de entrada con ViewModel: observa el estado y avisa cuando termina el registro.
@@ -70,6 +72,7 @@ fun RegisterRoute(
             onFirstNameChange = viewModel::onFirstNameChange,
             onLastNameChange = viewModel::onLastNameChange,
             onNicknameChange = viewModel::onNicknameChange,
+            onBirthDateChange = viewModel::onBirthDateChange,
             onPhoneChange = viewModel::onPhoneChange,
             onEmailChange = viewModel::onEmailChange,
             onPasswordChange = viewModel::onPasswordChange,
@@ -87,6 +90,7 @@ data class RegisterActions(
     val onFirstNameChange: (String) -> Unit = {},
     val onLastNameChange: (String) -> Unit = {},
     val onNicknameChange: (String) -> Unit = {},
+    val onBirthDateChange: (LocalDate) -> Unit = {},
     val onPhoneChange: (String) -> Unit = {},
     val onEmailChange: (String) -> Unit = {},
     val onPasswordChange: (String) -> Unit = {},
@@ -170,6 +174,14 @@ fun RegisterScreen(
                 error = errors.nickname?.message(),
                 supportingText = stringResource(R.string.register_nickname_hint),
                 enabled = enabled,
+            )
+            DateField(
+                value = uiState.birthDate,
+                onValueChange = actions.onBirthDateChange,
+                label = stringResource(R.string.register_birth_date),
+                error = errors.birthDate?.message(),
+                enabled = enabled,
+                initialDisplayedDate = LocalDate.now().minusYears(18),
             )
             FormTextField(
                 value = uiState.phone,

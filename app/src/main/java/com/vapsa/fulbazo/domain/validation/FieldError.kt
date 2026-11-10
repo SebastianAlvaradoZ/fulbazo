@@ -11,4 +11,6 @@ enum class FieldError {
     INVALID_EMAIL,
     PASSWORD_TOO_SHORT,
     PASSWORD_MISMATCH,
+    BIRTH_DATE_IN_FUTURE,
+    TOO_YOUNG,
 }

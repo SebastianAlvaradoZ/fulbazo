@@ -1,5 +1,7 @@
 package com.vapsa.fulbazo.domain.model
 
+import java.time.LocalDate
+
 /**
  * Usuario registrado en Fulbazo.
  *
@@ -12,6 +14,7 @@ data class User(
     val nickname: String,
     val phone: String,
     val email: String,
+    val birthDate: LocalDate,
 ) {
     val fullName: String get() = "$firstName $lastName"
 }

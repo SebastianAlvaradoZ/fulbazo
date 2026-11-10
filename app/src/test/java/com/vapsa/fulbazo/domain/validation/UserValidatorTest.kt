@@ -3,6 +3,7 @@ package com.vapsa.fulbazo.domain.validation
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import java.time.LocalDate
 
 class UserValidatorTest {
 
@@ -34,6 +35,21 @@ class UserValidatorTest {
         assertEquals(FieldError.INVALID_PHONE, UserValidator.validatePhone("887654321"))
         assertEquals(FieldError.INVALID_PHONE, UserValidator.validatePhone("98765432"))
         assertEquals(FieldError.REQUIRED, UserValidator.validatePhone(""))
+    }
+
+    @Test
+    fun birthDate_requiresMinimumAge() {
+        val today = LocalDate.of(2026, 11, 10)
+        assertNull(UserValidator.validateBirthDate(LocalDate.of(2013, 11, 10), today))
+        assertEquals(
+            FieldError.TOO_YOUNG,
+            UserValidator.validateBirthDate(LocalDate.of(2013, 11, 11), today),
+        )
+        assertEquals(
+            FieldError.BIRTH_DATE_IN_FUTURE,
+            UserValidator.validateBirthDate(LocalDate.of(2027, 1, 1), today),
+        )
+        assertEquals(FieldError.REQUIRED, UserValidator.validateBirthDate(null, today))
     }
 
     @Test

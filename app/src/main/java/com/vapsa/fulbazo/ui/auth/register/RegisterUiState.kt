@@ -2,6 +2,7 @@ package com.vapsa.fulbazo.ui.auth.register
 
 import com.vapsa.fulbazo.domain.model.AuthError
 import com.vapsa.fulbazo.domain.validation.FieldError
+import java.time.LocalDate
 
 /**
  * Estado completo de la pantalla de registro.
@@ -10,6 +11,7 @@ data class RegisterUiState(
     val firstName: String = "",
     val lastName: String = "",
     val nickname: String = "",
+    val birthDate: LocalDate? = null,
     val phone: String = "",
     val email: String = "",
     val password: String = "",
@@ -27,6 +29,7 @@ data class RegisterErrors(
     val firstName: FieldError? = null,
     val lastName: FieldError? = null,
     val nickname: FieldError? = null,
+    val birthDate: FieldError? = null,
     val phone: FieldError? = null,
     val email: FieldError? = null,
     val password: FieldError? = null,
@@ -34,6 +37,6 @@ data class RegisterErrors(
 ) {
     val hasErrors: Boolean
         get() = listOf(
-            firstName, lastName, nickname, phone, email, password, confirmPassword,
+            firstName, lastName, nickname, birthDate, phone, email, password, confirmPassword,
         ).any { it != null }
 }
