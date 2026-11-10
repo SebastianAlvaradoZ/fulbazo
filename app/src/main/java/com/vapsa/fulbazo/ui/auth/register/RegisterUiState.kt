@@ -12,6 +12,7 @@ data class RegisterUiState(
     val lastName: String = "",
     val nickname: String = "",
     val birthDate: LocalDate? = null,
+    val district: String? = null,
     val phone: String = "",
     val email: String = "",
     val password: String = "",
@@ -30,6 +31,7 @@ data class RegisterErrors(
     val lastName: FieldError? = null,
     val nickname: FieldError? = null,
     val birthDate: FieldError? = null,
+    val district: FieldError? = null,
     val phone: FieldError? = null,
     val email: FieldError? = null,
     val password: FieldError? = null,
@@ -37,6 +39,7 @@ data class RegisterErrors(
 ) {
     val hasErrors: Boolean
         get() = listOf(
-            firstName, lastName, nickname, birthDate, phone, email, password, confirmPassword,
+            firstName, lastName, nickname, birthDate, district, phone, email, password,
+            confirmPassword,
         ).any { it != null }
 }

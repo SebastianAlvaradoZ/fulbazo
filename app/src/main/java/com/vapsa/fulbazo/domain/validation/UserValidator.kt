@@ -1,5 +1,6 @@
 package com.vapsa.fulbazo.domain.validation
 
+import com.vapsa.fulbazo.domain.model.ArequipaDistricts
 import java.time.LocalDate
 import java.time.Period
 
@@ -63,6 +64,12 @@ object UserValidator {
         value == null -> FieldError.REQUIRED
         value.isAfter(today) -> FieldError.BIRTH_DATE_IN_FUTURE
         Period.between(value, today).years < MIN_AGE_YEARS -> FieldError.TOO_YOUNG
+        else -> null
+    }
+
+    fun validateDistrict(value: String?): FieldError? = when {
+        value.isNullOrBlank() -> FieldError.REQUIRED
+        value !in ArequipaDistricts.all -> FieldError.INVALID_DISTRICT
         else -> null
     }
 

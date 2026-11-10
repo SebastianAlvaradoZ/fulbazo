@@ -53,6 +53,13 @@ class UserValidatorTest {
     }
 
     @Test
+    fun district_mustBeFromList() {
+        assertNull(UserValidator.validateDistrict("Cayma"))
+        assertEquals(FieldError.REQUIRED, UserValidator.validateDistrict(null))
+        assertEquals(FieldError.INVALID_DISTRICT, UserValidator.validateDistrict("Lima"))
+    }
+
+    @Test
     fun email_validatesFormat() {
         assertNull(UserValidator.validateEmail("jugador@fulbazo.com"))
         assertEquals(FieldError.INVALID_EMAIL, UserValidator.validateEmail("jugador@fulbazo"))

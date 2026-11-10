@@ -15,6 +15,7 @@ data class User(
     val phone: String,
     val email: String,
     val birthDate: LocalDate,
+    val district: String,
 ) {
     val fullName: String get() = "$firstName $lastName"
 }

@@ -35,6 +35,7 @@ class FakeAuthRepository(
             phone = "987654321",
             email = "demo@fulbazo.com",
             birthDate = LocalDate.of(2000, 1, 1),
+            district = "Yanahuara",
         )
         put(demo.email, StoredUser(demo, "demo123"))
     }
@@ -70,6 +71,7 @@ class FakeAuthRepository(
                 phone = newUser.phone,
                 email = email,
                 birthDate = newUser.birthDate,
+                district = newUser.district,
             ).also { users[email] = StoredUser(it, newUser.password) }
         }
         _currentUser.value = user

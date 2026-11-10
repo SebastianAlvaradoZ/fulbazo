@@ -12,5 +12,6 @@ data class NewUser(
     val phone: String,
     val email: String,
     val birthDate: LocalDate,
+    val district: String,
     val password: String,
 )

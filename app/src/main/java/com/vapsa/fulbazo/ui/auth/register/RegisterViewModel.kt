@@ -41,6 +41,10 @@ class RegisterViewModel(
         copy(birthDate = value, errors = errors.copy(birthDate = null))
     }
 
+    fun onDistrictChange(value: String) = updateField {
+        copy(district = value, errors = errors.copy(district = null))
+    }
+
     fun onPhoneChange(value: String) = updateField {
         // Solo dígitos y como máximo 9, para que no se pueda escribir de más.
         copy(phone = value.filter(Char::isDigit).take(9), errors = errors.copy(phone = null))
@@ -78,6 +82,7 @@ class RegisterViewModel(
                     phone = UserValidator.normalizePhone(state.phone),
                     email = state.email.trim(),
                     birthDate = requireNotNull(state.birthDate),
+                    district = requireNotNull(state.district),
                     password = state.password,
                 ),
             )
@@ -100,6 +105,7 @@ class RegisterViewModel(
         lastName = UserValidator.validateName(state.lastName),
         nickname = UserValidator.validateNickname(state.nickname),
         birthDate = UserValidator.validateBirthDate(state.birthDate, today()),
+        district = UserValidator.validateDistrict(state.district),
         phone = UserValidator.validatePhone(state.phone),
         email = UserValidator.validateEmail(state.email),
         password = UserValidator.validatePassword(state.password),

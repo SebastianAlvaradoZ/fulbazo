@@ -27,6 +27,7 @@ fun FieldError.message(): String = when (this) {
     )
     FieldError.PASSWORD_MISMATCH -> stringResource(R.string.error_password_mismatch)
     FieldError.BIRTH_DATE_IN_FUTURE -> stringResource(R.string.error_birth_date_in_future)
+    FieldError.INVALID_DISTRICT -> stringResource(R.string.error_invalid_district)
     FieldError.TOO_YOUNG -> stringResource(R.string.error_too_young, UserValidator.MIN_AGE_YEARS)
 }
 

@@ -27,6 +27,7 @@ class RegisterViewModelTest {
         viewModel.onLastNameChange("Quispe")
         viewModel.onNicknameChange(nickname)
         viewModel.onBirthDateChange(LocalDate.of(2004, 5, 20))
+        viewModel.onDistrictChange("Cerro Colorado")
         viewModel.onPhoneChange("912345678")
         viewModel.onEmailChange(email)
         viewModel.onPasswordChange("secreto1")
@@ -40,6 +41,8 @@ class RegisterViewModelTest {
         val errors = viewModel.uiState.value.errors
         assertEquals(FieldError.REQUIRED, errors.firstName)
         assertEquals(FieldError.REQUIRED, errors.nickname)
+        assertEquals(FieldError.REQUIRED, errors.birthDate)
+        assertEquals(FieldError.REQUIRED, errors.district)
         assertEquals(FieldError.REQUIRED, errors.phone)
         assertEquals(FieldError.REQUIRED, errors.email)
         assertFalse(viewModel.uiState.value.isLoading)
