@@ -9,4 +9,5 @@ object AppRoutes {
     const val MAP = "map"
     const val MATCH = "match"
     const val PROFILE = "profile"
+    const val MY_STATS = "my_stats"
 }

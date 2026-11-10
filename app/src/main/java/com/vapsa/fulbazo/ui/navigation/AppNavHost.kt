@@ -9,7 +9,8 @@ import com.vapsa.fulbazo.ui.auth.login.LoginRoute
 import com.vapsa.fulbazo.ui.auth.register.RegisterRoute
 import com.vapsa.fulbazo.ui.map.MapScreen
 import com.vapsa.fulbazo.ui.match.MatchesScreen
-import com.vapsa.fulbazo.ui.profile.ProfileScreen
+import com.vapsa.fulbazo.ui.profile.ProfileRoute
+import com.vapsa.fulbazo.ui.stats.MyStatsRoute
 
 @Composable
 fun AppNavHost(
@@ -36,7 +37,12 @@ fun AppNavHost(
         }
         composable(AppRoutes.MAP) { MapScreen() }
         composable(AppRoutes.MATCH) { MatchesScreen() }
-        composable(AppRoutes.PROFILE) { ProfileScreen() }
+        composable(AppRoutes.PROFILE) {
+            ProfileRoute(onEditStats = { navController.navigate(AppRoutes.MY_STATS) })
+        }
+        composable(AppRoutes.MY_STATS) {
+            MyStatsRoute(onNavigateBack = { navController.popBackStack() })
+        }
     }
 }
 
