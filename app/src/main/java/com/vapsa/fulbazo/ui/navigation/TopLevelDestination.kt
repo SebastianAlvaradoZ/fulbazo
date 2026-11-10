@@ -14,5 +14,6 @@ enum class TopLevelDestination(
 ) {
     MAP(AppRoutes.MAP, R.string.nav_map, R.drawable.ic_map),
     MATCHES(AppRoutes.MATCH, R.string.nav_matches, R.drawable.ic_matches),
+    FRIENDS(AppRoutes.FRIENDS, R.string.nav_friends, R.drawable.ic_group),
     PROFILE(AppRoutes.PROFILE, R.string.nav_profile, R.drawable.ic_profile),
 }

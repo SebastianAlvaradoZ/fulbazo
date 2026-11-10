@@ -8,6 +8,16 @@ object AppRoutes {
     const val REGISTER = "register"
     const val MAP = "map"
     const val MATCH = "match"
+    const val FRIENDS = "friends"
     const val PROFILE = "profile"
     const val MY_STATS = "my_stats"
+    const val CREATE_MATCH = "create_match"
+    const val INVITATIONS = "invitations"
+
+    const val GROUP_ID_ARG = "groupId"
+    const val GROUP_EDITOR = "group_editor?$GROUP_ID_ARG={$GROUP_ID_ARG}"
+
+    /** Sin [groupId] abre el editor para crear un grupo nuevo. */
+    fun groupEditor(groupId: String? = null): String =
+        if (groupId == null) "group_editor" else "group_editor?$GROUP_ID_ARG=$groupId"
 }
