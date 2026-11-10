@@ -3,4 +3,46 @@
     <string name="nav_map">Mapa</string>
     <string name="nav_matches">Partidos</string>
     <string name="nav_profile">Perfil</string>
+
+    <!-- Autenticación -->
+    <string name="auth_tagline">Encuentra con quién jugar en Arequipa</string>
+    <string name="auth_email">Correo electrónico</string>
+    <string name="auth_password">Contraseña</string>
+    <string name="auth_confirm_password">Confirmar contraseña</string>
+    <string name="auth_show_password">Mostrar contraseña</string>
+    <string name="auth_hide_password">Ocultar contraseña</string>
+    <string name="auth_back">Volver</string>
+
+    <string name="login_button">Iniciar sesión</string>
+    <string name="login_no_account">¿No tienes cuenta?</string>
+    <string name="login_go_to_register">Regístrate</string>
+
+    <string name="register_title">Crear cuenta</string>
+    <string name="register_subtitle">Completa tus datos para empezar a jugar</string>
+    <string name="register_first_name">Nombre</string>
+    <string name="register_last_name">Apellido</string>
+    <string name="register_nickname">Apodo</string>
+    <string name="register_nickname_hint">Es el nombre que verán los demás jugadores</string>
+    <string name="register_phone">Celular</string>
+    <string name="register_phone_prefix">+51 </string>
+    <string name="register_password_hint">Mínimo %1$d caracteres</string>
+    <string name="register_button">Crear cuenta</string>
+    <string name="register_have_account">¿Ya tienes cuenta?</string>
+    <string name="register_go_to_login">Inicia sesión</string>
+
+    <!-- Errores de campos -->
+    <string name="error_required">Este campo es obligatorio</string>
+    <string name="error_invalid_name">Solo letras, mínimo 2 caracteres</string>
+    <string name="error_invalid_nickname">De %1$d a %2$d caracteres: letras, números, punto o guion bajo</string>
+    <string name="error_invalid_phone">Ingresa un celular de 9 dígitos que empiece en 9</string>
+    <string name="error_invalid_email">Ingresa un correo válido</string>
+    <string name="error_password_too_short">La contraseña debe tener al menos %1$d caracteres</string>
+    <string name="error_password_mismatch">Las contraseñas no coinciden</string>
+
+    <!-- Errores de autenticación -->
+    <string name="error_invalid_credentials">Correo o contraseña incorrectos</string>
+    <string name="error_email_in_use">Ya existe una cuenta con este correo</string>
+    <string name="error_nickname_in_use">Ese apodo ya está en uso, prueba con otro</string>
+    <string name="error_network">Sin conexión. Revisa tu internet e inténtalo de nuevo</string>
+    <string name="error_unknown">Ocurrió un error inesperado. Inténtalo de nuevo</string>
 </resources>
