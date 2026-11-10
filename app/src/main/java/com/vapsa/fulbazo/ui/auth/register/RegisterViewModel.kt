@@ -25,6 +25,9 @@ class RegisterViewModel(
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
 
+    /** Foto opcional: `null` quita la foto elegida. */
+    fun onPhotoChange(uri: String?) = updateField { copy(photoUri = uri) }
+
     fun onFirstNameChange(value: String) = updateField {
         copy(firstName = value, errors = errors.copy(firstName = null))
     }
@@ -84,6 +87,7 @@ class RegisterViewModel(
                     birthDate = requireNotNull(state.birthDate),
                     district = requireNotNull(state.district),
                     password = state.password,
+                    photoUri = state.photoUri,
                 ),
             )
             _uiState.update {

@@ -8,6 +8,7 @@ import java.time.LocalDate
  * Estado completo de la pantalla de registro.
  */
 data class RegisterUiState(
+    val photoUri: String? = null,
     val firstName: String = "",
     val lastName: String = "",
     val nickname: String = "",

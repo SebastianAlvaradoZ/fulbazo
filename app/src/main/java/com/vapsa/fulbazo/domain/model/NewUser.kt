@@ -14,4 +14,5 @@ data class NewUser(
     val birthDate: LocalDate,
     val district: String,
     val password: String,
+    val photoUri: String? = null,
 )

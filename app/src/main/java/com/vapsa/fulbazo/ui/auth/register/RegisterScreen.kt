@@ -1,5 +1,10 @@
 package com.vapsa.fulbazo.ui.auth.register
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -47,6 +53,7 @@ import com.vapsa.fulbazo.ui.components.DropdownField
 import com.vapsa.fulbazo.ui.components.ErrorBanner
 import com.vapsa.fulbazo.ui.components.FormTextField
 import com.vapsa.fulbazo.ui.components.PasswordTextField
+import com.vapsa.fulbazo.ui.components.UserAvatar
 import com.vapsa.fulbazo.ui.theme.FulbazoTheme
 import java.time.LocalDate
 
@@ -60,6 +67,22 @@ fun RegisterRoute(
     viewModel: RegisterViewModel = viewModel(factory = RegisterViewModel.Factory),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    // Photo Picker del sistema: no necesita permisos de almacenamiento.
+    val photoPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null) {
+            // Conserva el acceso a la foto aunque se reinicie la app.
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                )
+            }
+            viewModel.onPhotoChange(uri.toString())
+        }
+    }
 
     LaunchedEffect(uiState.isRegistered) {
         if (uiState.isRegistered) {
@@ -71,6 +94,12 @@ fun RegisterRoute(
     RegisterScreen(
         uiState = uiState,
         actions = RegisterActions(
+            onPickPhoto = {
+                photoPicker.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                )
+            },
+            onRemovePhoto = { viewModel.onPhotoChange(null) },
             onFirstNameChange = viewModel::onFirstNameChange,
             onLastNameChange = viewModel::onLastNameChange,
             onNicknameChange = viewModel::onNicknameChange,
@@ -90,6 +119,8 @@ fun RegisterRoute(
  * Eventos que la vista de registro envía al ViewModel.
  */
 data class RegisterActions(
+    val onPickPhoto: () -> Unit = {},
+    val onRemovePhoto: () -> Unit = {},
     val onFirstNameChange: (String) -> Unit = {},
     val onLastNameChange: (String) -> Unit = {},
     val onNicknameChange: (String) -> Unit = {},
@@ -154,6 +185,14 @@ fun RegisterScreen(
                 ErrorBanner(message = it.message())
                 Spacer(Modifier.height(12.dp))
             }
+
+            PhotoSection(
+                photoUri = uiState.photoUri,
+                enabled = enabled,
+                onPickPhoto = actions.onPickPhoto,
+                onRemovePhoto = actions.onRemovePhoto,
+            )
+            Spacer(Modifier.height(8.dp))
 
             FormTextField(
                 value = uiState.firstName,
@@ -264,6 +303,39 @@ fun RegisterScreen(
                 )
                 TextButton(onClick = actions.onBackClick, enabled = enabled) {
                     Text(stringResource(R.string.register_go_to_login))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PhotoSection(
+    photoUri: String?,
+    enabled: Boolean,
+    onPickPhoto: () -> Unit,
+    onRemovePhoto: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        UserAvatar(
+            photoUri = photoUri,
+            contentDescription = stringResource(R.string.register_photo),
+            modifier = Modifier.clickable(enabled = enabled, onClick = onPickPhoto),
+        )
+        Row {
+            TextButton(onClick = onPickPhoto, enabled = enabled) {
+                Text(
+                    stringResource(
+                        if (photoUri == null) R.string.register_add_photo else R.string.register_change_photo,
+                    ),
+                )
+            }
+            if (photoUri != null) {
+                TextButton(onClick = onRemovePhoto, enabled = enabled) {
+                    Text(stringResource(R.string.register_remove_photo))
                 }
             }
         }

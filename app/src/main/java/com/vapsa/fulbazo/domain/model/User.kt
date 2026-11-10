@@ -16,6 +16,8 @@ data class User(
     val email: String,
     val birthDate: LocalDate,
     val district: String,
+    /** Uri de la foto de perfil, o `null` si el usuario no eligió una. */
+    val photoUri: String? = null,
 ) {
     val fullName: String get() = "$firstName $lastName"
 }

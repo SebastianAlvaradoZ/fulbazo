@@ -83,6 +83,16 @@ class RegisterViewModelTest {
     }
 
     @Test
+    fun photo_isOptionalAndSaved() = runTest {
+        fillValidForm()
+        viewModel.onPhotoChange("content://media/picker/0/foto")
+        viewModel.register()
+        advanceUntilIdle()
+
+        assertEquals("content://media/picker/0/foto", repository.currentUser.value?.photoUri)
+    }
+
+    @Test
     fun existingEmail_showsError() = runTest {
         fillValidForm(email = "demo@fulbazo.com")
         viewModel.register()

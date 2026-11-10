@@ -72,6 +72,7 @@ class FakeAuthRepository(
                 email = email,
                 birthDate = newUser.birthDate,
                 district = newUser.district,
+                photoUri = newUser.photoUri,
             ).also { users[email] = StoredUser(it, newUser.password) }
         }
         _currentUser.value = user

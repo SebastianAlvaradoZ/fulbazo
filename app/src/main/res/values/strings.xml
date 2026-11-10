@@ -19,6 +19,10 @@
 
     <string name="register_title">Crear cuenta</string>
     <string name="register_subtitle">Completa tus datos para empezar a jugar</string>
+    <string name="register_photo">Foto de perfil</string>
+    <string name="register_add_photo">Agregar foto (opcional)</string>
+    <string name="register_change_photo">Cambiar foto</string>
+    <string name="register_remove_photo">Quitar</string>
     <string name="register_first_name">Nombre</string>
     <string name="register_last_name">Apellido</string>
     <string name="register_nickname">Apodo</string>
