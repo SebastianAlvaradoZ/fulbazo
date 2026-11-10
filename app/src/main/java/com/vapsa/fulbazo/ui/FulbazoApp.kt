@@ -1,5 +1,6 @@
 package com.vapsa.fulbazo.ui
 
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -14,11 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.ui.navigation.AppNavHost
+import com.vapsa.fulbazo.ui.navigation.AppRoutes
 import com.vapsa.fulbazo.ui.navigation.TopLevelDestination
 
 /**
@@ -36,22 +36,20 @@ fun FulbazoApp() {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(stringResource(currentTopLevel?.labelRes ?: R.string.app_name))
-                },
-            )
+            if (currentTopLevel != null) {
+                TopAppBar(title = { Text(stringResource(currentTopLevel.labelRes)) })
+            }
         },
         bottomBar = {
-            NavigationBar {
+            // Login y Registro se muestran sin las barras principales.
+            if (currentTopLevel != null) NavigationBar {
                 TopLevelDestination.entries.forEach { destination ->
                     NavigationBarItem(
                         selected = destination == currentTopLevel,
                         onClick = {
                             navController.navigate(destination.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
+                                // Mapa es la raíz del historial después de iniciar sesión.
+                                popUpTo(AppRoutes.MAP) { saveState = true }
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -70,7 +68,9 @@ fun FulbazoApp() {
     ) { innerPadding ->
         AppNavHost(
             navController = navController,
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding),
         )
     }
 }
