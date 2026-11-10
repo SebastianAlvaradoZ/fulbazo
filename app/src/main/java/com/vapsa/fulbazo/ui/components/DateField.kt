@@ -30,7 +30,7 @@ private const val MIN_YEAR = 1940
 
 /**
  * Campo de solo lectura que abre un DatePicker de Material 3 al tocarlo.
- * No permite elegir fechas posteriores a [maxDate].
+ * Solo permite elegir fechas entre [minDate] (si se indica) y [maxDate].
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +42,7 @@ fun DateField(
     error: String? = null,
     enabled: Boolean = true,
     maxDate: LocalDate = LocalDate.now(),
+    minDate: LocalDate? = null,
     initialDisplayedDate: LocalDate = maxDate,
 ) {
     var showDialog by rememberSaveable { mutableStateOf(false) }
@@ -74,13 +75,17 @@ fun DateField(
 
     if (showDialog) {
         val maxMillis = maxDate.toUtcMillis()
+        val minMillis = minDate?.toUtcMillis() ?: Long.MIN_VALUE
+        val minYear = minDate?.year ?: MIN_YEAR
         val pickerState = rememberDatePickerState(
             initialSelectedDateMillis = value?.toUtcMillis(),
             initialDisplayedMonthMillis = (value ?: initialDisplayedDate).toUtcMillis(),
-            yearRange = MIN_YEAR..maxDate.year,
+            yearRange = minYear..maxDate.year,
             selectableDates = object : SelectableDates {
-                override fun isSelectableDate(utcTimeMillis: Long) = utcTimeMillis <= maxMillis
-                override fun isSelectableYear(year: Int) = year <= maxDate.year
+                override fun isSelectableDate(utcTimeMillis: Long) =
+                    utcTimeMillis in minMillis..maxMillis
+
+                override fun isSelectableYear(year: Int) = year in minYear..maxDate.year
             },
         )
         DatePickerDialog(

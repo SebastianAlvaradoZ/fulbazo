@@ -3,6 +3,110 @@
     <string name="nav_map">Mapa</string>
     <string name="nav_matches">Partidos</string>
     <string name="nav_profile">Perfil</string>
+    <string name="nav_friends">Amigos</string>
+    <string name="action_back">Volver</string>
+    <string name="action_retry">Reintentar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_delete">Eliminar</string>
+    <string name="action_accept">Aceptar</string>
+    <string name="action_decline">Rechazar</string>
+    <string name="generic_error">Algo salió mal. Inténtalo de nuevo</string>
+
+    <!-- Mapa y partidos cercanos -->
+    <string name="map_preview_label">Vista previa de las losas · el mapa real llegará pronto</string>
+    <string name="map_nearby_title">Partidos cercanos</string>
+    <string name="map_nearby_subtitle">Ordenados por fecha</string>
+    <string name="map_empty">No hay partidos próximos. ¡Crea el primero!</string>
+    <string name="map_load_error">No se pudieron cargar los partidos</string>
+    <string name="map_create_match">Crear partido</string>
+
+    <string name="match_host">Anfitrión: %1$s</string>
+    <string name="match_you_are_host">Eres el anfitrión</string>
+    <string name="match_you_joined">Ya estás inscrito</string>
+    <string name="match_spots_left">%1$d de %2$d cupos libres</string>
+    <string name="match_full">Partido lleno</string>
+    <string name="level_any">Cualquier nivel</string>
+    <string name="level_beginner">Principiante</string>
+    <string name="level_intermediate">Intermedio</string>
+    <string name="level_advanced">Avanzado</string>
+
+    <!-- Crear partido -->
+    <string name="create_match_title">Crear partido</string>
+    <string name="create_match_host_note">Serás el anfitrión de este partido.</string>
+    <string name="create_match_court">Losa</string>
+    <string name="create_match_date">Fecha</string>
+    <string name="create_match_time">Hora</string>
+    <string name="create_match_pick_time">Elegir hora</string>
+    <string name="create_match_slots">Cupos</string>
+    <string name="create_match_slots_value">%1$d jugadores</string>
+    <string name="create_match_slots_less">Quitar un cupo</string>
+    <string name="create_match_slots_more">Agregar un cupo</string>
+    <string name="create_match_level">Nivel</string>
+    <string name="create_match_description">Descripción (opcional)</string>
+    <string name="create_match_description_counter">%1$d / %2$d</string>
+    <string name="create_match_invite">Invitar</string>
+    <string name="create_match_invite_friends">Amigos</string>
+    <string name="create_match_invite_groups">Grupos</string>
+    <string name="create_match_group_chip">%1$s (%2$d)</string>
+    <string name="create_match_no_friends">Aún no tienes amigos. Agrégalos en la pestaña Amigos.</string>
+    <string name="create_match_invitees">Se invitará a %1$d jugadores</string>
+    <string name="create_match_button">Crear partido</string>
+    <string name="create_match_error_court">Elige una losa</string>
+    <string name="create_match_error_date">Elige la fecha</string>
+    <string name="create_match_error_time">Elige la hora</string>
+    <string name="create_match_error_past">La fecha y hora deben ser futuras</string>
+    <string name="create_match_error_description">Máximo %1$d caracteres</string>
+    <string name="create_match_failed">No se pudo crear el partido. Inténtalo de nuevo</string>
+
+    <!-- Amigos -->
+    <string name="friends_search_hint">Buscar jugadores por apodo</string>
+    <string name="friends_clear_search">Borrar búsqueda</string>
+    <string name="friends_tab_friends">Amigos (%1$d)</string>
+    <string name="friends_tab_requests">Solicitudes (%1$d)</string>
+    <string name="friends_tab_groups">Grupos (%1$d)</string>
+    <string name="friends_empty">Aún no tienes amigos. Busca jugadores por su apodo para agregarlos.</string>
+    <string name="friends_requests_empty">No tienes solicitudes pendientes</string>
+    <string name="friends_groups_empty">Crea un grupo para invitar a varios amigos a la vez</string>
+    <string name="friends_search_empty">No encontramos jugadores con ese apodo</string>
+    <string name="friends_add">Agregar</string>
+    <string name="friends_request_sent">Enviada</string>
+    <string name="friends_already_friends">Amigos</string>
+    <string name="friends_remove">Quitar amigo</string>
+    <string name="friends_remove_title">¿Quitar a %1$s?</string>
+    <string name="friends_remove_text">Dejarán de ser amigos. Puedes volver a enviarle una solicitud.</string>
+    <string name="friends_wants_to_be_friend">Quiere ser tu amigo</string>
+    <string name="friends_new_group">Nuevo grupo</string>
+    <string name="friends_group_members">%1$d miembros: %2$s</string>
+
+    <!-- Grupos -->
+    <string name="group_new_title">Nuevo grupo</string>
+    <string name="group_edit_title">Editar grupo</string>
+    <string name="group_name">Nombre del grupo</string>
+    <string name="group_members">Miembros</string>
+    <string name="group_members_missing">Elige al menos un amigo</string>
+    <string name="group_name_required">Ponle un nombre al grupo</string>
+    <string name="group_name_too_long">Máximo %1$d caracteres</string>
+    <string name="group_no_friends">Primero agrega amigos para formar un grupo</string>
+    <string name="group_delete_title">¿Eliminar el grupo?</string>
+    <string name="group_delete_text">Los amigos del grupo no se eliminarán.</string>
+
+    <!-- Invitaciones -->
+    <string name="invitations_title">Invitaciones</string>
+    <string name="invitations_open">Ver invitaciones</string>
+    <string name="invitations_pending">Pendientes</string>
+    <string name="invitations_answered">Respondidas</string>
+    <string name="invitations_empty">No tienes invitaciones por ahora</string>
+    <string name="invitations_load_error">No se pudieron cargar tus invitaciones</string>
+    <string name="invitations_from">%1$s te invitó a un partido</string>
+    <string name="invitations_accepted">Aceptaste</string>
+    <string name="invitations_declined">Rechazaste</string>
+    <string name="invitations_match_gone">El partido ya no existe</string>
+    <string name="invitations_match_full">El partido ya está lleno</string>
+    <string name="notification_channel_invitations">Invitaciones a partidos</string>
+    <string name="notification_channel_invitations_description">Avisos cuando un amigo te invita a jugar</string>
+    <string name="notification_invitation_title">%1$s te invitó a jugar</string>
+    <string name="notification_invitation_text">%1$s · %2$s</string>
 
     <!-- Autenticación -->
     <string name="auth_tagline">Encuentra con quién jugar en Arequipa</string>
