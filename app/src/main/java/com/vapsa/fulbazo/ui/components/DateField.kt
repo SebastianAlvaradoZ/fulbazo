@@ -1,7 +1,7 @@
 package com.vapsa.fulbazo.ui.components
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,28 +47,30 @@ fun DateField(
     var showDialog by rememberSaveable { mutableStateOf(false) }
     val formatter = remember { DateTimeFormatter.ofPattern("dd/MM/yyyy") }
 
-    Box(modifier = modifier) {
-        FormTextField(
-            value = value?.format(formatter).orEmpty(),
-            onValueChange = {},
-            label = label,
-            error = error,
-            enabled = enabled,
-            readOnly = true,
-            trailingIcon = {
-                Icon(
-                    painter = painterResource(R.drawable.ic_calendar),
-                    contentDescription = stringResource(R.string.register_pick_date),
-                )
-            },
-        )
-        // Capa transparente encima del campo para abrir el selector al tocarlo.
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clickable(enabled = enabled) { showDialog = true },
-        )
+    // Abre el selector cuando se suelta un toque sobre el campo de solo lectura.
+    val interactionSource = remember { MutableInteractionSource() }
+    LaunchedEffect(interactionSource) {
+        interactionSource.interactions.collect { interaction ->
+            if (interaction is PressInteraction.Release) showDialog = true
+        }
     }
+
+    FormTextField(
+        value = value?.format(formatter).orEmpty(),
+        onValueChange = {},
+        label = label,
+        modifier = modifier,
+        error = error,
+        enabled = enabled,
+        readOnly = true,
+        interactionSource = interactionSource,
+        trailingIcon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_calendar),
+                contentDescription = stringResource(R.string.register_pick_date),
+            )
+        },
+    )
 
     if (showDialog) {
         val maxMillis = maxDate.toUtcMillis()
