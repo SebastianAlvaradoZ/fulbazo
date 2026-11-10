@@ -39,6 +39,62 @@
     <string name="register_have_account">¿Ya tienes cuenta?</string>
     <string name="register_go_to_login">Inicia sesión</string>
 
+    <!-- Mis estadísticas -->
+    <string name="stats_title">Mis estadísticas</string>
+    <string name="stats_intro">Así te ves como jugador. Califícate del 1 al 5.</string>
+    <string name="stats_dominant_foot">Pierna buena</string>
+    <string name="stats_weak_foot">Pierna mala: %1$s</string>
+    <string name="stats_weak_foot_none">Juegas con las dos piernas</string>
+    <string name="stats_main_position">Posición principal</string>
+    <string name="stats_secondary_position">Posición secundaria (opcional)</string>
+    <string name="stats_secondary_none">Ninguna</string>
+    <string name="stats_goalkeeper_note">Si eres arquero y también sales a jugar, elige Defensa como posición secundaria.</string>
+    <string name="stats_field_skills">Habilidades de campo</string>
+    <string name="stats_goalkeeper_skills">Habilidades de arquero</string>
+    <string name="stats_overall">Nivel general</string>
+    <string name="stats_overall_field">Como jugador</string>
+    <string name="stats_overall_goalkeeper">Como arquero</string>
+    <string name="stats_value">%1$d / 5</string>
+    <string name="stats_overall_value">%1$.1f</string>
+    <string name="stats_save">Guardar</string>
+    <string name="stats_saved">Estadísticas guardadas</string>
+    <string name="stats_save_error">No se pudieron guardar. Inténtalo de nuevo</string>
+    <string name="stats_load_error">No se pudieron cargar tus estadísticas</string>
+    <string name="stats_retry">Reintentar</string>
+    <string name="stats_select_foot">Elige tu pierna buena</string>
+    <string name="stats_select_position">Elige tu posición principal</string>
+
+    <string name="foot_right">Derecha</string>
+    <string name="foot_left">Izquierda</string>
+    <string name="foot_both">Ambas</string>
+
+    <string name="position_goalkeeper">Arquero</string>
+    <string name="position_defender">Defensa</string>
+    <string name="position_midfielder">Mediocampista</string>
+    <string name="position_forward">Delantero</string>
+
+    <string name="skill_speed">Velocidad</string>
+    <string name="skill_technique">Técnica</string>
+    <string name="skill_passing">Pase</string>
+    <string name="skill_shooting">Tiro</string>
+    <string name="skill_defending">Defensa</string>
+    <string name="skill_stamina">Resistencia</string>
+    <string name="skill_teamwork">Juego en equipo</string>
+    <string name="skill_saves">Atajadas</string>
+    <string name="skill_reflexes">Reflejos</string>
+    <string name="skill_rushing_out">Salidas</string>
+    <string name="skill_footwork">Juego con los pies</string>
+
+    <!-- Perfil -->
+    <string name="profile_how_i_see_me">Cómo me veo</string>
+    <string name="profile_how_they_see_me">Cómo me ven</string>
+    <string name="profile_no_self_stats">Aún no completas tus estadísticas</string>
+    <string name="profile_no_community_stats">Aún nadie te ha calificado. Juega un partido para recibir calificaciones.</string>
+    <string name="profile_votes">%1$d calificaciones</string>
+    <string name="profile_edit_stats">Editar mis estadísticas</string>
+    <string name="profile_complete_stats">Completar mis estadísticas</string>
+    <string name="profile_position_line">%1$s · Pierna %2$s</string>
+
     <!-- Errores de campos -->
     <string name="error_required">Este campo es obligatorio</string>
     <string name="error_invalid_name">Solo letras, mínimo 2 caracteres</string>
