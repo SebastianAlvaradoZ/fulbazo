@@ -89,6 +89,38 @@ class AuthFlowTest {
     }
 
     @Test
+    fun completeRegister_goesToMap() {
+        composeRule.onNodeWithText("Regístrate").performClick()
+
+        typeInto("Nombre", "Lucía")
+        typeInto("Apellido", "Quispe")
+        typeInto("Apodo", "lu.quispe${System.currentTimeMillis() % 10_000}")
+
+        composeRule.onNodeWithText("Fecha de nacimiento").performScrollTo().performClick()
+        // Cada día se describe con la fecha completa, p. ej. "Saturday, November 15, 2008",
+        // así que se busca el "15" dentro de un elemento que se pueda tocar.
+        val day15 = hasText("15", substring = true) and hasClickAction()
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodes(day15).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onAllNodes(day15)[0].performClick()
+        composeRule.onNodeWithText("Aceptar").performClick()
+
+        composeRule.onNodeWithText("Distrito").performScrollTo().performClick()
+        composeRule.onNodeWithText("Cayma").performClick()
+
+        typeInto("Celular", "912345678")
+        typeInto("Correo electrónico", "lucia${System.currentTimeMillis()}@fulbazo.com")
+        typeInto("Contraseña", "secreto1")
+        typeInto("Confirmar contraseña", "secreto1")
+
+        clickRegisterButton()
+
+        waitForText("Partidos")
+        composeRule.onNodeWithText("Perfil").assertIsDisplayed()
+    }
+
+    @Test
     fun register_backReturnsToLogin() {
         composeRule.onNodeWithText("Regístrate").performClick()
         composeRule.onNodeWithContentDescription("Volver").performClick()
