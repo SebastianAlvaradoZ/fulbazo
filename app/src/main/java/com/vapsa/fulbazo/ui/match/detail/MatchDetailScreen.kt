@@ -148,9 +148,13 @@ fun MatchDetailScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item { MatchCard(match) }
-                item { ViewerActions(uiState, actions) }
+                if (uiState.isFinished) {
+                    item { HelperText(stringResource(R.string.match_detail_finished)) }
+                } else {
+                    item { ViewerActions(uiState, actions) }
+                }
 
-                if (uiState.role == ViewerRole.HOST) {
+                if (uiState.role == ViewerRole.HOST && !uiState.isFinished) {
                     item {
                         SectionTitle(stringResource(R.string.match_detail_requests, uiState.pendingRequests.size))
                     }

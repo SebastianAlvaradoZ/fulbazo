@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.JoinRequestStatus
+import com.vapsa.fulbazo.domain.model.MatchStatus
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.repository.CourtRepository
 import com.vapsa.fulbazo.domain.repository.JoinRequestRepository
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 /**
  * Detalle de un partido: datos, jugadores y solicitudes para unirse.
@@ -32,6 +34,7 @@ class MatchDetailViewModel(
     courtRepository: CourtRepository,
     playerRepository: PlayerRepository,
     private val joinRequestRepository: JoinRequestRepository,
+    private val now: () -> LocalDateTime = { LocalDateTime.now() },
 ) : ViewModel() {
 
     private val userId: String? = authRepository.currentUser.value?.id
@@ -66,6 +69,7 @@ class MatchDetailViewModel(
                 .sortedByDescending { it == match.hostId }
                 .mapNotNull { id -> players[id]?.let { PlayerItem(it, isHost = id == match.hostId) } },
             role = role,
+            isFinished = match.status == MatchStatus.FINISHED || !match.dateTime.isAfter(now()),
             myPendingRequestId = myRequest?.takeIf { it.status == JoinRequestStatus.PENDING }?.id,
             pendingRequests = if (role == ViewerRole.HOST) {
                 requests

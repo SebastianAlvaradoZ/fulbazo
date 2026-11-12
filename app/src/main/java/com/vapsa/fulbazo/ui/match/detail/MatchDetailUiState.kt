@@ -27,6 +27,8 @@ data class MatchDetailUiState(
     val match: MatchItem? = null,
     val players: List<PlayerItem> = emptyList(),
     val role: ViewerRole = ViewerRole.NONE,
+    /** El partido ya se jugó: no se puede unir, salir ni aceptar solicitudes. */
+    val isFinished: Boolean = false,
     val myPendingRequestId: String? = null,
     /** Solo se llena para el anfitrión. */
     val pendingRequests: List<PendingRequestItem> = emptyList(),

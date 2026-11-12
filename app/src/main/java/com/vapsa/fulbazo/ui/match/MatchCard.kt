@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.MatchLevel
+import com.vapsa.fulbazo.domain.model.MatchStatus
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -88,6 +89,8 @@ private fun MatchCardContent(item: MatchItem, extraContent: @Composable (() -> U
         )
         Text(
             text = when {
+                item.status == MatchStatus.FINISHED && item.isHost -> stringResource(R.string.match_you_were_host)
+                item.status == MatchStatus.FINISHED && item.isPlayer -> stringResource(R.string.match_you_played)
                 item.isHost -> stringResource(R.string.match_you_are_host)
                 item.isPlayer -> stringResource(R.string.match_you_joined)
                 else -> stringResource(R.string.match_host, item.hostNickname)
@@ -101,13 +104,17 @@ private fun MatchCardContent(item: MatchItem, extraContent: @Composable (() -> U
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = if (item.spotsLeft == 0) {
+                text = if (item.status == MatchStatus.FINISHED) {
+                    stringResource(R.string.match_finished)
+                } else if (item.spotsLeft == 0) {
                     stringResource(R.string.match_full)
                 } else {
                     stringResource(R.string.match_spots_left, item.spotsLeft, item.slots)
                 },
                 style = MaterialTheme.typography.labelLarge,
-                color = if (item.spotsLeft == 0) {
+                color = if (item.status == MatchStatus.FINISHED) {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                } else if (item.spotsLeft == 0) {
                     MaterialTheme.colorScheme.error
                 } else {
                     MaterialTheme.colorScheme.primary

@@ -131,4 +131,13 @@ class MatchDetailViewModelTest {
         val match = matchRepository.observeMatches().first().first { it.id == FakeMatchRepository.SEED_MATCH_ID }
         assertTrue("demo" !in match.playerIds)
     }
+
+    @Test
+    fun pastMatch_isFinished() = runTest {
+        val viewModel = viewModel("match-past-selva")
+
+        val state = viewModel.uiState.value
+        assertTrue(state.isFinished)
+        assertEquals(ViewerRole.PLAYER, state.role)
+    }
 }

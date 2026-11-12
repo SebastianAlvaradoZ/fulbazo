@@ -26,6 +26,9 @@
     <string name="match_you_joined">Ya estás inscrito</string>
     <string name="match_spots_left">%1$d de %2$d cupos libres</string>
     <string name="match_full">Partido lleno</string>
+    <string name="match_finished">Partido jugado</string>
+    <string name="match_you_were_host">Fuiste el anfitrión</string>
+    <string name="match_you_played">Jugaste este partido</string>
     <string name="level_any">Cualquier nivel</string>
     <string name="level_beginner">Principiante</string>
     <string name="level_intermediate">Intermedio</string>
@@ -46,6 +49,7 @@
     <string name="match_detail_leave_title">¿Salir del partido?</string>
     <string name="match_detail_leave_text">Liberarás tu cupo. Para volver tendrás que pedir unirte otra vez.</string>
     <string name="match_detail_full">Partido lleno</string>
+    <string name="match_detail_finished">Este partido ya se jugó</string>
     <string name="match_detail_requests">Solicitudes (%1$d)</string>
     <string name="match_detail_no_requests">Aún no hay solicitudes para unirse</string>
     <string name="match_detail_wants_to_join">Quiere unirse al partido</string>
@@ -54,6 +58,20 @@
     <string name="match_detail_request_sent">Solicitud enviada</string>
     <string name="match_detail_request_cancelled">Solicitud cancelada</string>
     <string name="match_detail_left">Saliste del partido</string>
+
+    <!-- Mis partidos -->
+    <string name="my_matches_tab_upcoming">Próximos (%1$d)</string>
+    <string name="my_matches_tab_requests">Solicitudes (%1$d)</string>
+    <string name="my_matches_tab_history">Historial (%1$d)</string>
+    <string name="my_matches_upcoming_empty">No tienes partidos próximos. Crea uno o busca partidos cerca en el mapa.</string>
+    <string name="my_matches_explore_map">Buscar en el mapa</string>
+    <string name="my_matches_requests_empty">No has pedido unirte a ningún partido</string>
+    <string name="my_matches_history_empty">Aún no has jugado partidos con Fulbazo</string>
+    <string name="my_matches_load_error">No se pudieron cargar tus partidos</string>
+    <string name="my_matches_status_pending">Pendiente</string>
+    <string name="my_matches_status_accepted">Aceptada</string>
+    <string name="my_matches_status_rejected">Rechazada</string>
+    <string name="my_matches_evaluate_soon">Evaluar jugadores (próximamente)</string>
 
     <!-- Crear partido -->
     <string name="create_match_title">Crear partido</string>
