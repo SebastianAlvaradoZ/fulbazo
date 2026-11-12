@@ -52,7 +52,7 @@ class MyMatchesFlowTest {
 
         val selvaCard = hasText("Losa del Parque Selva Alegre") and hasClickAction()
         composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(selvaCard)
-        composeRule.onAllNodesWithText("Evaluar jugadores (próximamente)")[0].assertIsDisplayed()
+        composeRule.onAllNodesWithText("Evaluar jugadores")[0].assertIsDisplayed()
 
         composeRule.onNode(selvaCard).performClick()
         waitForText("Este partido ya se jugó")
