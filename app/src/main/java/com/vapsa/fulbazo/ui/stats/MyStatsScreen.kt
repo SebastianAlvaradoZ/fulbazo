@@ -26,7 +26,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -50,9 +49,8 @@ import com.vapsa.fulbazo.domain.model.FieldSkill
 import com.vapsa.fulbazo.domain.model.Foot
 import com.vapsa.fulbazo.domain.model.GoalkeeperSkill
 import com.vapsa.fulbazo.domain.model.Position
-import com.vapsa.fulbazo.domain.model.SkillScale
+import com.vapsa.fulbazo.ui.components.SkillSlider
 import com.vapsa.fulbazo.ui.theme.FulbazoTheme
-import kotlin.math.roundToInt
 
 @Composable
 fun MyStatsRoute(
@@ -326,37 +324,6 @@ private fun OverallValue(label: String, value: Double) {
             fontWeight = FontWeight.Bold,
         )
         Text(text = label, style = MaterialTheme.typography.labelLarge)
-    }
-}
-
-@Composable
-private fun SkillSlider(
-    label: String,
-    value: Int,
-    onValueChange: (Int) -> Unit,
-    enabled: Boolean,
-) {
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(text = label, style = MaterialTheme.typography.bodyLarge)
-            Text(
-                text = stringResource(R.string.stats_value, value),
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary,
-            )
-        }
-        Slider(
-            value = value.toFloat(),
-            onValueChange = { onValueChange(it.roundToInt()) },
-            valueRange = SkillScale.MIN.toFloat()..SkillScale.MAX.toFloat(),
-            // 3 pasos intermedios: 1, 2, 3, 4, 5.
-            steps = SkillScale.MAX - SkillScale.MIN - 1,
-            enabled = enabled,
-        )
     }
 }
 
