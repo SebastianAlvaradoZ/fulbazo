@@ -31,6 +31,30 @@
     <string name="level_intermediate">Intermedio</string>
     <string name="level_advanced">Avanzado</string>
 
+    <!-- Detalle de partido -->
+    <string name="match_detail_title">Detalle del partido</string>
+    <string name="match_detail_not_found">Este partido ya no existe</string>
+    <string name="match_detail_load_error">No se pudo cargar el partido</string>
+    <string name="match_detail_players">Jugadores (%1$d/%2$d)</string>
+    <string name="match_detail_host_tag">Anfitrión</string>
+    <string name="match_detail_request_join">Solicitar unirme</string>
+    <string name="match_detail_request_pending">Solicitud enviada. Espera a que el anfitrión te acepte.</string>
+    <string name="match_detail_cancel_request">Cancelar solicitud</string>
+    <string name="match_detail_request_rejected">El anfitrión rechazó tu solicitud</string>
+    <string name="match_detail_you_joined">Estás inscrito en este partido</string>
+    <string name="match_detail_leave">Salir del partido</string>
+    <string name="match_detail_leave_title">¿Salir del partido?</string>
+    <string name="match_detail_leave_text">Liberarás tu cupo. Para volver tendrás que pedir unirte otra vez.</string>
+    <string name="match_detail_full">Partido lleno</string>
+    <string name="match_detail_requests">Solicitudes (%1$d)</string>
+    <string name="match_detail_no_requests">Aún no hay solicitudes para unirse</string>
+    <string name="match_detail_wants_to_join">Quiere unirse al partido</string>
+    <string name="match_detail_full_note">El partido está lleno: no puedes aceptar más jugadores</string>
+    <string name="match_detail_teams_soon">Armar equipos con IA (próximamente)</string>
+    <string name="match_detail_request_sent">Solicitud enviada</string>
+    <string name="match_detail_request_cancelled">Solicitud cancelada</string>
+    <string name="match_detail_left">Saliste del partido</string>
+
     <!-- Crear partido -->
     <string name="create_match_title">Crear partido</string>
     <string name="create_match_host_note">Serás el anfitrión de este partido.</string>

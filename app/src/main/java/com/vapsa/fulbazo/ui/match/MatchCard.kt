@@ -45,70 +45,79 @@ val MatchLevel.labelRes: Int
 
 /**
  * Tarjeta de un partido: losa, fecha, anfitrión, cupos y nivel.
- * [extraContent] permite agregar botones (por ejemplo, en invitaciones).
+ * [extraContent] permite agregar botones (por ejemplo, en invitaciones) y
+ * [onClick] hace que la tarjeta se pueda tocar.
  */
 @Composable
 fun MatchCard(
     item: MatchItem,
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
     extraContent: @Composable (() -> Unit)? = null,
 ) {
-    Card(modifier = modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_place),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp),
-                )
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    text = item.courtName,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
-            Text(
-                text = "${item.dateTime.formatMatchDate()} · ${item.district}",
-                style = MaterialTheme.typography.bodyMedium,
+    if (onClick != null) {
+        Card(onClick = onClick, modifier = modifier.fillMaxWidth()) { MatchCardContent(item, extraContent) }
+    } else {
+        Card(modifier = modifier.fillMaxWidth()) { MatchCardContent(item, extraContent) }
+    }
+}
+
+@Composable
+private fun MatchCardContent(item: MatchItem, extraContent: @Composable (() -> Unit)?) {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = painterResource(R.drawable.ic_place),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp),
             )
+            Spacer(Modifier.width(6.dp))
             Text(
-                text = when {
-                    item.isHost -> stringResource(R.string.match_you_are_host)
-                    item.isPlayer -> stringResource(R.string.match_you_joined)
-                    else -> stringResource(R.string.match_host, item.hostNickname)
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = item.courtName,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = if (item.spotsLeft == 0) {
-                        stringResource(R.string.match_full)
-                    } else {
-                        stringResource(R.string.match_spots_left, item.spotsLeft, item.slots)
-                    },
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (item.spotsLeft == 0) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.primary
-                    },
-                )
-                AssistChip(onClick = {}, label = { Text(stringResource(item.level.labelRes)) })
-            }
-            if (item.description.isNotBlank()) {
-                Text(text = item.description, style = MaterialTheme.typography.bodySmall)
-            }
-            extraContent?.invoke()
         }
+        Text(
+            text = "${item.dateTime.formatMatchDate()} · ${item.district}",
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            text = when {
+                item.isHost -> stringResource(R.string.match_you_are_host)
+                item.isPlayer -> stringResource(R.string.match_you_joined)
+                else -> stringResource(R.string.match_host, item.hostNickname)
+            },
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = if (item.spotsLeft == 0) {
+                    stringResource(R.string.match_full)
+                } else {
+                    stringResource(R.string.match_spots_left, item.spotsLeft, item.slots)
+                },
+                style = MaterialTheme.typography.labelLarge,
+                color = if (item.spotsLeft == 0) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.primary
+                },
+            )
+            AssistChip(onClick = {}, label = { Text(stringResource(item.level.labelRes)) })
+        }
+        if (item.description.isNotBlank()) {
+            Text(text = item.description, style = MaterialTheme.typography.bodySmall)
+        }
+        extraContent?.invoke()
     }
 }
