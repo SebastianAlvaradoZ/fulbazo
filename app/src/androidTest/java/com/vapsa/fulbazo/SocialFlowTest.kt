@@ -95,7 +95,10 @@ class SocialFlowTest {
 
         // Vuelve al Mapa cuando termina de guardarse.
         waitForText("Partidos cercanos")
-        showInList("Eres el anfitrión")
+        // La tarjeta de Sachaca debe indicar que soy el anfitrión (puede haber otros partidos míos).
+        val sachacaCard = hasText("Losa Deportiva Sachaca") and hasText("Eres el anfitrión")
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(sachacaCard)
+        composeRule.onNode(sachacaCard).assertIsDisplayed()
     }
 
     @Test
