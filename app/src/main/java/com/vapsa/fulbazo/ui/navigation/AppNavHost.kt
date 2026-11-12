@@ -13,9 +13,9 @@ import com.vapsa.fulbazo.ui.friends.FriendsRoute
 import com.vapsa.fulbazo.ui.friends.group.GroupEditorRoute
 import com.vapsa.fulbazo.ui.invitations.InvitationsRoute
 import com.vapsa.fulbazo.ui.map.MapRoute
-import com.vapsa.fulbazo.ui.match.MatchesScreen
 import com.vapsa.fulbazo.ui.match.create.CreateMatchRoute
 import com.vapsa.fulbazo.ui.match.detail.MatchDetailRoute
+import com.vapsa.fulbazo.ui.match.mine.MyMatchesRoute
 import com.vapsa.fulbazo.ui.profile.ProfileRoute
 import com.vapsa.fulbazo.ui.stats.MyStatsRoute
 
@@ -48,7 +48,19 @@ fun AppNavHost(
                 onOpenMatch = { matchId -> navController.navigate(AppRoutes.matchDetail(matchId)) },
             )
         }
-        composable(AppRoutes.MATCH) { MatchesScreen() }
+        composable(AppRoutes.MATCH) {
+            MyMatchesRoute(
+                onOpenMatch = { matchId -> navController.navigate(AppRoutes.matchDetail(matchId)) },
+                onCreateMatch = { navController.navigate(AppRoutes.CREATE_MATCH) },
+                onExploreMap = {
+                    navController.navigate(AppRoutes.MAP) {
+                        popUpTo(AppRoutes.MAP) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+            )
+        }
         composable(AppRoutes.FRIENDS) {
             FriendsRoute(onOpenGroup = { groupId -> navController.navigate(AppRoutes.groupEditor(groupId)) })
         }
