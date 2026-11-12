@@ -44,4 +44,20 @@ class FakeMatchRepositoryTest {
         val updated = repository.observeMatches().first().first { it.id == match.id }
         assertEquals(MatchStatus.FULL, updated.status)
     }
+
+    @Test
+    fun leaveMatch_freesSpot_butHostCannotLeave() = runTest {
+        val match = repository.createMatch(
+            "demo",
+            NewMatch("losa-cayma", FakeMatchRepository.inDays(1), slots = 2, level = MatchLevel.ANY),
+        ).getOrThrow()
+        repository.joinMatch(match.id, "carlos")
+
+        assertTrue(repository.leaveMatch(match.id, "carlos").isSuccess)
+        assertTrue(repository.leaveMatch(match.id, "demo").isFailure)
+
+        val updated = repository.observeMatches().first().first { it.id == match.id }
+        assertEquals(listOf("demo"), updated.playerIds)
+        assertEquals(MatchStatus.OPEN, updated.status)
+    }
 }

@@ -103,6 +103,29 @@ class FakeMatchRepository(
         return Result.success(Unit)
     }
 
+    override suspend fun leaveMatch(matchId: String, userId: String): Result<Unit> {
+        delay(latencyMillis)
+        val match = matches.value.firstOrNull { it.id == matchId }
+            ?: return Result.failure(NoSuchElementException("El partido no existe"))
+        if (match.hostId == userId) {
+            return Result.failure(IllegalStateException("El anfitrión no puede salir de su partido"))
+        }
+        matches.update { list ->
+            list.map {
+                if (it.id != matchId) {
+                    it
+                } else {
+                    // Al liberarse un cupo, un partido lleno vuelve a estar abierto.
+                    it.copy(
+                        playerIds = it.playerIds - userId,
+                        status = if (it.status == MatchStatus.FULL) MatchStatus.OPEN else it.status,
+                    )
+                }
+            }
+        }
+        return Result.success(Unit)
+    }
+
     companion object {
         /** Partido de ejemplo al que el simulador invita al usuario. */
         const val SEED_MATCH_ID = "match-umacollo"

@@ -14,4 +14,7 @@ interface MatchRepository {
 
     /** Agrega al jugador si hay cupo. Falla si el partido está lleno o no existe. */
     suspend fun joinMatch(matchId: String, userId: String): Result<Unit>
+
+    /** Saca al jugador del partido. El anfitrión no puede salir de su propio partido. */
+    suspend fun leaveMatch(matchId: String, userId: String): Result<Unit>
 }
