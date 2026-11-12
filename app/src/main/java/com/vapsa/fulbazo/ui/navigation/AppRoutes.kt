@@ -19,6 +19,11 @@ object AppRoutes {
 
     fun matchDetail(matchId: String): String = "match_detail/$matchId"
 
+    const val PLAYER_ID_ARG = "playerId"
+    const val PLAYER = "player/{$PLAYER_ID_ARG}"
+
+    fun player(playerId: String): String = "player/$playerId"
+
     const val GROUP_ID_ARG = "groupId"
     const val GROUP_EDITOR = "group_editor?$GROUP_ID_ARG={$GROUP_ID_ARG}"
 

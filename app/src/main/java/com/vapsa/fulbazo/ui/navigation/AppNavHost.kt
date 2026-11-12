@@ -16,6 +16,7 @@ import com.vapsa.fulbazo.ui.map.MapRoute
 import com.vapsa.fulbazo.ui.match.create.CreateMatchRoute
 import com.vapsa.fulbazo.ui.match.detail.MatchDetailRoute
 import com.vapsa.fulbazo.ui.match.mine.MyMatchesRoute
+import com.vapsa.fulbazo.ui.player.PlayerProfileRoute
 import com.vapsa.fulbazo.ui.profile.ProfileRoute
 import com.vapsa.fulbazo.ui.stats.MyStatsRoute
 
@@ -62,7 +63,10 @@ fun AppNavHost(
             )
         }
         composable(AppRoutes.FRIENDS) {
-            FriendsRoute(onOpenGroup = { groupId -> navController.navigate(AppRoutes.groupEditor(groupId)) })
+            FriendsRoute(
+                onOpenGroup = { groupId -> navController.navigate(AppRoutes.groupEditor(groupId)) },
+                onOpenPlayer = { playerId -> navController.navigate(AppRoutes.player(playerId)) },
+            )
         }
         composable(AppRoutes.PROFILE) {
             ProfileRoute(onEditStats = { navController.navigate(AppRoutes.MY_STATS) })
@@ -83,6 +87,25 @@ fun AppNavHost(
             MatchDetailRoute(
                 matchId = requireNotNull(entry.arguments?.getString(AppRoutes.MATCH_ID_ARG)),
                 onNavigateBack = { navController.popBackStack() },
+                onOpenPlayer = { playerId -> navController.navigate(AppRoutes.player(playerId)) },
+            )
+        }
+        composable(
+            route = AppRoutes.PLAYER,
+            arguments = listOf(navArgument(AppRoutes.PLAYER_ID_ARG) { type = NavType.StringType }),
+        ) { entry ->
+            PlayerProfileRoute(
+                playerId = requireNotNull(entry.arguments?.getString(AppRoutes.PLAYER_ID_ARG)),
+                onNavigateBack = { navController.popBackStack() },
+                onOpenOwnProfile = {
+                    // Mi propio perfil vive en la pestaña Perfil.
+                    navController.popBackStack()
+                    navController.navigate(AppRoutes.PROFILE) {
+                        popUpTo(AppRoutes.MAP) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
             )
         }
         composable(AppRoutes.INVITATIONS) {

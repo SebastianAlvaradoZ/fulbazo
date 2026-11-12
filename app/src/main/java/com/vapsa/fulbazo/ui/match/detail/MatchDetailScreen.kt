@@ -1,5 +1,6 @@
 package com.vapsa.fulbazo.ui.match.detail
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -58,6 +59,7 @@ import com.vapsa.fulbazo.ui.match.MatchCard
 fun MatchDetailRoute(
     matchId: String,
     onNavigateBack: () -> Unit,
+    onOpenPlayer: (playerId: String) -> Unit,
     viewModel: MatchDetailViewModel = viewModel(
         key = "match-$matchId",
         factory = MatchDetailViewModel.factory(matchId),
@@ -96,6 +98,7 @@ fun MatchDetailRoute(
             onCancelRequest = viewModel::cancelRequest,
             onLeave = viewModel::leaveMatch,
             onRespond = viewModel::respondToRequest,
+            onOpenPlayer = onOpenPlayer,
         ),
     )
 }
@@ -106,6 +109,7 @@ data class MatchDetailActions(
     val onCancelRequest: () -> Unit = {},
     val onLeave: () -> Unit = {},
     val onRespond: (requestId: String, accept: Boolean) -> Unit = { _, _ -> },
+    val onOpenPlayer: (playerId: String) -> Unit = {},
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -170,6 +174,7 @@ fun MatchDetailScreen(
                             busy = request.requestId in uiState.busyRequestIds,
                             canAccept = !uiState.isFull,
                             onRespond = actions.onRespond,
+                            onOpenPlayer = actions.onOpenPlayer,
                         )
                     }
                     item {
@@ -185,7 +190,7 @@ fun MatchDetailScreen(
                     SectionTitle(stringResource(R.string.match_detail_players, uiState.playersCount, match.slots))
                 }
                 items(uiState.players, key = { it.player.id }) { item ->
-                    PlayerRow(item.player) {
+                    PlayerRow(item.player, onClick = { actions.onOpenPlayer(item.player.id) }) {
                         if (item.isHost) AssistChip(onClick = {}, label = { Text(stringResource(R.string.match_detail_host_tag)) })
                     }
                 }
@@ -260,10 +265,15 @@ private fun RequestCard(
     busy: Boolean,
     canAccept: Boolean,
     onRespond: (String, Boolean) -> Unit,
+    onOpenPlayer: (String) -> Unit,
 ) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            PlayerRow(request.player, subtitle = stringResource(R.string.match_detail_wants_to_join))
+            PlayerRow(
+                request.player,
+                subtitle = stringResource(R.string.match_detail_wants_to_join),
+                onClick = { onOpenPlayer(request.player.id) },
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
@@ -283,10 +293,13 @@ private fun RequestCard(
 private fun PlayerRow(
     player: PlayerSummary,
     subtitle: String = "${player.fullName} · ${player.district}",
+    onClick: () -> Unit = {},
     trailing: @Composable () -> Unit = {},
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         UserAvatar(photoUri = player.photoUri, contentDescription = null, size = 44.dp)

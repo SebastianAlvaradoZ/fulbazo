@@ -56,6 +56,7 @@ import com.vapsa.fulbazo.ui.components.UserAvatar
 @Composable
 fun FriendsRoute(
     onOpenGroup: (groupId: String?) -> Unit,
+    onOpenPlayer: (playerId: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: FriendsViewModel = viewModel(factory = FriendsViewModel.Factory),
 ) {
@@ -79,6 +80,7 @@ fun FriendsRoute(
                 onRespond = viewModel::respondToRequest,
                 onRemoveFriend = viewModel::removeFriend,
                 onOpenGroup = onOpenGroup,
+                onOpenPlayer = onOpenPlayer,
             ),
         )
         SnackbarHost(snackbarHostState, Modifier.align(Alignment.BottomCenter))
@@ -91,6 +93,7 @@ data class FriendsActions(
     val onRespond: (requestId: String, accept: Boolean) -> Unit = { _, _ -> },
     val onRemoveFriend: (String) -> Unit = {},
     val onOpenGroup: (groupId: String?) -> Unit = {},
+    val onOpenPlayer: (playerId: String) -> Unit = {},
 )
 
 @Composable
@@ -162,7 +165,7 @@ private fun SearchResults(uiState: FriendsUiState, actions: FriendsActions) {
     when {
         uiState.isSearching -> LoadingState(Modifier.fillMaxWidth())
         uiState.searchResults.isEmpty() -> EmptyState(stringResource(R.string.friends_search_empty))
-        else -> PlayerLazyList(uiState.searchResults.map { it.player }) { player ->
+        else -> PlayerLazyList(uiState.searchResults.map { it.player }, actions.onOpenPlayer) { player ->
             val relation = uiState.searchResults.first { it.player.id == player.id }.relation
             val busy = player.id in uiState.busyIds
             when (relation) {
@@ -195,7 +198,7 @@ private fun FriendsList(uiState: FriendsUiState, actions: FriendsActions) {
         return
     }
     var toRemove by remember { mutableStateOf<PlayerSummary?>(null) }
-    PlayerLazyList(uiState.friends) { friend ->
+    PlayerLazyList(uiState.friends, actions.onOpenPlayer) { friend ->
         IconButton(onClick = { toRemove = friend }, enabled = friend.id !in uiState.busyIds) {
             Icon(painterResource(R.drawable.ic_close), stringResource(R.string.friends_remove))
         }
@@ -232,7 +235,11 @@ private fun RequestsList(uiState: FriendsUiState, actions: FriendsActions) {
             val busy = request.requestId in uiState.busyIds
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    PlayerRow(request.player, subtitle = stringResource(R.string.friends_wants_to_be_friend))
+                    PlayerRow(
+                        request.player,
+                        subtitle = stringResource(R.string.friends_wants_to_be_friend),
+                        modifier = Modifier.clickable { actions.onOpenPlayer(request.player.id) },
+                    )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
@@ -292,7 +299,11 @@ private fun GroupsList(uiState: FriendsUiState, actions: FriendsActions) {
 }
 
 @Composable
-private fun PlayerLazyList(players: List<PlayerSummary>, action: @Composable (PlayerSummary) -> Unit) {
+private fun PlayerLazyList(
+    players: List<PlayerSummary>,
+    onOpenPlayer: (String) -> Unit,
+    action: @Composable (PlayerSummary) -> Unit,
+) {
     LazyColumn(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -304,7 +315,13 @@ private fun PlayerLazyList(players: List<PlayerSummary>, action: @Composable (Pl
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                PlayerRow(player, subtitle = "${player.fullName} · ${player.district}", modifier = Modifier.weight(1f))
+                PlayerRow(
+                    player,
+                    subtitle = "${player.fullName} · ${player.district}",
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onOpenPlayer(player.id) },
+                )
                 action(player)
             }
         }
