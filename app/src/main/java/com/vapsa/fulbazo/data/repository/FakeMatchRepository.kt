@@ -58,6 +58,37 @@ class FakeMatchRepository(
                 playerIds = listOf("jose"),
                 description = "Partido temprano, nivel competitivo.",
             ),
+            // Partidos ya jugados en los que participó el usuario de prueba "demo".
+            Match(
+                id = "match-past-selva",
+                courtId = "losa-selva-alegre",
+                hostId = "maria",
+                dateTime = today.minusDays(2).atTime(LocalTime.of(18, 0)),
+                slots = 10,
+                level = MatchLevel.ANY,
+                status = MatchStatus.FINISHED,
+                playerIds = listOf("maria", "demo", "carlos", "valeria"),
+            ),
+            Match(
+                id = "match-past-sachaca",
+                courtId = "losa-sachaca",
+                hostId = "demo",
+                dateTime = today.minusDays(6).atTime(LocalTime.of(20, 0)),
+                slots = 8,
+                level = MatchLevel.INTERMEDIATE,
+                status = MatchStatus.FINISHED,
+                playerIds = listOf("demo", "carlos", "jose", "pedro"),
+            ),
+            Match(
+                id = "match-past-paucarpata",
+                courtId = "losa-paucarpata",
+                hostId = "carlos",
+                dateTime = today.minusDays(10).atTime(LocalTime.of(16, 0)),
+                slots = 12,
+                level = MatchLevel.BEGINNER,
+                status = MatchStatus.FINISHED,
+                playerIds = listOf("carlos", "demo", "rodrigo"),
+            ),
         ),
     )
 

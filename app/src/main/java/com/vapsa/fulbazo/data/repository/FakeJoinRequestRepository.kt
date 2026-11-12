@@ -17,7 +17,10 @@ class FakeJoinRequestRepository(
     private val now: () -> LocalDateTime = { LocalDateTime.now() },
 ) : JoinRequestRepository {
 
-    private val requests = MutableStateFlow(emptyList<JoinRequest>())
+    /** El usuario de prueba "demo" ya pidió unirse al partido de vale9 en Cayma. */
+    private val requests = MutableStateFlow(
+        listOf(JoinRequest("req-demo-cayma", "match-cayma", "demo", now().minusHours(3))),
+    )
 
     override fun observeForMatch(matchId: String): Flow<List<JoinRequest>> =
         requests.map { list -> list.filter { it.matchId == matchId }.sortedBy { it.createdAt } }

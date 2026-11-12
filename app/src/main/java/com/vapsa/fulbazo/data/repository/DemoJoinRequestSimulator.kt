@@ -1,5 +1,6 @@
 package com.vapsa.fulbazo.data.repository
 
+import com.vapsa.fulbazo.domain.model.MatchStatus
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.repository.JoinRequestRepository
 import com.vapsa.fulbazo.domain.repository.MatchRepository
@@ -7,6 +8,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 /**
  * Solo para probar sin backend: cuando el usuario crea un partido, unos
@@ -22,7 +24,18 @@ class DemoJoinRequestSimulator(
     suspend fun run() = coroutineScope {
         val alreadySimulated = mutableSetOf<String>()
         combine(authRepository.currentUser, matchRepository.observeMatches()) { user, matches ->
-            if (user == null) emptyList() else matches.filter { it.hostId == user.id }.map { it.id }
+            if (user == null) {
+                emptyList()
+            } else {
+                // Solo partidos abiertos y futuros del usuario.
+                matches
+                    .filter {
+                        it.hostId == user.id &&
+                            it.status == MatchStatus.OPEN &&
+                            it.dateTime.isAfter(LocalDateTime.now())
+                    }
+                    .map { it.id }
+            }
         }.collect { hostedMatchIds ->
             hostedMatchIds.filter { alreadySimulated.add(it) }.forEach { matchId ->
                 // Se lanza en el scope externo para que no se cancele si la lista cambia.

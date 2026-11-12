@@ -13,16 +13,16 @@ class FakeJoinRequestRepositoryTest {
 
     @Test
     fun sendRequest_isIdempotentWhilePending() = runTest {
-        repository.sendRequest("m1", "demo")
-        repository.sendRequest("m1", "demo")
+        repository.sendRequest("m1", "valeria")
+        repository.sendRequest("m1", "valeria")
 
         assertEquals(1, repository.observeForMatch("m1").first().size)
-        assertEquals(1, repository.observeByUser("demo").first().size)
+        assertEquals(1, repository.observeByUser("valeria").first().size)
     }
 
     @Test
     fun respond_changesStatus_andCannotRespondTwice() = runTest {
-        repository.sendRequest("m1", "demo")
+        repository.sendRequest("m1", "valeria")
         val request = repository.observeForMatch("m1").first().single()
 
         assertTrue(repository.respond(request.id, accept = false).isSuccess)
@@ -32,7 +32,7 @@ class FakeJoinRequestRepositoryTest {
 
     @Test
     fun cancelRequest_removesIt() = runTest {
-        repository.sendRequest("m1", "demo")
+        repository.sendRequest("m1", "valeria")
         val request = repository.observeForMatch("m1").first().single()
 
         repository.cancelRequest(request.id)
