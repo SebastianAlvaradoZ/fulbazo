@@ -73,6 +73,30 @@
     <string name="my_matches_status_rejected">Rechazada</string>
     <string name="my_matches_evaluate_soon">Evaluar jugadores (próximamente)</string>
 
+    <!-- Perfil de otro jugador -->
+    <string name="player_title">Perfil del jugador</string>
+    <string name="player_not_found">Este jugador no existe</string>
+    <string name="player_load_error">No se pudo cargar el perfil</string>
+    <string name="player_add_friend">Agregar amigo</string>
+    <string name="player_request_sent">Solicitud enviada</string>
+    <string name="player_accept_request">Aceptar solicitud</string>
+    <string name="player_friends">Son amigos</string>
+    <string name="player_invite">Invitar a partido</string>
+    <string name="player_invite_title">Invitar a %1$s</string>
+    <string name="player_invite_text">Elige uno de tus partidos próximos:</string>
+    <string name="player_invite_empty">No tienes partidos próximos como anfitrión. Crea uno para invitarlo.</string>
+    <string name="player_invite_confirm">Invitar</string>
+    <string name="player_matches_together">Partidos jugados juntos: %1$d</string>
+    <string name="player_self_title">Cómo se ve</string>
+    <string name="player_community_title">Cómo lo ven</string>
+    <string name="player_no_self">Aún no completó sus estadísticas</string>
+    <string name="player_no_community">Aún nadie lo ha calificado</string>
+    <string name="player_msg_request_sent">Solicitud de amistad enviada</string>
+    <string name="player_msg_request_accepted">Ahora son amigos</string>
+    <string name="player_msg_invited">Invitación enviada</string>
+    <string name="skill_value_decimal">%1$.1f</string>
+    <string name="player_foot">Pierna %1$s</string>
+
     <!-- Crear partido -->
     <string name="create_match_title">Crear partido</string>
     <string name="create_match_host_note">Serás el anfitrión de este partido.</string>
