@@ -19,6 +19,7 @@ import com.vapsa.fulbazo.domain.repository.InvitationRepository
 import com.vapsa.fulbazo.domain.repository.JoinRequestRepository
 import com.vapsa.fulbazo.domain.repository.MatchRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
+import com.vapsa.fulbazo.domain.repository.RatingRepository
 import com.vapsa.fulbazo.domain.repository.StatsRepository
 
 /**
@@ -30,7 +31,10 @@ import com.vapsa.fulbazo.domain.repository.StatsRepository
  */
 object AppContainer {
     val authRepository: AuthRepository by lazy { FakeAuthRepository() }
-    val statsRepository: StatsRepository by lazy { FakeStatsRepository() }
+    /** Una sola instancia: las calificaciones recalculan las estadísticas "Cómo lo ven". */
+    private val fakeStatsRepository by lazy { FakeStatsRepository() }
+    val statsRepository: StatsRepository get() = fakeStatsRepository
+    val ratingRepository: RatingRepository get() = fakeStatsRepository
     val courtRepository: CourtRepository by lazy { FakeCourtRepository() }
     val matchRepository: MatchRepository by lazy { FakeMatchRepository() }
     val playerRepository: PlayerRepository by lazy { FakePlayerRepository(authRepository) }

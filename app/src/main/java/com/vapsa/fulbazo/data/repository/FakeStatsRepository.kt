@@ -5,23 +5,28 @@ import com.vapsa.fulbazo.domain.model.CommunityStats
 import com.vapsa.fulbazo.domain.model.FieldSkill
 import com.vapsa.fulbazo.domain.model.Foot
 import com.vapsa.fulbazo.domain.model.GoalkeeperSkill
+import com.vapsa.fulbazo.domain.model.MatchRole
 import com.vapsa.fulbazo.domain.model.PlayerProfile
+import com.vapsa.fulbazo.domain.model.PlayerRating
 import com.vapsa.fulbazo.domain.model.Position
 import com.vapsa.fulbazo.domain.model.SelfAssessment
+import com.vapsa.fulbazo.domain.repository.RatingRepository
 import com.vapsa.fulbazo.domain.repository.StatsRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
 /**
- * Implementación en memoria de [StatsRepository] para desarrollar sin backend.
+ * Implementación en memoria de [StatsRepository] y [RatingRepository] para
+ * desarrollar sin backend.
  * Se reemplazará por Firestore.
  */
 class FakeStatsRepository(
     private val latencyMillis: Long = 600,
-) : StatsRepository {
+) : StatsRepository, RatingRepository {
 
     private val profiles = MutableStateFlow(
         mapOf(
@@ -119,8 +124,15 @@ class FakeStatsRepository(
         ),
     )
 
+    /** Calificaciones hechas en la app; se suman a las estadísticas iniciales de prueba. */
+    private val ratings = MutableStateFlow(emptyList<PlayerRating>())
+
     override fun observeProfile(userId: String): Flow<PlayerProfile> =
-        profiles.map { it[userId] ?: PlayerProfile(userId) }
+        combine(profiles, ratings) { all, allRatings ->
+            val base = all[userId] ?: PlayerProfile(userId)
+            val received = allRatings.filter { it.ratedId == userId }
+            base.copy(community = base.community.withRatings(received))
+        }
 
     override suspend fun saveSelfAssessment(
         userId: String,
@@ -134,7 +146,50 @@ class FakeStatsRepository(
         return Result.success(Unit)
     }
 
+    override fun observeRatingsBy(raterId: String, matchId: String): Flow<List<PlayerRating>> =
+        ratings.map { list -> list.filter { it.raterId == raterId && it.matchId == matchId } }
+
+    override suspend fun submitRating(rating: PlayerRating): Result<Unit> {
+        delay(latencyMillis)
+        if (rating.raterId == rating.ratedId) {
+            return Result.failure(IllegalArgumentException("No puedes calificarte a ti mismo"))
+        }
+        if (!rating.isComplete) return Result.failure(IllegalArgumentException("Calificación incompleta"))
+        ratings.update { list ->
+            // Una sola calificación por evaluador, jugador y partido: la nueva reemplaza a la anterior.
+            list.filterNot {
+                it.matchId == rating.matchId && it.raterId == rating.raterId && it.ratedId == rating.ratedId
+            } + rating
+        }
+        return Result.success(Unit)
+    }
+
     private companion object {
+        /**
+         * Suma las calificaciones recibidas a los promedios existentes,
+         * por separado para campo y para arquero.
+         */
+        fun CommunityStats.withRatings(received: List<PlayerRating>): CommunityStats = CommunityStats(
+            asFieldPlayer = asFieldPlayer.merge(
+                received.filter { it.role == MatchRole.FIELD }.map { it.fieldSkills },
+            ),
+            asGoalkeeper = asGoalkeeper.merge(
+                received.filter { it.role == MatchRole.GOALKEEPER }.map { it.goalkeeperSkills },
+            ),
+        )
+
+        fun <S : Enum<S>> CommunityRatings<S>?.merge(newScores: List<Map<S, Int>>): CommunityRatings<S>? {
+            if (newScores.isEmpty()) return this
+            val previousVotes = this?.votes ?: 0
+            val totalVotes = previousVotes + newScores.size
+            val skills = (this?.averages?.keys.orEmpty() + newScores.flatMap { it.keys }).toSet()
+            val averages = skills.associateWith { skill ->
+                val previousSum = (this?.averages?.get(skill) ?: 0.0) * previousVotes
+                (previousSum + newScores.sumOf { it[skill] ?: 0 }) / totalVotes
+            }
+            return CommunityRatings(averages, totalVotes)
+        }
+
         fun fieldSkills(
             speed: Int,
             technique: Int,
