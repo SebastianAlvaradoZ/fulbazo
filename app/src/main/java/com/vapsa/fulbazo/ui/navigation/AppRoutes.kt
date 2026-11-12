@@ -14,6 +14,11 @@ object AppRoutes {
     const val CREATE_MATCH = "create_match"
     const val INVITATIONS = "invitations"
 
+    const val MATCH_ID_ARG = "matchId"
+    const val MATCH_DETAIL = "match_detail/{$MATCH_ID_ARG}"
+
+    fun matchDetail(matchId: String): String = "match_detail/$matchId"
+
     const val GROUP_ID_ARG = "groupId"
     const val GROUP_EDITOR = "group_editor?$GROUP_ID_ARG={$GROUP_ID_ARG}"
 

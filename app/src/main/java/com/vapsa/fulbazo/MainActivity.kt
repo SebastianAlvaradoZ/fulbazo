@@ -26,8 +26,9 @@ class MainActivity : ComponentActivity() {
         openInvitations = intent.wantsInvitations()
 
         lifecycleScope.launch { InvitationNotifier.get(this@MainActivity).run() }
-        // Solo mientras no haya backend: simula que un amigo te invita.
+        // Solo mientras no haya backend: simulan invitaciones y solicitudes de otros jugadores.
         lifecycleScope.launch { AppContainer.demoInvitationSimulator.run() }
+        lifecycleScope.launch { AppContainer.demoJoinRequestSimulator.run() }
 
         setContent {
             FulbazoTheme {

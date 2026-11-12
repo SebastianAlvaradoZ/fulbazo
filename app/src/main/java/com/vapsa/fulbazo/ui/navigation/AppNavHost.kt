@@ -15,6 +15,7 @@ import com.vapsa.fulbazo.ui.invitations.InvitationsRoute
 import com.vapsa.fulbazo.ui.map.MapRoute
 import com.vapsa.fulbazo.ui.match.MatchesScreen
 import com.vapsa.fulbazo.ui.match.create.CreateMatchRoute
+import com.vapsa.fulbazo.ui.match.detail.MatchDetailRoute
 import com.vapsa.fulbazo.ui.profile.ProfileRoute
 import com.vapsa.fulbazo.ui.stats.MyStatsRoute
 
@@ -42,7 +43,10 @@ fun AppNavHost(
             )
         }
         composable(AppRoutes.MAP) {
-            MapRoute(onCreateMatch = { navController.navigate(AppRoutes.CREATE_MATCH) })
+            MapRoute(
+                onCreateMatch = { navController.navigate(AppRoutes.CREATE_MATCH) },
+                onOpenMatch = { matchId -> navController.navigate(AppRoutes.matchDetail(matchId)) },
+            )
         }
         composable(AppRoutes.MATCH) { MatchesScreen() }
         composable(AppRoutes.FRIENDS) {
@@ -58,6 +62,15 @@ fun AppNavHost(
             CreateMatchRoute(
                 onNavigateBack = { navController.popBackStack() },
                 onCreated = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = AppRoutes.MATCH_DETAIL,
+            arguments = listOf(navArgument(AppRoutes.MATCH_ID_ARG) { type = NavType.StringType }),
+        ) { entry ->
+            MatchDetailRoute(
+                matchId = requireNotNull(entry.arguments?.getString(AppRoutes.MATCH_ID_ARG)),
+                onNavigateBack = { navController.popBackStack() },
             )
         }
         composable(AppRoutes.INVITATIONS) {

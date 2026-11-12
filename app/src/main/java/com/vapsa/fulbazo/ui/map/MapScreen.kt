@@ -43,11 +43,12 @@ private const val MAP_HEIGHT_FRACTION = 0.42f
 @Composable
 fun MapRoute(
     onCreateMatch: () -> Unit,
+    onOpenMatch: (matchId: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MapViewModel = viewModel(factory = MapViewModel.Factory),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    MapScreen(uiState = uiState, onCreateMatch = onCreateMatch, modifier = modifier)
+    MapScreen(uiState = uiState, onCreateMatch = onCreateMatch, onOpenMatch = onOpenMatch, modifier = modifier)
 }
 
 @Composable
@@ -55,6 +56,7 @@ fun MapScreen(
     uiState: MapUiState,
     onCreateMatch: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenMatch: (matchId: String) -> Unit = {},
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
@@ -65,7 +67,7 @@ fun MapScreen(
                     .fillMaxWidth()
                     .fillMaxHeight(MAP_HEIGHT_FRACTION),
             )
-            NearbyMatchesList(uiState = uiState, modifier = Modifier.weight(1f))
+            NearbyMatchesList(uiState = uiState, onOpenMatch = onOpenMatch, modifier = Modifier.weight(1f))
         }
         ExtendedFloatingActionButton(
             onClick = onCreateMatch,
@@ -79,7 +81,11 @@ fun MapScreen(
 }
 
 @Composable
-private fun NearbyMatchesList(uiState: MapUiState, modifier: Modifier = Modifier) {
+private fun NearbyMatchesList(
+    uiState: MapUiState,
+    onOpenMatch: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
         // Espacio abajo para que el botón flotante no tape la última tarjeta.
@@ -102,7 +108,9 @@ private fun NearbyMatchesList(uiState: MapUiState, modifier: Modifier = Modifier
             uiState.matches.isEmpty() -> item {
                 EmptyState(stringResource(R.string.map_empty), iconRes = R.drawable.ic_matches)
             }
-            else -> items(uiState.matches, key = { it.matchId }) { MatchCard(it) }
+            else -> items(uiState.matches, key = { it.matchId }) { item ->
+                MatchCard(item, onClick = { onOpenMatch(item.matchId) })
+            }
         }
     }
 }
