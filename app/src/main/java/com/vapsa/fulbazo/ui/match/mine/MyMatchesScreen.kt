@@ -45,6 +45,7 @@ fun MyMatchesRoute(
     onOpenMatch: (matchId: String) -> Unit,
     onCreateMatch: () -> Unit,
     onExploreMap: () -> Unit,
+    onRateMatch: (matchId: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MyMatchesViewModel = viewModel(factory = MyMatchesViewModel.Factory),
 ) {
@@ -66,6 +67,7 @@ fun MyMatchesRoute(
                 onOpenMatch = onOpenMatch,
                 onCreateMatch = onCreateMatch,
                 onExploreMap = onExploreMap,
+                onRateMatch = onRateMatch,
                 onCancelRequest = viewModel::cancelRequest,
                 onRetry = viewModel::retry,
             ),
@@ -78,6 +80,7 @@ data class MyMatchesActions(
     val onOpenMatch: (String) -> Unit = {},
     val onCreateMatch: () -> Unit = {},
     val onExploreMap: () -> Unit = {},
+    val onRateMatch: (String) -> Unit = {},
     val onCancelRequest: (String) -> Unit = {},
     val onRetry: () -> Unit = {},
 )
@@ -185,9 +188,11 @@ private fun LazyListScope.historyTab(uiState: MyMatchesUiState, actions: MyMatch
     }
     items(uiState.history, key = { it.matchId }) { match ->
         MatchCard(match, onClick = { actions.onOpenMatch(match.matchId) }) {
-            // Lugar reservado para la evaluación de jugadores después del partido.
-            OutlinedButton(onClick = {}, enabled = false, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.my_matches_evaluate_soon))
+            OutlinedButton(
+                onClick = { actions.onRateMatch(match.matchId) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.rate_open))
             }
         }
     }

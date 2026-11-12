@@ -16,6 +16,7 @@ import com.vapsa.fulbazo.ui.map.MapRoute
 import com.vapsa.fulbazo.ui.match.create.CreateMatchRoute
 import com.vapsa.fulbazo.ui.match.detail.MatchDetailRoute
 import com.vapsa.fulbazo.ui.match.mine.MyMatchesRoute
+import com.vapsa.fulbazo.ui.match.rate.RatePlayersRoute
 import com.vapsa.fulbazo.ui.player.PlayerProfileRoute
 import com.vapsa.fulbazo.ui.profile.ProfileRoute
 import com.vapsa.fulbazo.ui.stats.MyStatsRoute
@@ -60,6 +61,7 @@ fun AppNavHost(
                         restoreState = true
                     }
                 },
+                onRateMatch = { matchId -> navController.navigate(AppRoutes.rate(matchId)) },
             )
         }
         composable(AppRoutes.FRIENDS) {
@@ -88,6 +90,20 @@ fun AppNavHost(
                 matchId = requireNotNull(entry.arguments?.getString(AppRoutes.MATCH_ID_ARG)),
                 onNavigateBack = { navController.popBackStack() },
                 onOpenPlayer = { playerId -> navController.navigate(AppRoutes.player(playerId)) },
+                onRatePlayers = {
+                    navController.navigate(
+                        AppRoutes.rate(requireNotNull(entry.arguments?.getString(AppRoutes.MATCH_ID_ARG))),
+                    )
+                },
+            )
+        }
+        composable(
+            route = AppRoutes.RATE,
+            arguments = listOf(navArgument(AppRoutes.MATCH_ID_ARG) { type = NavType.StringType }),
+        ) { entry ->
+            RatePlayersRoute(
+                matchId = requireNotNull(entry.arguments?.getString(AppRoutes.MATCH_ID_ARG)),
+                onNavigateBack = { navController.popBackStack() },
             )
         }
         composable(

@@ -19,6 +19,10 @@ object AppRoutes {
 
     fun matchDetail(matchId: String): String = "match_detail/$matchId"
 
+    const val RATE = "rate/{$MATCH_ID_ARG}"
+
+    fun rate(matchId: String): String = "rate/$matchId"
+
     const val PLAYER_ID_ARG = "playerId"
     const val PLAYER = "player/{$PLAYER_ID_ARG}"
 

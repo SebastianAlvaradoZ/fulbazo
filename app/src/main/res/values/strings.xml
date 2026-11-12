@@ -71,7 +71,6 @@
     <string name="my_matches_status_pending">Pendiente</string>
     <string name="my_matches_status_accepted">Aceptada</string>
     <string name="my_matches_status_rejected">Rechazada</string>
-    <string name="my_matches_evaluate_soon">Evaluar jugadores (próximamente)</string>
 
     <!-- Perfil de otro jugador -->
     <string name="player_title">Perfil del jugador</string>
@@ -96,6 +95,27 @@
     <string name="player_msg_invited">Invitación enviada</string>
     <string name="skill_value_decimal">%1$.1f</string>
     <string name="player_foot">Pierna %1$s</string>
+
+    <!-- Evaluar jugadores -->
+    <string name="rate_title">Evaluar jugadores</string>
+    <string name="rate_progress">Evaluaste a %1$d de %2$d compañeros</string>
+    <string name="rate_not_allowed">Solo puedes evaluar partidos que ya jugaste</string>
+    <string name="rate_not_found">Este partido ya no existe</string>
+    <string name="rate_load_error">No se pudo cargar el partido</string>
+    <string name="rate_no_teammates">No hubo otros jugadores en este partido</string>
+    <string name="rate_pending">Sin evaluar</string>
+    <string name="rate_done_field">Evaluado como jugador de campo</string>
+    <string name="rate_done_goalkeeper">Evaluado como arquero</string>
+    <string name="rate_button">Evaluar</string>
+    <string name="rate_edit">Editar</string>
+    <string name="rate_sheet_title">Evaluar a %1$s</string>
+    <string name="rate_sheet_role">¿Cómo jugó en este partido?</string>
+    <string name="rate_role_field">Jugador de campo</string>
+    <string name="rate_role_goalkeeper">Arquero</string>
+    <string name="rate_save">Guardar evaluación</string>
+    <string name="rate_saved">Evaluaste a %1$s</string>
+    <string name="rate_save_error">No se pudo guardar la evaluación</string>
+    <string name="rate_open">Evaluar jugadores</string>
 
     <!-- Crear partido -->
     <string name="create_match_title">Crear partido</string>

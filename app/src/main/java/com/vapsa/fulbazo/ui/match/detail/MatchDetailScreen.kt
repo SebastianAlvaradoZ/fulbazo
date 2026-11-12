@@ -60,6 +60,7 @@ fun MatchDetailRoute(
     matchId: String,
     onNavigateBack: () -> Unit,
     onOpenPlayer: (playerId: String) -> Unit,
+    onRatePlayers: () -> Unit,
     viewModel: MatchDetailViewModel = viewModel(
         key = "match-$matchId",
         factory = MatchDetailViewModel.factory(matchId),
@@ -99,6 +100,7 @@ fun MatchDetailRoute(
             onLeave = viewModel::leaveMatch,
             onRespond = viewModel::respondToRequest,
             onOpenPlayer = onOpenPlayer,
+            onRatePlayers = onRatePlayers,
         ),
     )
 }
@@ -110,6 +112,7 @@ data class MatchDetailActions(
     val onLeave: () -> Unit = {},
     val onRespond: (requestId: String, accept: Boolean) -> Unit = { _, _ -> },
     val onOpenPlayer: (playerId: String) -> Unit = {},
+    val onRatePlayers: () -> Unit = {},
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -154,6 +157,14 @@ fun MatchDetailScreen(
                 item { MatchCard(match) }
                 if (uiState.isFinished) {
                     item { HelperText(stringResource(R.string.match_detail_finished)) }
+                    // Quien jugó el partido puede evaluar a sus compañeros.
+                    if (uiState.role == ViewerRole.HOST || uiState.role == ViewerRole.PLAYER) {
+                        item {
+                            Button(onClick = actions.onRatePlayers, modifier = Modifier.fillMaxWidth()) {
+                                Text(stringResource(R.string.rate_open))
+                            }
+                        }
+                    }
                 } else {
                     item { ViewerActions(uiState, actions) }
                 }
