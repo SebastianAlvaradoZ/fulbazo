@@ -1,5 +1,6 @@
 package com.vapsa.fulbazo.di
 
+import android.content.Context
 import com.vapsa.fulbazo.data.repository.DemoInvitationSimulator
 import com.vapsa.fulbazo.data.repository.DemoJoinRequestSimulator
 import com.vapsa.fulbazo.data.repository.FakeAuthRepository
@@ -11,12 +12,14 @@ import com.vapsa.fulbazo.data.repository.FakeJoinRequestRepository
 import com.vapsa.fulbazo.data.repository.FakeMatchRepository
 import com.vapsa.fulbazo.data.repository.FakePlayerRepository
 import com.vapsa.fulbazo.data.repository.FakeStatsRepository
+import com.vapsa.fulbazo.data.repository.FusedLocationRepository
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.repository.CourtRepository
 import com.vapsa.fulbazo.domain.repository.FriendRepository
 import com.vapsa.fulbazo.domain.repository.GroupRepository
 import com.vapsa.fulbazo.domain.repository.InvitationRepository
 import com.vapsa.fulbazo.domain.repository.JoinRequestRepository
+import com.vapsa.fulbazo.domain.repository.LocationRepository
 import com.vapsa.fulbazo.domain.repository.MatchRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
 import com.vapsa.fulbazo.domain.repository.RatingRepository
@@ -30,6 +33,13 @@ import com.vapsa.fulbazo.domain.repository.StatsRepository
  * las factories.
  */
 object AppContainer {
+    private lateinit var appContext: Context
+
+    /** Lo llama [com.vapsa.fulbazo.FulbazoApplication] al arrancar la app. */
+    fun init(context: Context) {
+        appContext = context.applicationContext
+    }
+
     val authRepository: AuthRepository by lazy { FakeAuthRepository() }
     /** Una sola instancia: las calificaciones recalculan las estadísticas "Cómo lo ven". */
     private val fakeStatsRepository by lazy { FakeStatsRepository() }
@@ -42,6 +52,7 @@ object AppContainer {
     val groupRepository: GroupRepository by lazy { FakeGroupRepository() }
     val invitationRepository: InvitationRepository by lazy { FakeInvitationRepository() }
     val joinRequestRepository: JoinRequestRepository by lazy { FakeJoinRequestRepository() }
+    val locationRepository: LocationRepository by lazy { FusedLocationRepository(appContext) }
 
     /** Simula invitaciones entrantes mientras no haya backend. */
     val demoInvitationSimulator by lazy {

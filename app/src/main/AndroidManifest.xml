@@ -4,8 +4,12 @@
 
     <!-- Notificaciones de invitaciones a partidos (Android 13+ lo pide en tiempo de ejecución). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Ubicación para ordenar los partidos por cercanía y mostrarte en el mapa. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
+        android:name=".FulbazoApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -14,6 +18,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Fulbazo">
+        <!-- La clave sale de local.properties (MAPS_API_KEY); nunca se escribe aquí. -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

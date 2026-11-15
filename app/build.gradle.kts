@@ -1,6 +1,20 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+}
+
+/**
+ * Lee MAPS_API_KEY de local.properties (que no se sube a git). Si no está, usa el
+ * valor de local.defaults.properties, y la app muestra un aviso en vez del mapa.
+ */
+val mapsApiKey: String = Properties().run {
+    listOf("local.defaults.properties", "local.properties")
+        .map(rootProject::file)
+        .filter { it.exists() }
+        .forEach { file -> file.inputStream().use(::load) }
+    getProperty("MAPS_API_KEY", "DEFAULT_API_KEY").trim()
 }
 
 android {
@@ -17,6 +31,13 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        buildConfigField(
+            "boolean",
+            "HAS_MAPS_API_KEY",
+            (mapsApiKey.isNotBlank() && mapsApiKey != "DEFAULT_API_KEY").toString(),
+        )
     }
 
     buildTypes {
@@ -32,6 +53,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -49,6 +71,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.coil.compose)
+    implementation(libs.maps.compose)
+    implementation(libs.play.services.location)
+    implementation(libs.kotlinx.coroutines.play.services)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))
