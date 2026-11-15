@@ -26,6 +26,8 @@ data class MatchItem(
     val isHost: Boolean,
     val isPlayer: Boolean,
     val description: String,
+    /** Distancia desde tu ubicación, o `null` si no la conocemos. */
+    val distanceKm: Double? = null,
 )
 
 /** Une el partido con su losa y su anfitrión. */
