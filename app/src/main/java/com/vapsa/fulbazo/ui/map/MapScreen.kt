@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
-import com.vapsa.fulbazo.data.repository.FakeCourtRepository
 import com.vapsa.fulbazo.domain.model.Court
 import com.vapsa.fulbazo.ui.components.EmptyState
 import com.vapsa.fulbazo.ui.components.ErrorState
@@ -175,12 +174,19 @@ private fun CourtsMapPreview(
     }
 }
 
+/** Losas de ejemplo solo para la vista previa de Android Studio. */
+private val previewCourts = listOf(
+    Court("p1", "Losa Umacollo", "Yanahuara", -16.3935, -71.5480),
+    Court("p2", "Losa Cayma", "Cayma", -16.3720, -71.5450),
+    Court("p3", "Losa Paucarpata", "Paucarpata", -16.4280, -71.5050),
+)
+
 @Preview(showBackground = true, heightDp = 700)
 @Composable
 private fun MapScreenPreview() {
     FulbazoTheme {
         MapScreen(
-            uiState = MapUiState(isLoading = false, courts = FakeCourtRepository.COURTS),
+            uiState = MapUiState(isLoading = false, courts = previewCourts),
             onCreateMatch = {},
         )
     }
