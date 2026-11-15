@@ -1,11 +1,7 @@
 package com.vapsa.fulbazo.ui.match.create
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.MatchLevel
 import com.vapsa.fulbazo.domain.model.NewMatch
 import com.vapsa.fulbazo.domain.repository.AuthRepository
@@ -15,6 +11,10 @@ import com.vapsa.fulbazo.domain.repository.GroupRepository
 import com.vapsa.fulbazo.domain.repository.InvitationRepository
 import com.vapsa.fulbazo.domain.repository.MatchRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,6 +26,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
+@HiltViewModel(assistedFactory = CreateMatchViewModel.Factory::class)
 class CreateMatchViewModel(
     private val authRepository: AuthRepository,
     courtRepository: CourtRepository,
@@ -37,6 +38,28 @@ class CreateMatchViewModel(
     private val now: () -> LocalDateTime = { LocalDateTime.now() },
     initialCourtId: String? = null,
 ) : ViewModel() {
+
+    /** Constructor que usa Hilt; las pruebas usan el principal para fijar la hora y los tiempos. */
+    @AssistedInject constructor(
+        authRepository: AuthRepository,
+        courtRepository: CourtRepository,
+        matchRepository: MatchRepository,
+        playerRepository: PlayerRepository,
+        friendRepository: FriendRepository,
+        groupRepository: GroupRepository,
+        invitationRepository: InvitationRepository,
+        @Assisted initialCourtId: String?,
+    ) : this(
+        authRepository = authRepository,
+        courtRepository = courtRepository,
+        matchRepository = matchRepository,
+        playerRepository = playerRepository,
+        friendRepository = friendRepository,
+        groupRepository = groupRepository,
+        invitationRepository = invitationRepository,
+        now = { LocalDateTime.now() },
+        initialCourtId = initialCourtId,
+    )
 
     private val _uiState = MutableStateFlow(CreateMatchUiState(courtId = initialCourtId))
     val uiState: StateFlow<CreateMatchUiState> = _uiState.asStateFlow()
@@ -155,22 +178,10 @@ class CreateMatchViewModel(
         _uiState.update { it.transform().copy(saveFailed = false) }
     }
 
-    companion object {
-        /** [courtId] permite abrir el formulario con una losa ya elegida. */
-        fun factory(courtId: String? = null): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                CreateMatchViewModel(
-                    authRepository = AppContainer.authRepository,
-                    courtRepository = AppContainer.courtRepository,
-                    matchRepository = AppContainer.matchRepository,
-                    playerRepository = AppContainer.playerRepository,
-                    friendRepository = AppContainer.friendRepository,
-                    groupRepository = AppContainer.groupRepository,
-                    invitationRepository = AppContainer.invitationRepository,
-                    initialCourtId = courtId,
-                )
-            }
-        }
+    /** Hilt crea el ViewModel con el [initialCourtId] que recibe la pantalla. */
+    @AssistedFactory
+    interface Factory {
+        fun create(initialCourtId: String?): CreateMatchViewModel
     }
 }
 

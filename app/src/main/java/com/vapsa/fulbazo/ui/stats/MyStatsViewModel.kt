@@ -1,11 +1,7 @@
 package com.vapsa.fulbazo.ui.stats
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.FieldSkill
 import com.vapsa.fulbazo.domain.model.Foot
 import com.vapsa.fulbazo.domain.model.GoalkeeperSkill
@@ -14,14 +10,17 @@ import com.vapsa.fulbazo.domain.model.SelfAssessment
 import com.vapsa.fulbazo.domain.model.SkillScale
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.repository.StatsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MyStatsViewModel(
+@HiltViewModel
+class MyStatsViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val statsRepository: StatsRepository,
 ) : ViewModel() {
@@ -141,13 +140,5 @@ class MyStatsViewModel(
     /** La vista llama a esto después de mostrar la confirmación o el error. */
     fun onSaveMessageShown() {
         _uiState.update { it.copy(isSaved = false, saveFailed = false) }
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                MyStatsViewModel(AppContainer.authRepository, AppContainer.statsRepository)
-            }
-        }
     }
 }

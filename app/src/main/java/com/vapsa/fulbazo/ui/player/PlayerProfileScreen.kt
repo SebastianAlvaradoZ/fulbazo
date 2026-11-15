@@ -49,8 +49,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.CommunityRatings
 import com.vapsa.fulbazo.domain.model.PlayerRelation
@@ -69,10 +69,9 @@ fun PlayerProfileRoute(
     playerId: String,
     onNavigateBack: () -> Unit,
     onOpenOwnProfile: () -> Unit,
-    viewModel: PlayerProfileViewModel = viewModel(
+    viewModel: PlayerProfileViewModel = hiltViewModel<PlayerProfileViewModel, PlayerProfileViewModel.Factory>(
         key = "player-$playerId",
-        factory = PlayerProfileViewModel.factory(playerId),
-    ),
+    ) { factory -> factory.create(playerId) },
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

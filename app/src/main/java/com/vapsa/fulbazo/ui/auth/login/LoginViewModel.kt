@@ -1,22 +1,21 @@
 package com.vapsa.fulbazo.ui.auth.login
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.AuthResult
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.validation.FieldError
 import com.vapsa.fulbazo.domain.validation.UserValidator
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LoginViewModel(
+@HiltViewModel
+class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository,
 ) : ViewModel() {
 
@@ -58,11 +57,5 @@ class LoginViewModel(
     /** La vista llama a esto después de navegar, para no repetir la navegación. */
     fun onLoginHandled() {
         _uiState.update { it.copy(isLoggedIn = false) }
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer { LoginViewModel(AppContainer.authRepository) }
-        }
     }
 }

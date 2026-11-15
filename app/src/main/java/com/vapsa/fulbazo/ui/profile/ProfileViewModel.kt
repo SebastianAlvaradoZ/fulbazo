@@ -1,15 +1,12 @@
 package com.vapsa.fulbazo.ui.profile
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.PlayerProfile
 import com.vapsa.fulbazo.domain.model.User
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.repository.StatsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,6 +17,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * Estado de la pantalla de perfil.
@@ -31,7 +29,8 @@ data class ProfileUiState(
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ProfileViewModel(
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     statsRepository: StatsRepository,
 ) : ViewModel() {
@@ -64,12 +63,4 @@ class ProfileViewModel(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = ProfileUiState(),
         )
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                ProfileViewModel(AppContainer.authRepository, AppContainer.statsRepository)
-            }
-        }
-    }
 }

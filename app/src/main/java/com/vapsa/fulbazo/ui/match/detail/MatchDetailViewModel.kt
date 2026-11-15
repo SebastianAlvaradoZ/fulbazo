@@ -1,11 +1,7 @@
 package com.vapsa.fulbazo.ui.match.detail
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.JoinRequestStatus
 import com.vapsa.fulbazo.domain.model.MatchStatus
 import com.vapsa.fulbazo.domain.repository.AuthRepository
@@ -14,6 +10,10 @@ import com.vapsa.fulbazo.domain.repository.JoinRequestRepository
 import com.vapsa.fulbazo.domain.repository.MatchRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
 import com.vapsa.fulbazo.ui.match.toItem
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +27,7 @@ import java.time.LocalDateTime
 /**
  * Detalle de un partido: datos, jugadores y solicitudes para unirse.
  */
+@HiltViewModel(assistedFactory = MatchDetailViewModel.Factory::class)
 class MatchDetailViewModel(
     private val matchId: String,
     authRepository: AuthRepository,
@@ -36,6 +37,24 @@ class MatchDetailViewModel(
     private val joinRequestRepository: JoinRequestRepository,
     private val now: () -> LocalDateTime = { LocalDateTime.now() },
 ) : ViewModel() {
+
+    /** Constructor que usa Hilt; las pruebas usan el principal para fijar la hora y los tiempos. */
+    @AssistedInject constructor(
+        @Assisted matchId: String,
+        authRepository: AuthRepository,
+        matchRepository: MatchRepository,
+        courtRepository: CourtRepository,
+        playerRepository: PlayerRepository,
+        joinRequestRepository: JoinRequestRepository,
+    ) : this(
+        matchId = matchId,
+        authRepository = authRepository,
+        matchRepository = matchRepository,
+        courtRepository = courtRepository,
+        playerRepository = playerRepository,
+        joinRequestRepository = joinRequestRepository,
+        now = { LocalDateTime.now() },
+    )
 
     private val userId: String? = authRepository.currentUser.value?.id
 
@@ -153,18 +172,9 @@ class MatchDetailViewModel(
         }
     }
 
-    companion object {
-        fun factory(matchId: String): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                MatchDetailViewModel(
-                    matchId,
-                    AppContainer.authRepository,
-                    AppContainer.matchRepository,
-                    AppContainer.courtRepository,
-                    AppContainer.playerRepository,
-                    AppContainer.joinRequestRepository,
-                )
-            }
-        }
+    /** Hilt crea el ViewModel con el [matchId] que recibe la pantalla. */
+    @AssistedFactory
+    interface Factory {
+        fun create(matchId: String): MatchDetailViewModel
     }
 }

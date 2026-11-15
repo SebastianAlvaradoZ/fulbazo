@@ -30,8 +30,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.ui.components.EmptyState
 import com.vapsa.fulbazo.ui.components.ErrorState
@@ -51,10 +51,9 @@ fun CourtDetailSheet(
     onDismiss: () -> Unit,
     onOpenMatch: (matchId: String) -> Unit,
     onCreateMatchHere: (courtId: String) -> Unit,
-    viewModel: CourtDetailViewModel = viewModel(
+    viewModel: CourtDetailViewModel = hiltViewModel<CourtDetailViewModel, CourtDetailViewModel.Factory>(
         key = "court-$courtId",
-        factory = CourtDetailViewModel.factory(courtId),
-    ),
+    ) { factory -> factory.create(courtId) },
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)

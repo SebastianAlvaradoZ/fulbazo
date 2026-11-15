@@ -8,13 +8,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.lifecycleScope
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.notifications.InvitationNotifier
 import com.vapsa.fulbazo.ui.FulbazoApp
 import com.vapsa.fulbazo.ui.theme.FulbazoTheme
-import kotlinx.coroutines.launch
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     /** Se pone en `true` cuando la app se abre desde una notificación de invitación. */
@@ -24,11 +23,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         openInvitations = intent.wantsInvitations()
-
-        lifecycleScope.launch { InvitationNotifier.get(this@MainActivity).run() }
-        // Solo mientras no haya backend: simulan invitaciones y solicitudes de otros jugadores.
-        lifecycleScope.launch { AppContainer.demoInvitationSimulator.run() }
-        lifecycleScope.launch { AppContainer.demoJoinRequestSimulator.run() }
 
         setContent {
             FulbazoTheme {

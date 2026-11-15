@@ -31,8 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.JoinRequestStatus
 import com.vapsa.fulbazo.ui.components.EmptyState
@@ -47,7 +47,7 @@ fun MyMatchesRoute(
     onExploreMap: () -> Unit,
     onRateMatch: (matchId: String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: MyMatchesViewModel = viewModel(factory = MyMatchesViewModel.Factory),
+    viewModel: MyMatchesViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

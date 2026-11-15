@@ -32,8 +32,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.CommunityStats
 import com.vapsa.fulbazo.domain.model.SelfAssessment
@@ -49,7 +49,7 @@ fun ProfileRoute(
     onEditProfile: () -> Unit,
     onLoggedOut: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory),
+    viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val loggedOut by viewModel.loggedOut.collectAsStateWithLifecycle()

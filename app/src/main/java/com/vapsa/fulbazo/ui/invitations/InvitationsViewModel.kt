@@ -1,11 +1,7 @@
 package com.vapsa.fulbazo.ui.invitations
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.InvitationStatus
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.repository.CourtRepository
@@ -14,6 +10,7 @@ import com.vapsa.fulbazo.domain.repository.MatchRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
 import com.vapsa.fulbazo.ui.match.MatchItem
 import com.vapsa.fulbazo.ui.match.toItem
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +20,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class InvitationItem(
     val invitationId: String,
@@ -45,7 +43,8 @@ data class InvitationsUiState(
     val isEmpty: Boolean get() = pending.isEmpty() && answered.isEmpty()
 }
 
-class InvitationsViewModel(
+@HiltViewModel
+class InvitationsViewModel @Inject constructor(
     authRepository: AuthRepository,
     private val invitationRepository: InvitationRepository,
     private val matchRepository: MatchRepository,
@@ -115,19 +114,5 @@ class InvitationsViewModel(
 
     fun onErrorShown() {
         actionError.value = null
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                InvitationsViewModel(
-                    AppContainer.authRepository,
-                    AppContainer.invitationRepository,
-                    AppContainer.matchRepository,
-                    AppContainer.courtRepository,
-                    AppContainer.playerRepository,
-                )
-            }
-        }
     }
 }

@@ -1,11 +1,7 @@
 package com.vapsa.fulbazo.ui.court
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.Court
 import com.vapsa.fulbazo.domain.model.MatchStatus
 import com.vapsa.fulbazo.domain.repository.AuthRepository
@@ -14,6 +10,10 @@ import com.vapsa.fulbazo.domain.repository.MatchRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
 import com.vapsa.fulbazo.ui.match.MatchItem
 import com.vapsa.fulbazo.ui.match.toItem
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,6 +39,7 @@ data class CourtDetailUiState(
  * desde el mapa (hoy la vista previa; luego el marcador del mapa real).
  */
 @OptIn(ExperimentalCoroutinesApi::class)
+@HiltViewModel(assistedFactory = CourtDetailViewModel.Factory::class)
 class CourtDetailViewModel(
     private val courtId: String,
     authRepository: AuthRepository,
@@ -47,6 +48,22 @@ class CourtDetailViewModel(
     playerRepository: PlayerRepository,
     private val now: () -> LocalDateTime = { LocalDateTime.now() },
 ) : ViewModel() {
+
+    /** Constructor que usa Hilt; las pruebas usan el principal para fijar la hora y los tiempos. */
+    @AssistedInject constructor(
+        @Assisted courtId: String,
+        authRepository: AuthRepository,
+        courtRepository: CourtRepository,
+        matchRepository: MatchRepository,
+        playerRepository: PlayerRepository,
+    ) : this(
+        courtId = courtId,
+        authRepository = authRepository,
+        courtRepository = courtRepository,
+        matchRepository = matchRepository,
+        playerRepository = playerRepository,
+        now = { LocalDateTime.now() },
+    )
 
     /** Cambia para volver a suscribirse después de un error. */
     private val reloadTrigger = MutableStateFlow(0)
@@ -83,17 +100,9 @@ class CourtDetailViewModel(
         reloadTrigger.update { it + 1 }
     }
 
-    companion object {
-        fun factory(courtId: String): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                CourtDetailViewModel(
-                    courtId,
-                    AppContainer.authRepository,
-                    AppContainer.courtRepository,
-                    AppContainer.matchRepository,
-                    AppContainer.playerRepository,
-                )
-            }
-        }
+    /** Hilt crea el ViewModel con el [courtId] que recibe la pantalla. */
+    @AssistedFactory
+    interface Factory {
+        fun create(courtId: String): CourtDetailViewModel
     }
 }

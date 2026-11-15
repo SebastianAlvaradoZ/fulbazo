@@ -42,8 +42,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.FriendGroup
 import com.vapsa.fulbazo.ui.components.FormTextField
@@ -54,10 +54,9 @@ import com.vapsa.fulbazo.ui.components.UserAvatar
 fun GroupEditorRoute(
     groupId: String?,
     onDone: () -> Unit,
-    viewModel: GroupEditorViewModel = viewModel(
+    viewModel: GroupEditorViewModel = hiltViewModel<GroupEditorViewModel, GroupEditorViewModel.Factory>(
         key = "group-$groupId",
-        factory = GroupEditorViewModel.factory(groupId),
-    ),
+    ) { factory -> factory.create(groupId) },
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

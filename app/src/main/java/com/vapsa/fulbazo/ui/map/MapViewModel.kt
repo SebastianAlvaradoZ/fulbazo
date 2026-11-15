@@ -1,12 +1,8 @@
 package com.vapsa.fulbazo.ui.map
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.vapsa.fulbazo.BuildConfig
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.Court
 import com.vapsa.fulbazo.domain.model.GeoPoint
 import com.vapsa.fulbazo.domain.model.MatchStatus
@@ -18,6 +14,7 @@ import com.vapsa.fulbazo.domain.repository.MatchRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
 import com.vapsa.fulbazo.ui.match.MatchItem
 import com.vapsa.fulbazo.ui.match.toItem
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,6 +25,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import javax.inject.Inject
 
 /** Estado del permiso de ubicación, visto por la pantalla. */
 enum class LocationPermission {
@@ -72,6 +70,7 @@ data class MapUiState(
     val sortedByDistance: Boolean get() = userLocation != null
 }
 
+@HiltViewModel
 class MapViewModel(
     authRepository: AuthRepository,
     courtRepository: CourtRepository,
@@ -81,6 +80,23 @@ class MapViewModel(
     private val mapsConfigured: Boolean = true,
     private val now: () -> LocalDateTime = { LocalDateTime.now() },
 ) : ViewModel() {
+
+    /** Constructor que usa Hilt; las pruebas usan el principal para fijar la hora y los tiempos. */
+    @Inject constructor(
+        authRepository: AuthRepository,
+        courtRepository: CourtRepository,
+        matchRepository: MatchRepository,
+        playerRepository: PlayerRepository,
+        locationRepository: LocationRepository,
+    ) : this(
+        authRepository = authRepository,
+        courtRepository = courtRepository,
+        matchRepository = matchRepository,
+        playerRepository = playerRepository,
+        locationRepository = locationRepository,
+        mapsConfigured = BuildConfig.HAS_MAPS_API_KEY,
+        now = { LocalDateTime.now() },
+    )
 
     private val selectedCourtId = MutableStateFlow<String?>(null)
     private val openedCourtId = MutableStateFlow<String?>(null)
@@ -162,21 +178,6 @@ class MapViewModel(
 
     fun closeCourt() {
         openedCourtId.value = null
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                MapViewModel(
-                    AppContainer.authRepository,
-                    AppContainer.courtRepository,
-                    AppContainer.matchRepository,
-                    AppContainer.playerRepository,
-                    AppContainer.locationRepository,
-                    mapsConfigured = BuildConfig.HAS_MAPS_API_KEY,
-                )
-            }
-        }
     }
 }
 

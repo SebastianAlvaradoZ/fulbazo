@@ -1,17 +1,17 @@
 package com.vapsa.fulbazo.ui.friends.group
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.FriendGroup
 import com.vapsa.fulbazo.domain.model.PlayerSummary
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.repository.FriendRepository
 import com.vapsa.fulbazo.domain.repository.GroupRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,8 +39,9 @@ data class GroupEditorUiState(
 /**
  * Crear o editar un grupo de amigos. Con [groupId] nulo se crea uno nuevo.
  */
-class GroupEditorViewModel(
-    private val groupId: String?,
+@HiltViewModel(assistedFactory = GroupEditorViewModel.Factory::class)
+class GroupEditorViewModel @AssistedInject constructor(
+    @Assisted private val groupId: String?,
     authRepository: AuthRepository,
     playerRepository: PlayerRepository,
     friendRepository: FriendRepository,
@@ -132,17 +133,9 @@ class GroupEditorViewModel(
         _uiState.update { it.copy(saveFailed = false) }
     }
 
-    companion object {
-        fun factory(groupId: String?): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                GroupEditorViewModel(
-                    groupId,
-                    AppContainer.authRepository,
-                    AppContainer.playerRepository,
-                    AppContainer.friendRepository,
-                    AppContainer.groupRepository,
-                )
-            }
-        }
+    /** Hilt crea el ViewModel con el [groupId] que recibe la pantalla. */
+    @AssistedFactory
+    interface Factory {
+        fun create(groupId: String?): GroupEditorViewModel
     }
 }

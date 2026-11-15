@@ -1,14 +1,11 @@
 package com.vapsa.fulbazo.ui.invitations
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.InvitationStatus
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.repository.InvitationRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,12 +13,14 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
 /**
  * Cantidad de invitaciones pendientes, para el contador de la campanita.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class InvitationBadgeViewModel(
+@HiltViewModel
+class InvitationBadgeViewModel @Inject constructor(
     authRepository: AuthRepository,
     invitationRepository: InvitationRepository,
 ) : ViewModel() {
@@ -36,12 +35,4 @@ class InvitationBadgeViewModel(
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                InvitationBadgeViewModel(AppContainer.authRepository, AppContainer.invitationRepository)
-            }
-        }
-    }
 }

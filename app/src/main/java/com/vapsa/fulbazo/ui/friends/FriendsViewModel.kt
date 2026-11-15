@@ -1,11 +1,7 @@
 package com.vapsa.fulbazo.ui.friends
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.FriendRequest
 import com.vapsa.fulbazo.domain.model.PlayerRelation
 import com.vapsa.fulbazo.domain.model.PlayerSearchResult
@@ -14,6 +10,7 @@ import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.repository.FriendRepository
 import com.vapsa.fulbazo.domain.repository.GroupRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +21,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class FriendRequestItem(val requestId: String, val player: PlayerSummary)
 
@@ -47,6 +45,7 @@ data class FriendsUiState(
     val isSearchActive: Boolean get() = query.isNotBlank()
 }
 
+@HiltViewModel
 class FriendsViewModel(
     authRepository: AuthRepository,
     private val playerRepository: PlayerRepository,
@@ -54,6 +53,20 @@ class FriendsViewModel(
     groupRepository: GroupRepository,
     private val searchDebounceMillis: Long = 300,
 ) : ViewModel() {
+
+    /** Constructor que usa Hilt; las pruebas usan el principal para fijar la hora y los tiempos. */
+    @Inject constructor(
+        authRepository: AuthRepository,
+        playerRepository: PlayerRepository,
+        friendRepository: FriendRepository,
+        groupRepository: GroupRepository,
+    ) : this(
+        authRepository = authRepository,
+        playerRepository = playerRepository,
+        friendRepository = friendRepository,
+        groupRepository = groupRepository,
+        searchDebounceMillis = 300,
+    )
 
     private val userId: String? = authRepository.currentUser.value?.id
 
@@ -158,19 +171,6 @@ class FriendsViewModel(
             requests.any { it.toUserId == playerId } -> PlayerRelation.REQUEST_SENT
             requests.any { it.fromUserId == playerId } -> PlayerRelation.REQUEST_RECEIVED
             else -> PlayerRelation.NONE
-        }
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                FriendsViewModel(
-                    AppContainer.authRepository,
-                    AppContainer.playerRepository,
-                    AppContainer.friendRepository,
-                    AppContainer.groupRepository,
-                )
-            }
         }
     }
 }

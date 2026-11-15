@@ -1,11 +1,7 @@
 package com.vapsa.fulbazo.ui.match.mine
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.JoinRequestStatus
 import com.vapsa.fulbazo.domain.model.MatchStatus
 import com.vapsa.fulbazo.domain.repository.AuthRepository
@@ -15,6 +11,7 @@ import com.vapsa.fulbazo.domain.repository.MatchRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
 import com.vapsa.fulbazo.ui.match.MatchItem
 import com.vapsa.fulbazo.ui.match.toItem
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,6 +24,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import javax.inject.Inject
 
 data class MyRequestItem(
     val requestId: String,
@@ -51,6 +49,7 @@ data class MyMatchesUiState(
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@HiltViewModel
 class MyMatchesViewModel(
     authRepository: AuthRepository,
     matchRepository: MatchRepository,
@@ -59,6 +58,22 @@ class MyMatchesViewModel(
     private val joinRequestRepository: JoinRequestRepository,
     private val now: () -> LocalDateTime = { LocalDateTime.now() },
 ) : ViewModel() {
+
+    /** Constructor que usa Hilt; las pruebas usan el principal para fijar la hora y los tiempos. */
+    @Inject constructor(
+        authRepository: AuthRepository,
+        matchRepository: MatchRepository,
+        courtRepository: CourtRepository,
+        playerRepository: PlayerRepository,
+        joinRequestRepository: JoinRequestRepository,
+    ) : this(
+        authRepository = authRepository,
+        matchRepository = matchRepository,
+        courtRepository = courtRepository,
+        playerRepository = playerRepository,
+        joinRequestRepository = joinRequestRepository,
+        now = { LocalDateTime.now() },
+    )
 
     private val userId: String? = authRepository.currentUser.value?.id
 
@@ -124,19 +139,5 @@ class MyMatchesViewModel(
 
     fun onErrorShown() {
         actionFailed.value = false
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                MyMatchesViewModel(
-                    AppContainer.authRepository,
-                    AppContainer.matchRepository,
-                    AppContainer.courtRepository,
-                    AppContainer.playerRepository,
-                    AppContainer.joinRequestRepository,
-                )
-            }
-        }
     }
 }

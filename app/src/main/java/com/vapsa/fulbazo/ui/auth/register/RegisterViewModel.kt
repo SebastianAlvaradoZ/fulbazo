@@ -1,26 +1,33 @@
 package com.vapsa.fulbazo.ui.auth.register
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.AuthResult
 import com.vapsa.fulbazo.domain.model.NewUser
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.validation.UserValidator
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import javax.inject.Inject
 
+@HiltViewModel
 class RegisterViewModel(
     private val authRepository: AuthRepository,
     private val today: () -> LocalDate = { LocalDate.now() },
 ) : ViewModel() {
+
+    /** Constructor que usa Hilt; las pruebas usan el principal para fijar la hora y los tiempos. */
+    @Inject constructor(
+        authRepository: AuthRepository,
+    ) : this(
+        authRepository = authRepository,
+        today = { LocalDate.now() },
+    )
 
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
@@ -121,11 +128,5 @@ class RegisterViewModel(
 
     private fun updateField(transform: RegisterUiState.() -> RegisterUiState) {
         _uiState.update { it.transform().copy(authError = null) }
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer { RegisterViewModel(AppContainer.authRepository) }
-        }
     }
 }

@@ -45,8 +45,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.FieldSkill
 import com.vapsa.fulbazo.domain.model.GoalkeeperSkill
@@ -63,10 +63,9 @@ import com.vapsa.fulbazo.ui.stats.labelRes
 fun RatePlayersRoute(
     matchId: String,
     onNavigateBack: () -> Unit,
-    viewModel: RatePlayersViewModel = viewModel(
+    viewModel: RatePlayersViewModel = hiltViewModel<RatePlayersViewModel, RatePlayersViewModel.Factory>(
         key = "rate-$matchId",
-        factory = RatePlayersViewModel.factory(matchId),
-    ),
+    ) { factory -> factory.create(matchId) },
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

@@ -44,8 +44,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.FieldSkill
 import com.vapsa.fulbazo.domain.model.Foot
@@ -57,7 +57,7 @@ import com.vapsa.fulbazo.ui.theme.FulbazoTheme
 @Composable
 fun MyStatsRoute(
     onNavigateBack: () -> Unit,
-    viewModel: MyStatsViewModel = viewModel(factory = MyStatsViewModel.Factory),
+    viewModel: MyStatsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

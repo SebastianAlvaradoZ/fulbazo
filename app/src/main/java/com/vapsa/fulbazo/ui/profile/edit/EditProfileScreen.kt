@@ -29,8 +29,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.ArequipaDistricts
 import com.vapsa.fulbazo.ui.auth.message
@@ -48,7 +48,7 @@ import java.time.format.DateTimeFormatter
 fun EditProfileRoute(
     onNavigateBack: () -> Unit,
     onSaved: () -> Unit,
-    viewModel: EditProfileViewModel = viewModel(factory = EditProfileViewModel.Factory),
+    viewModel: EditProfileViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val pickPhoto = rememberPhotoPicker(onPicked = viewModel::onPhotoChange)

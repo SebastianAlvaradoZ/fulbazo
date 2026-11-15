@@ -30,8 +30,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.AuthError
 import com.vapsa.fulbazo.ui.auth.message
@@ -48,7 +48,7 @@ import com.vapsa.fulbazo.ui.theme.FulbazoTheme
 fun LoginRoute(
     onLoggedIn: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    viewModel: LoginViewModel = viewModel(factory = LoginViewModel.Factory),
+    viewModel: LoginViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

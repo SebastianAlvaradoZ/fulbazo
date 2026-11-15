@@ -32,8 +32,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -53,7 +53,7 @@ import com.vapsa.fulbazo.ui.navigation.TopLevelDestination
 fun FulbazoApp(
     openInvitationsRequested: Boolean = false,
     onInvitationsOpened: () -> Unit = {},
-    badgeViewModel: InvitationBadgeViewModel = viewModel(factory = InvitationBadgeViewModel.Factory),
+    badgeViewModel: InvitationBadgeViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()

@@ -1,11 +1,7 @@
 package com.vapsa.fulbazo.ui.player
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.CommunityStats
 import com.vapsa.fulbazo.domain.model.MatchStatus
 import com.vapsa.fulbazo.domain.model.PlayerRelation
@@ -20,6 +16,10 @@ import com.vapsa.fulbazo.domain.repository.PlayerRepository
 import com.vapsa.fulbazo.domain.repository.StatsRepository
 import com.vapsa.fulbazo.ui.match.MatchItem
 import com.vapsa.fulbazo.ui.match.toItem
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -60,6 +60,7 @@ data class PlayerProfileUiState(
  * Perfil público de otro jugador: datos, estadísticas, amistad e invitación a partidos.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
+@HiltViewModel(assistedFactory = PlayerProfileViewModel.Factory::class)
 class PlayerProfileViewModel(
     private val playerId: String,
     authRepository: AuthRepository,
@@ -71,6 +72,28 @@ class PlayerProfileViewModel(
     private val invitationRepository: InvitationRepository,
     private val now: () -> LocalDateTime = { LocalDateTime.now() },
 ) : ViewModel() {
+
+    /** Constructor que usa Hilt; las pruebas usan el principal para fijar la hora y los tiempos. */
+    @AssistedInject constructor(
+        @Assisted playerId: String,
+        authRepository: AuthRepository,
+        playerRepository: PlayerRepository,
+        statsRepository: StatsRepository,
+        friendRepository: FriendRepository,
+        matchRepository: MatchRepository,
+        courtRepository: CourtRepository,
+        invitationRepository: InvitationRepository,
+    ) : this(
+        playerId = playerId,
+        authRepository = authRepository,
+        playerRepository = playerRepository,
+        statsRepository = statsRepository,
+        friendRepository = friendRepository,
+        matchRepository = matchRepository,
+        courtRepository = courtRepository,
+        invitationRepository = invitationRepository,
+        now = { LocalDateTime.now() },
+    )
 
     private val myId: String? = authRepository.currentUser.value?.id
 
@@ -182,20 +205,9 @@ class PlayerProfileViewModel(
         }
     }
 
-    companion object {
-        fun factory(playerId: String): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                PlayerProfileViewModel(
-                    playerId = playerId,
-                    authRepository = AppContainer.authRepository,
-                    playerRepository = AppContainer.playerRepository,
-                    statsRepository = AppContainer.statsRepository,
-                    friendRepository = AppContainer.friendRepository,
-                    matchRepository = AppContainer.matchRepository,
-                    courtRepository = AppContainer.courtRepository,
-                    invitationRepository = AppContainer.invitationRepository,
-                )
-            }
-        }
+    /** Hilt crea el ViewModel con el [playerId] que recibe la pantalla. */
+    @AssistedFactory
+    interface Factory {
+        fun create(playerId: String): PlayerProfileViewModel
     }
 }

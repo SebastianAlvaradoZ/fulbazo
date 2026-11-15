@@ -45,8 +45,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.PlayerSummary
 import com.vapsa.fulbazo.ui.components.EmptyState
@@ -63,10 +63,9 @@ fun MatchDetailRoute(
     onNavigateBack: () -> Unit,
     onOpenPlayer: (playerId: String) -> Unit,
     onRatePlayers: () -> Unit,
-    viewModel: MatchDetailViewModel = viewModel(
+    viewModel: MatchDetailViewModel = hiltViewModel<MatchDetailViewModel, MatchDetailViewModel.Factory>(
         key = "match-$matchId",
-        factory = MatchDetailViewModel.factory(matchId),
-    ),
+    ) { factory -> factory.create(matchId) },
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

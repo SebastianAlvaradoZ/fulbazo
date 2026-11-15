@@ -1,23 +1,21 @@
 package com.vapsa.fulbazo.ui.profile.edit
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.AuthError
 import com.vapsa.fulbazo.domain.model.AuthResult
 import com.vapsa.fulbazo.domain.model.ProfileUpdate
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.validation.FieldError
 import com.vapsa.fulbazo.domain.validation.UserValidator
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import javax.inject.Inject
 
 data class EditProfileErrors(
     val firstName: FieldError? = null,
@@ -50,7 +48,8 @@ data class EditProfileUiState(
     val isSaved: Boolean = false,
 )
 
-class EditProfileViewModel(
+@HiltViewModel
+class EditProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
 ) : ViewModel() {
 
@@ -142,11 +141,5 @@ class EditProfileViewModel(
 
     private fun updateField(transform: EditProfileUiState.() -> EditProfileUiState) {
         _uiState.update { it.transform().copy(authError = null) }
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer { EditProfileViewModel(AppContainer.authRepository) }
-        }
     }
 }

@@ -32,8 +32,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.InvitationStatus
 import com.vapsa.fulbazo.ui.components.EmptyState
@@ -46,7 +46,7 @@ import com.vapsa.fulbazo.ui.match.MatchCard
 @Composable
 fun InvitationsRoute(
     onNavigateBack: () -> Unit,
-    viewModel: InvitationsViewModel = viewModel(factory = InvitationsViewModel.Factory),
+    viewModel: InvitationsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

@@ -13,7 +13,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.vapsa.fulbazo.MainActivity
 import com.vapsa.fulbazo.R
-import com.vapsa.fulbazo.di.AppContainer
 import com.vapsa.fulbazo.domain.model.InvitationStatus
 import com.vapsa.fulbazo.domain.model.MatchInvitation
 import com.vapsa.fulbazo.domain.repository.AuthRepository
@@ -22,18 +21,24 @@ import com.vapsa.fulbazo.domain.repository.InvitationRepository
 import com.vapsa.fulbazo.domain.repository.MatchRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
 import com.vapsa.fulbazo.ui.match.formatMatchDate
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import java.util.Collections
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Muestra una notificación del sistema por cada invitación nueva que recibe
  * el usuario con sesión iniciada. Al tocarla se abre la bandeja de invitaciones.
+ *
+ * Una sola instancia por app ([Singleton]), para recordar qué ya se notificó.
  */
-class InvitationNotifier(
-    context: Context,
+@Singleton
+class InvitationNotifier @Inject constructor(
+    @ApplicationContext context: Context,
     private val authRepository: AuthRepository,
     private val invitationRepository: InvitationRepository,
     private val matchRepository: MatchRepository,
@@ -126,21 +131,5 @@ class InvitationNotifier(
 
         /** Extra del Intent que pide abrir la bandeja de invitaciones. */
         const val EXTRA_OPEN_INVITATIONS = "open_invitations"
-
-        @Volatile
-        private var instance: InvitationNotifier? = null
-
-        /** Una sola instancia por app, para recordar qué ya se notificó. */
-        fun get(context: Context): InvitationNotifier =
-            instance ?: synchronized(this) {
-                instance ?: InvitationNotifier(
-                    context = context,
-                    authRepository = AppContainer.authRepository,
-                    invitationRepository = AppContainer.invitationRepository,
-                    matchRepository = AppContainer.matchRepository,
-                    courtRepository = AppContainer.courtRepository,
-                    playerRepository = AppContainer.playerRepository,
-                ).also { instance = it }
-            }
     }
 }

@@ -39,8 +39,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.MatchLevel
 import com.vapsa.fulbazo.domain.model.NewMatch
@@ -60,10 +60,9 @@ fun CreateMatchRoute(
     onNavigateBack: () -> Unit,
     onCreated: () -> Unit,
     initialCourtId: String? = null,
-    viewModel: CreateMatchViewModel = viewModel(
+    viewModel: CreateMatchViewModel = hiltViewModel<CreateMatchViewModel, CreateMatchViewModel.Factory>(
         key = "create-match-$initialCourtId",
-        factory = CreateMatchViewModel.factory(initialCourtId),
-    ),
+    ) { factory -> factory.create(initialCourtId) },
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
