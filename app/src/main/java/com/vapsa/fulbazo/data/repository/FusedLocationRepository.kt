@@ -9,13 +9,17 @@ import com.vapsa.fulbazo.domain.model.GeoPoint
 import com.vapsa.fulbazo.domain.repository.LocationRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.withTimeoutOrNull
+import javax.inject.Inject
 
 /**
  * Ubicación con el proveedor combinado de Google Play services. La precisión
  * "balanceada" (~100 m) basta para ordenar losas y gasta menos batería.
  */
-class FusedLocationRepository(context: Context) : LocationRepository {
+class FusedLocationRepository @Inject constructor(
+    @ApplicationContext context: Context,
+) : LocationRepository {
 
     private val client = LocationServices.getFusedLocationProviderClient(context.applicationContext)
 
