@@ -16,14 +16,42 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 
 /**
- * Lista desplegable de Material 3 para elegir una opción de [options].
+ * Lista desplegable de Material 3 para elegir un texto de [options].
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DropdownField(
     value: String?,
     options: List<String>,
     onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    error: String? = null,
+    enabled: Boolean = true,
+) {
+    DropdownField(
+        selected = value,
+        options = options,
+        optionLabel = { it },
+        onSelected = onValueChange,
+        label = label,
+        modifier = modifier,
+        error = error,
+        enabled = enabled,
+    )
+}
+
+/**
+ * Lista desplegable de Material 3 para elegir un elemento de [options].
+ * [optionLabel] dice cómo se muestra cada opción y [onSelected] recibe el
+ * elemento elegido (no su texto).
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T> DropdownField(
+    selected: T?,
+    options: List<T>,
+    optionLabel: (T) -> String,
+    onSelected: (T) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
     error: String? = null,
@@ -37,7 +65,7 @@ fun DropdownField(
         modifier = modifier,
     ) {
         OutlinedTextField(
-            value = value.orEmpty(),
+            value = selected?.let(optionLabel).orEmpty(),
             onValueChange = {},
             readOnly = true,
             enabled = enabled,
@@ -56,9 +84,9 @@ fun DropdownField(
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(option) },
+                    text = { Text(optionLabel(option)) },
                     onClick = {
-                        onValueChange(option)
+                        onSelected(option)
                         expanded = false
                     },
                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
