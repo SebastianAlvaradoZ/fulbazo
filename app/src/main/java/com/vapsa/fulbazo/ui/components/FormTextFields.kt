@@ -1,9 +1,16 @@
 package com.vapsa.fulbazo.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
@@ -17,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -143,6 +151,27 @@ fun ErrorBanner(message: String, modifier: Modifier = Modifier) {
             Icon(painter = painterResource(R.drawable.ic_error), contentDescription = null)
             Spacer(Modifier.width(12.dp))
             Text(text = message, style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
+/**
+ * [ErrorBanner] que aparece y desaparece con animación. Con [message] nulo se
+ * oculta, pero sigue mostrando el último texto mientras se anima la salida.
+ */
+@Composable
+fun AnimatedErrorBanner(message: String?, modifier: Modifier = Modifier) {
+    var lastMessage by remember { mutableStateOf(message) }
+    if (message != null) lastMessage = message
+    AnimatedVisibility(
+        visible = message != null,
+        modifier = modifier,
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically(),
+    ) {
+        Column {
+            ErrorBanner(message = lastMessage.orEmpty())
+            Spacer(Modifier.height(12.dp))
         }
     }
 }

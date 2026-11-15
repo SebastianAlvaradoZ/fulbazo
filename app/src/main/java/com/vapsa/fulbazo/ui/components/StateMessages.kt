@@ -1,5 +1,6 @@
 package com.vapsa.fulbazo.ui.components
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -76,4 +77,20 @@ fun ErrorState(message: String, modifier: Modifier = Modifier, onRetry: (() -> U
             OutlinedButton(onClick = it) { Text(stringResource(R.string.action_retry)) }
         }
     }
+}
+
+/** Fase de una pantalla que carga datos. */
+enum class ScreenPhase { LOADING, ERROR, EMPTY, CONTENT }
+
+/**
+ * Cambia entre carga, error, vacío y contenido con un fundido suave en lugar
+ * de reemplazar la pantalla de golpe.
+ */
+@Composable
+fun PhaseCrossfade(
+    phase: ScreenPhase,
+    modifier: Modifier = Modifier,
+    content: @Composable (ScreenPhase) -> Unit,
+) {
+    Crossfade(targetState = phase, modifier = modifier, label = "screenPhase", content = content)
 }
