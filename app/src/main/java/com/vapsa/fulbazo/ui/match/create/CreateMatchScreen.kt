@@ -59,7 +59,11 @@ private const val MAX_DAYS_AHEAD = 60L
 fun CreateMatchRoute(
     onNavigateBack: () -> Unit,
     onCreated: () -> Unit,
-    viewModel: CreateMatchViewModel = viewModel(factory = CreateMatchViewModel.factory()),
+    initialCourtId: String? = null,
+    viewModel: CreateMatchViewModel = viewModel(
+        key = "create-match-$initialCourtId",
+        factory = CreateMatchViewModel.factory(initialCourtId),
+    ),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

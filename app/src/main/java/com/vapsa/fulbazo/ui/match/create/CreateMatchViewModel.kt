@@ -54,6 +54,8 @@ class CreateMatchViewModel(
                     state.copy(
                         isLoading = false,
                         courts = courts,
+                        // La losa inicial (por ejemplo, "Crear partido aquí") debe existir.
+                        courtId = state.courtId?.takeIf { id -> courts.any { it.id == id } },
                         friends = friendIds.mapNotNull { players[it] }.sortedBy { it.nickname.lowercase() },
                         groups = groups,
                     )

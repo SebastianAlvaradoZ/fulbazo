@@ -32,7 +32,7 @@ class CreateMatchViewModelTest {
     private val matchRepository = FakeMatchRepository(latencyMillis = 0)
     private val invitationRepository = FakeInvitationRepository(latencyMillis = 0)
 
-    private suspend fun viewModel(): CreateMatchViewModel {
+    private suspend fun viewModel(initialCourtId: String? = null): CreateMatchViewModel {
         authRepository.login("demo@fulbazo.com", "demo123")
         return CreateMatchViewModel(
             authRepository = authRepository,
@@ -43,6 +43,7 @@ class CreateMatchViewModelTest {
             groupRepository = FakeGroupRepository(latencyMillis = 0),
             invitationRepository = invitationRepository,
             now = { now },
+            initialCourtId = initialCourtId,
         )
     }
 
@@ -73,6 +74,17 @@ class CreateMatchViewModelTest {
 
         viewModel.onCourtSelected("losa-sachaca")
         assertEquals("Losa Deportiva Sachaca", viewModel.uiState.value.selectedCourt?.name)
+    }
+
+    @Test
+    fun initialCourt_isPreselected_onlyIfItExists() = runTest {
+        val viewModel = viewModel(initialCourtId = "losa-melgar")
+        advanceUntilIdle()
+        assertEquals("Losa Deportiva Mariano Melgar", viewModel.uiState.value.selectedCourt?.name)
+
+        val invalid = viewModel(initialCourtId = "no-existe")
+        advanceUntilIdle()
+        assertEquals(null, invalid.uiState.value.courtId)
     }
 
     @Test
