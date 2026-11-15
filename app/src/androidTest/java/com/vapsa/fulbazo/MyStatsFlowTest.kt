@@ -26,7 +26,7 @@ class MyStatsFlowTest {
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Before
-    fun setUp() = grantNotificationPermission()
+    fun setUp() = grantAppPermissions()
 
     private fun waitForText(text: String) {
         composeRule.waitUntil(timeoutMillis = 5_000) {

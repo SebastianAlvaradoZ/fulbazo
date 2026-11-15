@@ -27,7 +27,7 @@ class AuthFlowTest {
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Before
-    fun setUp() = grantNotificationPermission()
+    fun setUp() = grantAppPermissions()
 
     private fun typeInto(label: String, text: String) {
         composeRule.onNode(hasText(label) and hasSetTextAction())

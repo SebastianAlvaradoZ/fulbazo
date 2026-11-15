@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -27,7 +28,7 @@ class CourtDetailFlowTest {
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Before
-    fun setUp() = grantNotificationPermission()
+    fun setUp() = grantAppPermissions()
 
     private fun waitForText(text: String, timeoutMillis: Long = 5_000) {
         composeRule.waitUntil(timeoutMillis) {
@@ -44,7 +45,10 @@ class CourtDetailFlowTest {
     }
 
     @Test
-    fun tappingCourtOnMap_opensSheet_andCreateMatchHerePreselectsCourt() {
+    fun tappingCourtOnGridMap_opensSheet_andCreateMatchHerePreselectsCourt() {
+        // Los marcadores de Google Maps no están en el árbol de Compose; con clave,
+        // el detalle se prueba desde el filtro (prueba de abajo).
+        assumeFalse(BuildConfig.HAS_MAPS_API_KEY)
         loginAsDemo()
         composeRule.onNode(hasContentDescription("Losa Deportiva Mariano Melgar", substring = true)).performClick()
 

@@ -30,7 +30,7 @@ class PlayerProfileFlowTest {
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Before
-    fun setUp() = grantNotificationPermission()
+    fun setUp() = grantAppPermissions()
 
     private fun waitForText(text: String, timeoutMillis: Long = 5_000) {
         composeRule.waitUntil(timeoutMillis) {
