@@ -52,6 +52,8 @@ import com.vapsa.fulbazo.domain.model.PlayerSummary
 import com.vapsa.fulbazo.ui.components.EmptyState
 import com.vapsa.fulbazo.ui.components.ErrorState
 import com.vapsa.fulbazo.ui.components.LoadingState
+import com.vapsa.fulbazo.ui.components.PhaseCrossfade
+import com.vapsa.fulbazo.ui.components.ScreenPhase
 import com.vapsa.fulbazo.ui.components.UserAvatar
 import com.vapsa.fulbazo.ui.match.MatchCard
 
@@ -141,68 +143,77 @@ fun MatchDetailScreen(
             .fillMaxSize()
             .padding(innerPadding)
         val match = uiState.match
-        when {
-            uiState.isLoading -> LoadingState(contentModifier)
-            uiState.loadFailed -> ErrorState(stringResource(R.string.match_detail_load_error), contentModifier)
-            uiState.notFound || match == null -> EmptyState(
-                stringResource(R.string.match_detail_not_found),
-                contentModifier,
-                iconRes = R.drawable.ic_matches,
-            )
-            else -> LazyColumn(
-                modifier = contentModifier,
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                item { MatchCard(match) }
-                if (uiState.isFinished) {
-                    item { HelperText(stringResource(R.string.match_detail_finished)) }
-                    // Quien jugó el partido puede evaluar a sus compañeros.
-                    if (uiState.role == ViewerRole.HOST || uiState.role == ViewerRole.PLAYER) {
+        val phase = when {
+            uiState.isLoading -> ScreenPhase.LOADING
+            uiState.loadFailed -> ScreenPhase.ERROR
+            uiState.notFound || match == null -> ScreenPhase.EMPTY
+            else -> ScreenPhase.CONTENT
+        }
+        PhaseCrossfade(phase) { current ->
+            when (current) {
+                ScreenPhase.LOADING -> LoadingState(contentModifier)
+                ScreenPhase.ERROR -> ErrorState(stringResource(R.string.match_detail_load_error), contentModifier)
+                ScreenPhase.EMPTY -> EmptyState(
+                    stringResource(R.string.match_detail_not_found),
+                    contentModifier,
+                    iconRes = R.drawable.ic_matches,
+                )
+                ScreenPhase.CONTENT -> if (match != null) LazyColumn(
+                    modifier = contentModifier,
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    item { MatchCard(match) }
+                    if (uiState.isFinished) {
+                        item { HelperText(stringResource(R.string.match_detail_finished)) }
+                        // Quien jugó el partido puede evaluar a sus compañeros.
+                        if (uiState.role == ViewerRole.HOST || uiState.role == ViewerRole.PLAYER) {
+                            item {
+                                Button(onClick = actions.onRatePlayers, modifier = Modifier.fillMaxWidth()) {
+                                    Text(stringResource(R.string.rate_open))
+                                }
+                            }
+                        }
+                    } else {
+                        item { ViewerActions(uiState, actions) }
+                    }
+    
+                    if (uiState.role == ViewerRole.HOST && !uiState.isFinished) {
                         item {
-                            Button(onClick = actions.onRatePlayers, modifier = Modifier.fillMaxWidth()) {
-                                Text(stringResource(R.string.rate_open))
+                            SectionTitle(stringResource(R.string.match_detail_requests, uiState.pendingRequests.size))
+                        }
+                        if (uiState.isFull && uiState.pendingRequests.isNotEmpty()) {
+                            item { HelperText(stringResource(R.string.match_detail_full_note)) }
+                        }
+                        if (uiState.pendingRequests.isEmpty()) {
+                            item { HelperText(stringResource(R.string.match_detail_no_requests)) }
+                        }
+                        items(uiState.pendingRequests, key = { it.requestId }) { request ->
+                            RequestCard(
+                                modifier = Modifier.animateItem(),
+                                request = request,
+                                busy = request.requestId in uiState.busyRequestIds,
+                                canAccept = !uiState.isFull,
+                                onRespond = actions.onRespond,
+                                onOpenPlayer = actions.onOpenPlayer,
+                            )
+                        }
+                        item {
+                            // Lugar reservado para la IA que arma equipos balanceados.
+                            OutlinedButton(onClick = {}, enabled = false, modifier = Modifier.fillMaxWidth()) {
+                                Text(stringResource(R.string.match_detail_teams_soon))
                             }
                         }
                     }
-                } else {
-                    item { ViewerActions(uiState, actions) }
-                }
-
-                if (uiState.role == ViewerRole.HOST && !uiState.isFinished) {
+    
+                    item { HorizontalDivider() }
                     item {
-                        SectionTitle(stringResource(R.string.match_detail_requests, uiState.pendingRequests.size))
+                        SectionTitle(stringResource(R.string.match_detail_players, uiState.playersCount, match.slots))
                     }
-                    if (uiState.isFull && uiState.pendingRequests.isNotEmpty()) {
-                        item { HelperText(stringResource(R.string.match_detail_full_note)) }
-                    }
-                    if (uiState.pendingRequests.isEmpty()) {
-                        item { HelperText(stringResource(R.string.match_detail_no_requests)) }
-                    }
-                    items(uiState.pendingRequests, key = { it.requestId }) { request ->
-                        RequestCard(
-                            request = request,
-                            busy = request.requestId in uiState.busyRequestIds,
-                            canAccept = !uiState.isFull,
-                            onRespond = actions.onRespond,
-                            onOpenPlayer = actions.onOpenPlayer,
-                        )
-                    }
-                    item {
-                        // Lugar reservado para la IA que arma equipos balanceados.
-                        OutlinedButton(onClick = {}, enabled = false, modifier = Modifier.fillMaxWidth()) {
-                            Text(stringResource(R.string.match_detail_teams_soon))
+                    items(uiState.players, key = { it.player.id }) { item ->
+                        PlayerRow(item.player, onClick = { actions.onOpenPlayer(item.player.id) }) {
+                            if (item.isHost) AssistChip(onClick = {}, label = { Text(stringResource(R.string.match_detail_host_tag)) })
                         }
-                    }
-                }
-
-                item { HorizontalDivider() }
-                item {
-                    SectionTitle(stringResource(R.string.match_detail_players, uiState.playersCount, match.slots))
-                }
-                items(uiState.players, key = { it.player.id }) { item ->
-                    PlayerRow(item.player, onClick = { actions.onOpenPlayer(item.player.id) }) {
-                        if (item.isHost) AssistChip(onClick = {}, label = { Text(stringResource(R.string.match_detail_host_tag)) })
                     }
                 }
             }
@@ -273,12 +284,13 @@ private fun ViewerActions(uiState: MatchDetailUiState, actions: MatchDetailActio
 @Composable
 private fun RequestCard(
     request: PendingRequestItem,
+    modifier: Modifier = Modifier,
     busy: Boolean,
     canAccept: Boolean,
     onRespond: (String, Boolean) -> Unit,
     onOpenPlayer: (String) -> Unit,
 ) {
-    Card(Modifier.fillMaxWidth()) {
+    Card(modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             PlayerRow(
                 request.player,

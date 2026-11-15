@@ -1,5 +1,7 @@
 package com.vapsa.fulbazo.ui.player
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -56,6 +58,8 @@ import com.vapsa.fulbazo.domain.model.SkillScale
 import com.vapsa.fulbazo.ui.components.EmptyState
 import com.vapsa.fulbazo.ui.components.ErrorState
 import com.vapsa.fulbazo.ui.components.LoadingState
+import com.vapsa.fulbazo.ui.components.PhaseCrossfade
+import com.vapsa.fulbazo.ui.components.ScreenPhase
 import com.vapsa.fulbazo.ui.components.UserAvatar
 import com.vapsa.fulbazo.ui.match.formatMatchDate
 import com.vapsa.fulbazo.ui.stats.labelRes
@@ -139,38 +143,46 @@ fun PlayerProfileScreen(
             .fillMaxSize()
             .padding(innerPadding)
         val player = uiState.player
-        when {
-            uiState.isLoading || uiState.isMe -> LoadingState(contentModifier)
-            uiState.loadFailed -> ErrorState(
-                stringResource(R.string.player_load_error),
-                contentModifier,
-                onRetry = actions.onRetry,
-            )
-            uiState.notFound || player == null -> EmptyState(stringResource(R.string.player_not_found), contentModifier)
-            else -> Column(
-                modifier = contentModifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                UserAvatar(photoUri = player.photoUri, contentDescription = null)
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(player.nickname, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                    Text(
-                        "${player.fullName} · ${player.district}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                PositionChips(uiState)
-                Text(
-                    stringResource(R.string.player_matches_together, uiState.matchesTogether),
-                    style = MaterialTheme.typography.bodyLarge,
+        val phase = when {
+            uiState.isLoading || uiState.isMe -> ScreenPhase.LOADING
+            uiState.loadFailed -> ScreenPhase.ERROR
+            uiState.notFound || player == null -> ScreenPhase.EMPTY
+            else -> ScreenPhase.CONTENT
+        }
+        PhaseCrossfade(phase) { current ->
+            when (current) {
+                ScreenPhase.LOADING -> LoadingState(contentModifier)
+                ScreenPhase.ERROR -> ErrorState(
+                    stringResource(R.string.player_load_error),
+                    contentModifier,
+                    onRetry = actions.onRetry,
                 )
-                ActionButtons(uiState, actions)
-                SelfCard(uiState)
-                CommunityCard(uiState)
+                ScreenPhase.EMPTY -> EmptyState(stringResource(R.string.player_not_found), contentModifier)
+                ScreenPhase.CONTENT -> if (player != null) Column(
+                    modifier = contentModifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    UserAvatar(photoUri = player.photoUri, contentDescription = null)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(player.nickname, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                        Text(
+                            "${player.fullName} · ${player.district}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    PositionChips(uiState)
+                    Text(
+                        stringResource(R.string.player_matches_together, uiState.matchesTogether),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    ActionButtons(uiState, actions)
+                    SelfCard(uiState)
+                    CommunityCard(uiState)
+                }
             }
         }
     }
@@ -330,12 +342,7 @@ private fun <S : Enum<S>> RatingsSection(
                 Text(label(skill), style = MaterialTheme.typography.bodyMedium)
                 Text(stringResource(R.string.skill_value_decimal, value), style = MaterialTheme.typography.bodyMedium)
             }
-            LinearProgressIndicator(
-                progress = { (value / SkillScale.MAX).toFloat() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp),
-            )
+            AnimatedSkillBar(fraction = (value / SkillScale.MAX).toFloat())
         }
     }
 }
@@ -375,4 +382,22 @@ private fun OverallRow(label: String, value: Double, detail: String? = null) {
 @Composable
 private fun HelperText(text: String) {
     Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+}
+
+/** Barra de una habilidad que se llena desde cero al mostrarse. */
+@Composable
+private fun AnimatedSkillBar(fraction: Float) {
+    var shown by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { shown = true }
+    val progress by animateFloatAsState(
+        targetValue = if (shown) fraction else 0f,
+        animationSpec = tween(durationMillis = 700),
+        label = "skillBar",
+    )
+    LinearProgressIndicator(
+        progress = { progress },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp),
+    )
 }

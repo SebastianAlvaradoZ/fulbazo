@@ -39,6 +39,8 @@ import com.vapsa.fulbazo.domain.model.InvitationStatus
 import com.vapsa.fulbazo.ui.components.EmptyState
 import com.vapsa.fulbazo.ui.components.ErrorState
 import com.vapsa.fulbazo.ui.components.LoadingState
+import com.vapsa.fulbazo.ui.components.PhaseCrossfade
+import com.vapsa.fulbazo.ui.components.ScreenPhase
 import com.vapsa.fulbazo.ui.match.MatchCard
 
 @Composable
@@ -94,29 +96,37 @@ fun InvitationsScreen(
         val contentModifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
-        when {
-            uiState.isLoading -> LoadingState(contentModifier)
-            uiState.loadFailed -> ErrorState(stringResource(R.string.invitations_load_error), contentModifier)
-            uiState.isEmpty -> EmptyState(
-                stringResource(R.string.invitations_empty),
-                contentModifier,
-                iconRes = R.drawable.ic_notifications,
-            )
-            else -> LazyColumn(
-                modifier = contentModifier,
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                if (uiState.pending.isNotEmpty()) {
-                    item { SectionTitle(stringResource(R.string.invitations_pending)) }
-                    items(uiState.pending, key = { it.invitationId }) { item ->
-                        InvitationCard(item, busy = item.invitationId in uiState.busyIds, onRespond = onRespond)
+        val phase = when {
+            uiState.isLoading -> ScreenPhase.LOADING
+            uiState.loadFailed -> ScreenPhase.ERROR
+            uiState.isEmpty -> ScreenPhase.EMPTY
+            else -> ScreenPhase.CONTENT
+        }
+        PhaseCrossfade(phase) { current ->
+            when (current) {
+                ScreenPhase.LOADING -> LoadingState(contentModifier)
+                ScreenPhase.ERROR -> ErrorState(stringResource(R.string.invitations_load_error), contentModifier)
+                ScreenPhase.EMPTY -> EmptyState(
+                    stringResource(R.string.invitations_empty),
+                    contentModifier,
+                    iconRes = R.drawable.ic_notifications,
+                )
+                ScreenPhase.CONTENT -> LazyColumn(
+                    modifier = contentModifier,
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    if (uiState.pending.isNotEmpty()) {
+                        item { SectionTitle(stringResource(R.string.invitations_pending)) }
+                        items(uiState.pending, key = { it.invitationId }) { item ->
+                            InvitationCard(item, item.invitationId in uiState.busyIds, onRespond, Modifier.animateItem())
+                        }
                     }
-                }
-                if (uiState.answered.isNotEmpty()) {
-                    item { SectionTitle(stringResource(R.string.invitations_answered)) }
-                    items(uiState.answered, key = { it.invitationId }) { item ->
-                        InvitationCard(item, busy = false, onRespond = onRespond)
+                    if (uiState.answered.isNotEmpty()) {
+                        item { SectionTitle(stringResource(R.string.invitations_answered)) }
+                        items(uiState.answered, key = { it.invitationId }) { item ->
+                            InvitationCard(item, busy = false, onRespond = onRespond, modifier = Modifier.animateItem())
+                        }
                     }
                 }
             }
@@ -129,9 +139,10 @@ private fun InvitationCard(
     item: InvitationItem,
     busy: Boolean,
     onRespond: (String, Boolean) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     // Un solo Column: en un LazyColumn, varios elementos sueltos se superpondrían.
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         InvitationCardContent(item, busy, onRespond)
     }
 }
