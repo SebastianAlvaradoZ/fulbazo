@@ -32,6 +32,10 @@ fun AppNavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier,
+        enterTransition = enterTransition,
+        exitTransition = exitTransition,
+        popEnterTransition = popEnterTransition,
+        popExitTransition = popExitTransition,
     ) {
         composable(AppRoutes.LOGIN) {
             LoginRoute(
