@@ -11,7 +11,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.Lifecycle
-import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Before
 import org.junit.Rule
@@ -75,7 +74,9 @@ class EditProfileFlowTest {
         composeRule.onNodeWithText("¿No tienes cuenta?").assertIsDisplayed()
 
         // Atrás desde el Login cierra la app en lugar de volver al Perfil.
-        Espresso.pressBackUnconditionally()
+        // Se envía desde la app para no depender del foco de la ventana (una
+        // notificación simulada puede quitárselo).
+        composeRule.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
         composeRule.waitUntil(5_000) {
             composeRule.activityRule.scenario.state == Lifecycle.State.DESTROYED
         }
