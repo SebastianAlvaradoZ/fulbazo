@@ -34,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.ArequipaDistricts
 import com.vapsa.fulbazo.ui.auth.message
+import com.vapsa.fulbazo.ui.components.AnimatedErrorBanner
 import com.vapsa.fulbazo.ui.components.DropdownField
 import com.vapsa.fulbazo.ui.components.EmptyState
 import com.vapsa.fulbazo.ui.components.ErrorBanner
@@ -133,10 +134,7 @@ private fun EditProfileForm(
             .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        uiState.authError?.let {
-            ErrorBanner(message = it.message())
-            Spacer(Modifier.height(12.dp))
-        }
+        AnimatedErrorBanner(message = uiState.authError?.message())
         ProfilePhotoSection(
             photoUri = uiState.photoUri,
             enabled = enabled,

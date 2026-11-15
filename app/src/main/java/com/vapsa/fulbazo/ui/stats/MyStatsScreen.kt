@@ -1,5 +1,7 @@
 package com.vapsa.fulbazo.ui.stats
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -249,16 +251,19 @@ private fun StatsForm(
             )
         }
 
-        if (uiState.showGoalkeeperSkills) {
-            HorizontalDivider()
-            SectionTitle(stringResource(R.string.stats_goalkeeper_skills))
-            GoalkeeperSkill.entries.forEach { skill ->
-                SkillSlider(
-                    label = stringResource(skill.labelRes),
-                    value = uiState.goalkeeperSkills.getValue(skill),
-                    onValueChange = { actions.onGoalkeeperSkillChange(skill, it) },
-                    enabled = enabled,
-                )
+        // Las habilidades de arquero aparecen y desaparecen con animación.
+        AnimatedVisibility(visible = uiState.showGoalkeeperSkills) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                HorizontalDivider()
+                SectionTitle(stringResource(R.string.stats_goalkeeper_skills))
+                GoalkeeperSkill.entries.forEach { skill ->
+                    SkillSlider(
+                        label = stringResource(skill.labelRes),
+                        value = uiState.goalkeeperSkills.getValue(skill),
+                        onValueChange = { actions.onGoalkeeperSkillChange(skill, it) },
+                        enabled = enabled,
+                    )
+                }
             }
         }
 
@@ -317,9 +322,11 @@ private fun OverallCard(uiState: MyStatsUiState) {
 
 @Composable
 private fun OverallValue(label: String, value: Double) {
+    // El número cambia suavemente al mover los deslizadores.
+    val animatedValue by animateFloatAsState(targetValue = value.toFloat(), label = "overall")
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = stringResource(R.string.stats_overall_value, value),
+            text = stringResource(R.string.stats_overall_value, animatedValue),
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.Bold,
         )

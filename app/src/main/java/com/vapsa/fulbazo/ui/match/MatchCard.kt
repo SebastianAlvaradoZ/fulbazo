@@ -1,6 +1,7 @@
 package com.vapsa.fulbazo.ui.match
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -65,6 +67,8 @@ fun MatchCard(
 
 @Composable
 private fun MatchCardContent(item: MatchItem, extraContent: @Composable (() -> Unit)?) {
+    // Los cupos libres cuentan hacia arriba o abajo cuando alguien entra o sale.
+    val spotsLeft by animateIntAsState(targetValue = item.spotsLeft, label = "spotsLeft")
     Column(
         modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -109,7 +113,7 @@ private fun MatchCardContent(item: MatchItem, extraContent: @Composable (() -> U
                 } else if (item.spotsLeft == 0) {
                     stringResource(R.string.match_full)
                 } else {
-                    stringResource(R.string.match_spots_left, item.spotsLeft, item.slots)
+                    stringResource(R.string.match_spots_left, spotsLeft, item.slots)
                 },
                 style = MaterialTheme.typography.labelLarge,
                 color = if (item.status == MatchStatus.FINISHED) {

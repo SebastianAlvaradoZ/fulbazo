@@ -42,6 +42,7 @@ import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.ArequipaDistricts
 import com.vapsa.fulbazo.domain.validation.UserValidator
 import com.vapsa.fulbazo.ui.auth.message
+import com.vapsa.fulbazo.ui.components.AnimatedErrorBanner
 import com.vapsa.fulbazo.ui.components.DateField
 import com.vapsa.fulbazo.ui.components.DropdownField
 import com.vapsa.fulbazo.ui.components.ErrorBanner
@@ -157,10 +158,7 @@ fun RegisterScreen(
             )
             Spacer(Modifier.height(12.dp))
 
-            uiState.authError?.let {
-                ErrorBanner(message = it.message())
-                Spacer(Modifier.height(12.dp))
-            }
+            AnimatedErrorBanner(message = uiState.authError?.message())
 
             ProfilePhotoSection(
                 photoUri = uiState.photoUri,

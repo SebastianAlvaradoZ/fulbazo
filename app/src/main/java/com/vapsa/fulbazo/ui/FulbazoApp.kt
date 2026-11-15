@@ -5,6 +5,10 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Badge
@@ -79,7 +83,15 @@ fun FulbazoApp(
                         IconButton(onClick = { navController.navigate(AppRoutes.INVITATIONS) }) {
                             BadgedBox(
                                 badge = {
-                                    if (pendingInvitations > 0) Badge { Text(pendingInvitations.toString()) }
+                                    // El contador aparece con una pequeña animación de escala.
+                                    // Versión general: el espacio del contador es una fila (RowScope).
+                                    androidx.compose.animation.AnimatedVisibility(
+                                        visible = pendingInvitations > 0,
+                                        enter = scaleIn() + fadeIn(),
+                                        exit = scaleOut() + fadeOut(),
+                                    ) {
+                                        Badge { Text(pendingInvitations.toString()) }
+                                    }
                                 },
                             ) {
                                 Icon(

@@ -35,6 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.AuthError
 import com.vapsa.fulbazo.ui.auth.message
+import com.vapsa.fulbazo.ui.components.AnimatedErrorBanner
 import com.vapsa.fulbazo.ui.components.ErrorBanner
 import com.vapsa.fulbazo.ui.components.FormTextField
 import com.vapsa.fulbazo.ui.components.PasswordTextField
@@ -105,10 +106,7 @@ fun LoginScreen(
 
         Spacer(Modifier.height(40.dp))
 
-        uiState.authError?.let {
-            ErrorBanner(message = it.message())
-            Spacer(Modifier.height(16.dp))
-        }
+        AnimatedErrorBanner(message = uiState.authError?.message())
 
         FormTextField(
             value = uiState.email,
