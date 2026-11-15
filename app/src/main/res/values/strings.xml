@@ -14,9 +14,19 @@
     <string name="generic_error">Algo salió mal. Inténtalo de nuevo</string>
 
     <!-- Mapa y partidos cercanos -->
-    <string name="map_preview_label">Vista previa de las losas · el mapa real llegará pronto</string>
+    <string name="map_unavailable_label">Mapa no disponible: falta configurar la clave de Google Maps (MAPS_API_KEY). Se muestra una vista simple de las losas.</string>
+    <string name="map_content_description">Mapa de las losas de Arequipa</string>
+    <string name="map_loading">Cargando mapa…</string>
+    <string name="map_tiles_failed">No se pudo cargar el mapa. Revisa tu conexión a internet.</string>
+    <string name="map_marker_snippet">%1$d partidos próximos</string>
     <string name="map_nearby_title">Partidos cercanos</string>
     <string name="map_nearby_subtitle">Ordenados por fecha</string>
+    <string name="map_nearby_subtitle_distance">Ordenados por distancia</string>
+    <string name="map_location_denied">Activa tu ubicación para ver primero los partidos más cerca de ti. Sin ella, los ordenamos por fecha.</string>
+    <string name="map_location_allow">Permitir ubicación</string>
+    <string name="map_location_settings">Abrir ajustes</string>
+    <string name="match_distance_km">a %1$.1f km</string>
+    <string name="match_distance_m">a %1$d m</string>
     <string name="map_empty">No hay partidos próximos. ¡Crea el primero!</string>
     <string name="map_load_error">No se pudieron cargar los partidos</string>
     <string name="map_create_match">Crear partido</string>

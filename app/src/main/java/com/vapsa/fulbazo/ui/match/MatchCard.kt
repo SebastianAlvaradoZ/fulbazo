@@ -29,6 +29,7 @@ import com.vapsa.fulbazo.domain.model.MatchStatus
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.roundToInt
 
 private val matchDateFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("EEE d 'de' MMM, HH:mm", Locale.forLanguageTag("es-PE"))
@@ -36,6 +37,15 @@ private val matchDateFormatter: DateTimeFormatter =
 /** Fecha del partido en español, p. ej. "mié 11 de nov., 19:00". */
 fun LocalDateTime.formatMatchDate(): String =
     format(matchDateFormatter).replaceFirstChar { it.titlecase(Locale.forLanguageTag("es-PE")) }
+
+/** Distancia hasta la losa: "a 850 m" si es menos de 1 km, si no "a 2.4 km". */
+@Composable
+fun formatDistance(km: Double): String =
+    if (km < 1.0) {
+        stringResource(R.string.match_distance_m, ((km * 1000) / 10).roundToInt() * 10)
+    } else {
+        stringResource(R.string.match_distance_km, km)
+    }
 
 @get:StringRes
 val MatchLevel.labelRes: Int
@@ -88,7 +98,11 @@ private fun MatchCardContent(item: MatchItem, extraContent: @Composable (() -> U
             )
         }
         Text(
-            text = "${item.dateTime.formatMatchDate()} · ${item.district}",
+            text = listOfNotNull(
+                item.dateTime.formatMatchDate(),
+                item.district,
+                item.distanceKm?.let { formatDistance(it) },
+            ).joinToString(" · "),
             style = MaterialTheme.typography.bodyMedium,
         )
         Text(
