@@ -11,6 +11,7 @@ object AppRoutes {
     const val FRIENDS = "friends"
     const val PROFILE = "profile"
     const val MY_STATS = "my_stats"
+    const val EDIT_PROFILE = "edit_profile"
     const val CREATE_MATCH = "create_match"
     const val INVITATIONS = "invitations"
 

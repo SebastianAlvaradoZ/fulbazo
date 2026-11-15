@@ -19,6 +19,7 @@ import com.vapsa.fulbazo.ui.match.mine.MyMatchesRoute
 import com.vapsa.fulbazo.ui.match.rate.RatePlayersRoute
 import com.vapsa.fulbazo.ui.player.PlayerProfileRoute
 import com.vapsa.fulbazo.ui.profile.ProfileRoute
+import com.vapsa.fulbazo.ui.profile.edit.EditProfileRoute
 import com.vapsa.fulbazo.ui.stats.MyStatsRoute
 
 @Composable
@@ -71,7 +72,23 @@ fun AppNavHost(
             )
         }
         composable(AppRoutes.PROFILE) {
-            ProfileRoute(onEditStats = { navController.navigate(AppRoutes.MY_STATS) })
+            ProfileRoute(
+                onEditStats = { navController.navigate(AppRoutes.MY_STATS) },
+                onEditProfile = { navController.navigate(AppRoutes.EDIT_PROFILE) },
+                onLoggedOut = {
+                    // Vuelve al Login y borra todo el historial: Atrás no regresa a la app.
+                    navController.navigate(AppRoutes.LOGIN) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
+        composable(AppRoutes.EDIT_PROFILE) {
+            EditProfileRoute(
+                onNavigateBack = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() },
+            )
         }
         composable(AppRoutes.MY_STATS) {
             MyStatsRoute(onNavigateBack = { navController.popBackStack() })

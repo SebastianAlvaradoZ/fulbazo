@@ -117,6 +117,16 @@
     <string name="rate_save_error">No se pudo guardar la evaluación</string>
     <string name="rate_open">Evaluar jugadores</string>
 
+    <!-- Editar perfil y cerrar sesión -->
+    <string name="edit_profile_title">Editar perfil</string>
+    <string name="edit_profile_readonly_note">El correo y la fecha de nacimiento no se pueden cambiar</string>
+    <string name="edit_profile_save">Guardar cambios</string>
+    <string name="edit_profile_saved">Perfil actualizado</string>
+    <string name="profile_edit">Editar perfil</string>
+    <string name="profile_logout">Cerrar sesión</string>
+    <string name="profile_logout_title">¿Cerrar sesión?</string>
+    <string name="profile_logout_text">Tendrás que volver a ingresar tu correo y contraseña.</string>
+
     <!-- Crear partido -->
     <string name="create_match_title">Crear partido</string>
     <string name="create_match_host_note">Serás el anfitrión de este partido.</string>
