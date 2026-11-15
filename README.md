@@ -19,7 +19,10 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
   mínima de 13 años, distrito de Arequipa, celular peruano, correo, contraseña y
   foto opcional), inicio de sesión, edición del perfil y cierre de sesión.
 - **Mapa (pantalla principal):** vista previa de las losas y lista de partidos
-  próximos; botón flotante para crear un partido.
+  próximos, con filtro por losa; botón flotante para crear un partido.
+- **Detalle de losa:** al tocar una losa en el mapa (o desde el filtro) se abre
+  una hoja con su dirección, si tiene iluminación y sus próximos partidos, y el
+  botón **"Crear partido aquí"** con la losa ya elegida.
 - **Partidos:**
   - Crear partido (losa, fecha, hora, cupos, nivel y descripción). Quien lo crea
     es el anfitrión.
