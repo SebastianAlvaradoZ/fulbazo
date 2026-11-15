@@ -83,7 +83,7 @@ fun CreateMatchRoute(
         snackbarHostState = snackbarHostState,
         actions = CreateMatchActions(
             onBack = onNavigateBack,
-            onCourtChange = viewModel::onCourtChange,
+            onCourtSelected = viewModel::onCourtSelected,
             onDateChange = viewModel::onDateChange,
             onTimeChange = viewModel::onTimeChange,
             onSlotsChange = viewModel::onSlotsChange,
@@ -98,7 +98,7 @@ fun CreateMatchRoute(
 
 data class CreateMatchActions(
     val onBack: () -> Unit = {},
-    val onCourtChange: (String) -> Unit = {},
+    val onCourtSelected: (courtId: String) -> Unit = {},
     val onDateChange: (LocalDate) -> Unit = {},
     val onTimeChange: (LocalTime) -> Unit = {},
     val onSlotsChange: (Int) -> Unit = {},
@@ -159,12 +159,10 @@ fun CreateMatchScreen(
             )
 
             DropdownField(
-                value = uiState.selectedCourt?.let { "${it.name} · ${it.district}" },
-                options = uiState.courts.map { "${it.name} · ${it.district}" },
-                onValueChange = { label ->
-                    uiState.courts.firstOrNull { "${it.name} · ${it.district}" == label }
-                        ?.let { actions.onCourtChange(it.id) }
-                },
+                selected = uiState.selectedCourt,
+                options = uiState.courts,
+                optionLabel = { "${it.name} · ${it.district}" },
+                onSelected = { actions.onCourtSelected(it.id) },
                 label = stringResource(R.string.create_match_court),
                 error = if (CreateMatchError.COURT_REQUIRED in errors) {
                     stringResource(R.string.create_match_error_court)

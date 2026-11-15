@@ -62,8 +62,13 @@ class CreateMatchViewModel(
         }
     }
 
-    fun onCourtChange(courtId: String) = updateForm {
-        copy(courtId = courtId, errors = errors - CreateMatchError.COURT_REQUIRED)
+    /** Solo acepta losas de la lista cargada. */
+    fun onCourtSelected(courtId: String) = updateForm {
+        if (courts.none { it.id == courtId }) {
+            this
+        } else {
+            copy(courtId = courtId, errors = errors - CreateMatchError.COURT_REQUIRED)
+        }
     }
 
     fun onDateChange(date: LocalDate) = updateForm {

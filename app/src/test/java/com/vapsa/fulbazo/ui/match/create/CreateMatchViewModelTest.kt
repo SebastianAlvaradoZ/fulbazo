@@ -47,7 +47,7 @@ class CreateMatchViewModelTest {
     }
 
     private fun CreateMatchViewModel.fillValid() {
-        onCourtChange("losa-cayma")
+        onCourtSelected("losa-cayma")
         onDateChange(LocalDate.of(2026, 11, 12))
         onTimeChange(LocalTime.of(19, 0))
     }
@@ -61,6 +61,18 @@ class CreateMatchViewModelTest {
         assertEquals(8, state.courts.size)
         assertEquals(setOf("carlos", "maria"), state.friends.map { it.id }.toSet())
         assertEquals(1, state.groups.size)
+    }
+
+    @Test
+    fun selectingCourt_byId_setsSelectedCourt_andIgnoresUnknownIds() = runTest {
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.onCourtSelected("no-existe")
+        assertEquals(null, viewModel.uiState.value.selectedCourt)
+
+        viewModel.onCourtSelected("losa-sachaca")
+        assertEquals("Losa Deportiva Sachaca", viewModel.uiState.value.selectedCourt?.name)
     }
 
     @Test
