@@ -150,7 +150,7 @@ private fun LazyListScope.upcomingTab(uiState: MyMatchesUiState, actions: MyMatc
     }
     // La tarjeta ya indica "Eres el anfitrión" o "Ya estás inscrito".
     items(uiState.upcoming, key = { it.matchId }) { match ->
-        MatchCard(match, onClick = { actions.onOpenMatch(match.matchId) })
+        MatchCard(match, onClick = { actions.onOpenMatch(match.matchId) }, modifier = Modifier.animateItem())
     }
 }
 
@@ -161,7 +161,7 @@ private fun LazyListScope.requestsTab(uiState: MyMatchesUiState, actions: MyMatc
     }
     items(uiState.requests, key = { it.requestId }) { request ->
         val match = request.match ?: return@items
-        MatchCard(match, onClick = { actions.onOpenMatch(match.matchId) }) {
+        MatchCard(match, onClick = { actions.onOpenMatch(match.matchId) }, modifier = Modifier.animateItem()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,

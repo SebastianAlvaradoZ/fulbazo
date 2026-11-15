@@ -233,7 +233,11 @@ private fun RequestsList(uiState: FriendsUiState, actions: FriendsActions) {
     ) {
         items(uiState.incomingRequests, key = { it.requestId }) { request ->
             val busy = request.requestId in uiState.busyIds
-            Card(Modifier.fillMaxWidth()) {
+            Card(
+                Modifier
+                    .fillMaxWidth()
+                    .animateItem(),
+            ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     PlayerRow(
                         request.player,
@@ -277,6 +281,7 @@ private fun GroupsList(uiState: FriendsUiState, actions: FriendsActions) {
             Card(
                 Modifier
                     .fillMaxWidth()
+                    .animateItem()
                     .clickable { actions.onOpenGroup(group.id) },
             ) {
                 Column(Modifier.padding(16.dp)) {
@@ -312,6 +317,7 @@ private fun PlayerLazyList(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .animateItem()
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

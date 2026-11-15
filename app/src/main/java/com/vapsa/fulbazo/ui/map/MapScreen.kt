@@ -109,7 +109,7 @@ private fun NearbyMatchesList(
                 EmptyState(stringResource(R.string.map_empty), iconRes = R.drawable.ic_matches)
             }
             else -> items(uiState.matches, key = { it.matchId }) { item ->
-                MatchCard(item, onClick = { onOpenMatch(item.matchId) })
+                MatchCard(item, onClick = { onOpenMatch(item.matchId) }, modifier = Modifier.animateItem())
             }
         }
     }
