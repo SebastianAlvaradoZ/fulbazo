@@ -11,12 +11,15 @@ import com.vapsa.fulbazo.domain.model.User
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.repository.StatsRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * Estado de la pantalla de perfil.
@@ -29,9 +32,21 @@ data class ProfileUiState(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileViewModel(
-    authRepository: AuthRepository,
+    private val authRepository: AuthRepository,
     statsRepository: StatsRepository,
 ) : ViewModel() {
+
+    private val _loggedOut = MutableStateFlow(false)
+
+    /** `true` después de cerrar sesión: la vista vuelve al Login. */
+    val loggedOut: StateFlow<Boolean> = _loggedOut.asStateFlow()
+
+    fun logout() {
+        viewModelScope.launch {
+            authRepository.logout()
+            _loggedOut.value = true
+        }
+    }
 
     /** Se actualiza solo cuando cambian el usuario o sus estadísticas. */
     val uiState: StateFlow<ProfileUiState> = authRepository.currentUser
