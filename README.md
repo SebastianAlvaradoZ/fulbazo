@@ -18,9 +18,14 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
 - **Cuenta:** registro (nombre, apellido, apodo, fecha de nacimiento con edad
   mínima de 13 años, distrito de Arequipa, celular peruano, correo, contraseña y
   foto opcional), inicio de sesión, edición del perfil y cierre de sesión.
-- **Mapa (pantalla principal):** vista previa de las losas y lista de partidos
+- **Mapa (pantalla principal):** **Google Maps** centrado en Arequipa con un
+  marcador por losa (verde si tiene partidos próximos) y la lista de partidos
   próximos, con filtro por losa; botón flotante para crear un partido.
-- **Detalle de losa:** al tocar una losa en el mapa (o desde el filtro) se abre
+- **Ubicación:** con el permiso de ubicación, el mapa muestra dónde estás y los
+  partidos se ordenan **del más cercano al más lejano** ("a 2.4 km"). Si no lo
+  das, un aviso explica para qué sirve y permite activarlo (o abrir Ajustes), y
+  los partidos se ordenan por fecha.
+- **Detalle de losa:** al tocar un marcador del mapa (o desde el filtro) se abre
   una hoja con su dirección, si tiene iluminación y sus próximos partidos, y el
   botón **"Crear partido aquí"** con la losa ya elegida.
 - **Partidos:**
@@ -52,8 +57,6 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
 
 ### Pendientes
 
-- **Mapa real** con la ubicación del usuario y los partidos ordenados por
-  distancia (Google Maps u OpenStreetMap).
 - **Firebase:** autenticación, base de datos (Firestore) y notificaciones push
   reales entre dispositivos.
 - **Losas de Arequipa** registradas a mano, consumidas con **Retrofit** y
@@ -73,6 +76,7 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
 | Interfaz | Jetpack Compose, Material 3, animaciones de Compose |
 | Arquitectura | MVVM, `ViewModel`, `StateFlow`, corrutinas |
 | Navegación | Navigation Compose |
+| Mapa y ubicación | Google Maps (`maps-compose`), Fused Location Provider |
 | Imágenes | Coil (fotos de perfil) y Photo Picker del sistema |
 | Notificaciones | `NotificationCompat` con permiso `POST_NOTIFICATIONS` |
 | Pruebas | JUnit 4, `kotlinx-coroutines-test` y pruebas instrumentadas de Compose |
@@ -136,11 +140,26 @@ app/src/main/java/com/vapsa/fulbazo/
 2. Ábrelo en Android Studio y espera la sincronización de Gradle.
 3. Ejecuta la configuración **app** en un emulador o un teléfono.
 
-### Claves y configuración
+### Clave de Google Maps (`MAPS_API_KEY`)
 
-Las claves que se agreguen más adelante (por ejemplo la API key de Maps) irán en
-`local.properties`, y `google-services.json` en `app/`. Ambos archivos están
-en `.gitignore`: **nunca se suben al repositorio**.
+1. En [Google Cloud Console](https://console.cloud.google.com/), crea un
+   proyecto, activa **Maps SDK for Android** y crea una **API key**.
+2. Restringe la clave a apps Android con el paquete `com.vapsa.fulbazo` y la
+   huella SHA-1 de tu certificado de depuración (`./gradlew signingReport`).
+3. Agrega esta línea a `local.properties`, en la raíz del proyecto:
+   ```properties
+   MAPS_API_KEY=tu_clave_aqui
+   ```
+4. Sincroniza Gradle y vuelve a ejecutar la app.
+
+`local.properties` está en `.gitignore`: **la clave nunca se sube al
+repositorio**. `app/build.gradle.kts` la lee de ahí y la pone en el
+`AndroidManifest.xml` (`com.google.android.geo.API_KEY`). Si falta, se usa el
+valor de `local.defaults.properties` (`DEFAULT_API_KEY`) y la app no se cae:
+muestra un aviso y una vista simple de las losas, que se pueden seguir tocando.
+
+Más adelante, `google-services.json` (Firebase) irá en `app/`; también está en
+`.gitignore`.
 
 ### Usuario de prueba
 
@@ -168,6 +187,14 @@ Para probar sin backend, la app simula a otros jugadores:
 
 Si hay varios dispositivos conectados, elige uno con `ANDROID_SERIAL`; por
 ejemplo, `ANDROID_SERIAL=emulator-5554`.
+
+Las pruebas conceden los permisos de ubicación y notificaciones. Para la prueba
+del orden por distancia, el emulador necesita una ubicación, por ejemplo la
+plaza de Cayma:
+
+```bash
+adb emu geo fix -71.545 -16.372
+```
 
 ---
 
