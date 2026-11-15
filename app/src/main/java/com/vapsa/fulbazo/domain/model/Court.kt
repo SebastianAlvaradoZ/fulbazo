@@ -9,4 +9,6 @@ data class Court(
     val district: String,
     val latitude: Double,
     val longitude: Double,
+    val address: String = "",
+    val hasLighting: Boolean = false,
 )
