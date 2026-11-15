@@ -2,8 +2,8 @@ package com.vapsa.fulbazo
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -14,11 +14,12 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.vapsa.fulbazo.ui.map.MAP_MATCHES_LIST_TAG
+import java.time.LocalDate
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.time.LocalDate
 
 /**
  * Pruebas de punta a punta: crear partido, amigos e invitaciones.
@@ -40,7 +41,7 @@ class SocialFlowTest {
 
     /** Desplaza la lista hasta el elemento (LazyColumn solo dibuja lo visible). */
     private fun showInList(text: String) {
-        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(text))
+        composeRule.onNode(hasTestTag(MAP_MATCHES_LIST_TAG)).performScrollToNode(hasText(text))
         composeRule.onNodeWithText(text).assertIsDisplayed()
     }
 
@@ -97,7 +98,7 @@ class SocialFlowTest {
         waitForText("Partidos cercanos")
         // La tarjeta de Sachaca debe indicar que soy el anfitrión (puede haber otros partidos míos).
         val sachacaCard = hasText("Losa Deportiva Sachaca") and hasText("Eres el anfitrión")
-        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(sachacaCard)
+        composeRule.onNode(hasTestTag(MAP_MATCHES_LIST_TAG)).performScrollToNode(sachacaCard)
         composeRule.onNode(sachacaCard).assertIsDisplayed()
     }
 

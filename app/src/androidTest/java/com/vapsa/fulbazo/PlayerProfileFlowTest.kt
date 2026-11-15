@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -13,6 +14,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.vapsa.fulbazo.ui.map.MAP_MATCHES_LIST_TAG
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -75,7 +77,7 @@ class PlayerProfileFlowTest {
     @Test
     fun matchDetailPlayer_opensProfile_withGoalkeeperRatings() {
         loginAsDemo()
-        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Losa Deportiva Umacollo"))
+        composeRule.onNode(hasTestTag(MAP_MATCHES_LIST_TAG)).performScrollToNode(hasText("Losa Deportiva Umacollo"))
         composeRule.onNode(hasText("Losa Deportiva Umacollo") and hasClickAction()).performClick()
         waitForText("Detalle del partido")
 

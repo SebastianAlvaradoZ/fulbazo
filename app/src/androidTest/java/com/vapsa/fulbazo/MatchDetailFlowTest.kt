@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -14,11 +15,12 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.vapsa.fulbazo.ui.map.MAP_MATCHES_LIST_TAG
+import java.time.LocalDate
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.time.LocalDate
 
 /**
  * Prueba de punta a punta del detalle de partido y las solicitudes para unirse.
@@ -48,7 +50,7 @@ class MatchDetailFlowTest {
 
     /** Desplaza la lista del mapa hasta la tarjeta y la toca. */
     private fun openMatchCard(text: String) {
-        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(text))
+        composeRule.onNode(hasTestTag(MAP_MATCHES_LIST_TAG)).performScrollToNode(hasText(text))
         composeRule.onNode(hasText(text) and hasClickAction()).performClick()
         waitForText("Detalle del partido")
     }
