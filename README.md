@@ -64,7 +64,6 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
 - **IA (Gemini)** para armar equipos balanceados según las estadísticas de los
   jugadores.
 - **Diseño propio** ("verde cancha") con Material 3 Expressive.
-- **Hilt** para la inyección de dependencias.
 
 ---
 
@@ -75,6 +74,7 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
 | Lenguaje | Kotlin |
 | Interfaz | Jetpack Compose, Material 3, animaciones de Compose |
 | Arquitectura | MVVM, `ViewModel`, `StateFlow`, corrutinas |
+| Inyección de dependencias | Hilt (con KSP) |
 | Navegación | Navigation Compose |
 | Mapa y ubicación | Google Maps (`maps-compose`), Fused Location Provider |
 | Imágenes | Coil (fotos de perfil) y Photo Picker del sistema |
@@ -93,6 +93,8 @@ La app sigue **MVVM** por capas:
 - Los ViewModels dependen de **interfaces de repositorio** (`domain/repository`).
   Hoy las implementan repositorios en memoria; más adelante se cambian por
   Firebase, Retrofit y Room sin tocar las pantallas.
+- **Hilt** crea los repositorios (`@Singleton`, en los módulos de `di/`) y los
+  ViewModels (`@HiltViewModel`); las pantallas los piden con `hiltViewModel()`.
 
 ```
 app/src/main/java/com/vapsa/fulbazo/
@@ -100,7 +102,7 @@ app/src/main/java/com/vapsa/fulbazo/
 │   ├── local/            # Room (pendiente)
 │   ├── remote/           # Retrofit / Firebase (pendiente)
 │   └── repository/       # Implementaciones (por ahora Fake* en memoria)
-├── di/                   # AppContainer (antes de migrar a Hilt)
+├── di/                   # Módulos de Hilt (repositorios y scope de la app)
 ├── domain/
 │   ├── model/            # Usuario, partido, losa, estadísticas, invitaciones…
 │   ├── repository/       # Interfaces de repositorio
