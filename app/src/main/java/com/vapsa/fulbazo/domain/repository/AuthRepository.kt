@@ -2,6 +2,7 @@ package com.vapsa.fulbazo.domain.repository
 
 import com.vapsa.fulbazo.domain.model.AuthResult
 import com.vapsa.fulbazo.domain.model.NewUser
+import com.vapsa.fulbazo.domain.model.ProfileUpdate
 import com.vapsa.fulbazo.domain.model.User
 import kotlinx.coroutines.flow.StateFlow
 
@@ -18,5 +19,9 @@ interface AuthRepository {
 
     suspend fun register(newUser: NewUser): AuthResult
 
+    /** Actualiza los datos del usuario con sesión. Falla si el apodo ya lo usa otro jugador. */
+    suspend fun updateProfile(update: ProfileUpdate): AuthResult
+
+    /** Cierra la sesión: [currentUser] pasa a `null`. */
     suspend fun logout()
 }

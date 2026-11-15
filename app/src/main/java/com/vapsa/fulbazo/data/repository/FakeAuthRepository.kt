@@ -3,6 +3,7 @@ package com.vapsa.fulbazo.data.repository
 import com.vapsa.fulbazo.domain.model.AuthError
 import com.vapsa.fulbazo.domain.model.AuthResult
 import com.vapsa.fulbazo.domain.model.NewUser
+import com.vapsa.fulbazo.domain.model.ProfileUpdate
 import com.vapsa.fulbazo.domain.model.User
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import kotlinx.coroutines.delay
@@ -77,6 +78,28 @@ class FakeAuthRepository(
         }
         _currentUser.value = user
         return AuthResult.Success(user)
+    }
+
+    override suspend fun updateProfile(update: ProfileUpdate): AuthResult {
+        delay(latencyMillis)
+        val current = _currentUser.value ?: return AuthResult.Failure(AuthError.UNKNOWN)
+        val updated = mutex.withLock {
+            val nicknameTaken = users.values.any {
+                it.user.id != current.id && it.user.nickname.equals(update.nickname, ignoreCase = true)
+            }
+            if (nicknameTaken) return AuthResult.Failure(AuthError.NICKNAME_ALREADY_IN_USE)
+            val stored = users.getValue(current.email)
+            stored.user.copy(
+                firstName = update.firstName,
+                lastName = update.lastName,
+                nickname = update.nickname,
+                phone = update.phone,
+                district = update.district,
+                photoUri = update.photoUri,
+            ).also { users[current.email] = stored.copy(user = it) }
+        }
+        _currentUser.value = updated
+        return AuthResult.Success(updated)
     }
 
     override suspend fun logout() {
