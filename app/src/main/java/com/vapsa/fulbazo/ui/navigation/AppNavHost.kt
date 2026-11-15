@@ -51,14 +51,14 @@ fun AppNavHost(
         }
         composable(AppRoutes.MAP) {
             MapRoute(
-                onCreateMatch = { navController.navigate(AppRoutes.CREATE_MATCH) },
+                onCreateMatch = { courtId -> navController.navigate(AppRoutes.createMatch(courtId)) },
                 onOpenMatch = { matchId -> navController.navigate(AppRoutes.matchDetail(matchId)) },
             )
         }
         composable(AppRoutes.MATCH) {
             MyMatchesRoute(
                 onOpenMatch = { matchId -> navController.navigate(AppRoutes.matchDetail(matchId)) },
-                onCreateMatch = { navController.navigate(AppRoutes.CREATE_MATCH) },
+                onCreateMatch = { navController.navigate(AppRoutes.createMatch()) },
                 onExploreMap = {
                     navController.navigate(AppRoutes.MAP) {
                         popUpTo(AppRoutes.MAP) { saveState = true }
@@ -97,10 +97,20 @@ fun AppNavHost(
         composable(AppRoutes.MY_STATS) {
             MyStatsRoute(onNavigateBack = { navController.popBackStack() })
         }
-        composable(AppRoutes.CREATE_MATCH) {
+        composable(
+            route = AppRoutes.CREATE_MATCH,
+            arguments = listOf(
+                navArgument(AppRoutes.COURT_ID_ARG) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
+        ) { entry ->
             CreateMatchRoute(
                 onNavigateBack = { navController.popBackStack() },
                 onCreated = { navController.popBackStack() },
+                initialCourtId = entry.arguments?.getString(AppRoutes.COURT_ID_ARG),
             )
         }
         composable(

@@ -12,7 +12,12 @@ object AppRoutes {
     const val PROFILE = "profile"
     const val MY_STATS = "my_stats"
     const val EDIT_PROFILE = "edit_profile"
-    const val CREATE_MATCH = "create_match"
+    const val COURT_ID_ARG = "courtId"
+    const val CREATE_MATCH = "create_match?$COURT_ID_ARG={$COURT_ID_ARG}"
+
+    /** Con [courtId], el formulario abre con esa losa ya elegida. */
+    fun createMatch(courtId: String? = null): String =
+        if (courtId == null) "create_match" else "create_match?$COURT_ID_ARG=$courtId"
     const val INVITATIONS = "invitations"
 
     const val MATCH_ID_ARG = "matchId"
