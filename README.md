@@ -52,14 +52,14 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
   estados de carga, error y contenido, listas animadas y números que cambian
   suavemente.
 
-> La cuenta y el perfil se guardan en **Firebase**. El resto de datos todavía
-> son **de prueba y viven en memoria** (repositorios `Fake*`): al cerrar la app
-> se pierden los cambios.
+> Cuentas, partidos, solicitudes, amigos, grupos, invitaciones y estadísticas
+> se guardan en **Firebase** y se actualizan en tiempo real entre teléfonos. Las
+> losas todavía son una lista local hasta que lleguen de Retrofit + Room.
 
 ### Pendientes
 
-- **Firestore** para partidos, solicitudes, amigos, grupos, invitaciones y
-  estadísticas (la cuenta y el perfil ya usan Firebase).
+- **Notificaciones push** con la app cerrada (FCM). Hoy la invitación llega
+  como notificación mientras la app está abierta.
 - **Losas de Arequipa** registradas a mano, consumidas con **Retrofit** y
   guardadas en **Room** para usar la app sin conexión.
 - **IA (Gemini)** para armar equipos balanceados según las estadísticas de los
@@ -93,8 +93,8 @@ La app sigue **MVVM** por capas:
 - Los **ViewModels** exponen un `StateFlow<UiState>` (carga, contenido, vacío y
   error), validan los datos y lanzan el trabajo en `viewModelScope`.
 - Los ViewModels dependen de **interfaces de repositorio** (`domain/repository`).
-  Hoy las implementan repositorios en memoria; más adelante se cambian por
-  Firebase, Retrofit y Room sin tocar las pantallas.
+  Hoy las implementan repositorios de Firebase (`Firebase*` y `Firestore*`);
+  las pruebas usan los mismos ViewModels con repositorios en memoria (`Fake*`).
 - **Hilt** crea los repositorios (`@Singleton`, en los módulos de `di/`) y los
   ViewModels (`@HiltViewModel`); las pantallas los piden con `hiltViewModel()`.
 
@@ -102,8 +102,8 @@ La app sigue **MVVM** por capas:
 app/src/main/java/com/vapsa/fulbazo/
 ├── data/
 │   ├── local/            # Room (pendiente)
-│   ├── remote/           # Retrofit / Firebase (pendiente)
-│   └── repository/       # Implementaciones (por ahora Fake* en memoria)
+│   ├── remote/           # Utilidades de Firestore (colecciones, fechas, Flows)
+│   └── repository/       # Firebase*/Firestore* (app) y Fake* (pruebas)
 ├── di/                   # Módulos de Hilt (repositorios y scope de la app)
 ├── domain/
 │   ├── model/            # Usuario, partido, losa, estadísticas, invitaciones…
@@ -177,20 +177,31 @@ contraseña) y **Cloud Firestore**.
    `southamerica-west1`) y publica las reglas de [`firestore.rules`](firestore.rules)
    en la pestaña **Reglas**.
 
-El perfil se guarda en `usuarios/{uid}` y cada apodo se reserva en
-`apodos/{apodo}` para que no se repita. La foto de perfil se comprime (JPEG de
-256 px) y se guarda dentro del mismo documento, sin Firebase Storage.
+Colecciones de Firestore (las reglas de `firestore.rules` revisan cada escritura):
 
-### Usuario de prueba
+| Colección | Contenido |
+|---|---|
+| `usuarios/{uid}` | Perfil público: nombre, apodo, distrito y foto |
+| `usuarios/{uid}/privado/datos` | Celular, correo y fecha de nacimiento (solo los ve su dueño) |
+| `apodos/{apodo}` | Reserva del apodo para que no se repita |
+| `partidos/{id}` | Losa, anfitrión, fecha, cupos, nivel, estado y jugadores |
+| `solicitudes/{partido}_{usuario}` | Pedido para unirse; solo el anfitrión lo acepta o rechaza |
+| `invitaciones/{partido}_{invitado}` | Invitación a un partido |
+| `solicitudesAmistad/{de}_{para}` | Solicitud de amistad |
+| `amistades/{a}_{b}` | Amistad aceptada (`miembros`) |
+| `grupos/{id}` | Grupos de amigos (solo los ve su dueño) |
+| `estadisticas/{uid}` | Autoevaluación ("Cómo me veo") |
+| `calificaciones/{partido}_{evaluador}_{evaluado}` | Calificación de un compañero; con ellas se calcula "Cómo me ven" |
 
-Crea tu cuenta desde **Regístrate**. Partidos, amigos, estadísticas e
-invitaciones todavía son datos de prueba en memoria (repositorios `Fake*`) y se
-pasan a Firestore en la siguiente fase.
+La foto de perfil se comprime (JPEG de 256 px) y se guarda dentro del perfil,
+sin Firebase Storage. Las fechas se guardan con la hora de Perú.
 
-Para probar sin backend, la app simula a otros jugadores:
+### Probar con dos cuentas
 
-- Unos segundos después de iniciar sesión, un amigo de prueba te invita a un partido.
-- Al crear un partido, dos jugadores de prueba piden unirse.
+Crea dos cuentas desde **Regístrate** (por ejemplo, una en el emulador y otra en
+tu teléfono). Con una crea un partido e invita a la otra: la invitación llega al
+instante, con una notificación si la app está abierta. Con la otra pide unirte a
+un partido y acepta la solicitud desde la primera.
 
 ---
 
@@ -207,8 +218,10 @@ Para probar sin backend, la app simula a otros jugadores:
 Si hay varios dispositivos conectados, elige uno con `ANDROID_SERIAL`; por
 ejemplo, `ANDROID_SERIAL=emulator-5554`.
 
-Las pruebas instrumentadas no usan Firebase: con Hilt testing (`FakeAuthModule`)
-la sesión es falsa, así no necesitan internet ni crean cuentas reales.
+Las pruebas instrumentadas no usan Firebase: con Hilt testing
+(`FakeRepositoryModule`) todos los repositorios son los `Fake*` en memoria, con
+un usuario de prueba (`demo@fulbazo.com`) que ya tiene amigos, partidos y
+estadísticas. Así no necesitan internet ni escriben en la base real.
 
 Las pruebas conceden los permisos de ubicación y notificaciones. Para la prueba
 del orden por distancia, el emulador necesita una ubicación, por ejemplo la
