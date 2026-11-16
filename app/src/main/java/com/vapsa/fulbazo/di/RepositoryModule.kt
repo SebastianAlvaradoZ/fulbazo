@@ -1,6 +1,7 @@
 package com.vapsa.fulbazo.di
 
 import com.vapsa.fulbazo.data.repository.FakeCourtRepository
+import com.vapsa.fulbazo.data.repository.FirestoreCommentRepository
 import com.vapsa.fulbazo.data.repository.FirestoreFriendRepository
 import com.vapsa.fulbazo.data.repository.FirestoreGroupRepository
 import com.vapsa.fulbazo.data.repository.FirestoreInvitationRepository
@@ -8,6 +9,7 @@ import com.vapsa.fulbazo.data.repository.FirestoreJoinRequestRepository
 import com.vapsa.fulbazo.data.repository.FirestoreMatchRepository
 import com.vapsa.fulbazo.data.repository.FirestorePlayerRepository
 import com.vapsa.fulbazo.data.repository.FirestoreStatsRepository
+import com.vapsa.fulbazo.domain.repository.CommentRepository
 import com.vapsa.fulbazo.domain.repository.CourtRepository
 import com.vapsa.fulbazo.domain.repository.FriendRepository
 import com.vapsa.fulbazo.domain.repository.GroupRepository
@@ -66,6 +68,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindRatingRepository(repository: FirestoreStatsRepository): RatingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCommentRepository(repository: FirestoreCommentRepository): CommentRepository
 
     companion object {
         @Provides

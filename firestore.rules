@@ -25,6 +25,14 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/invitaciones/$(invitationId));
     }
 
+    function commentData(commentId) {
+      return get(/databases/$(database)/documents/comentarios/$(commentId)).data;
+    }
+
+    function commentExists(commentId) {
+      return exists(/databases/$(database)/documents/comentarios/$(commentId));
+    }
+
     function friendRequestExists(requestId) {
       return exists(/databases/$(database)/documents/solicitudesAmistad/$(requestId));
     }
@@ -238,6 +246,47 @@ service cloud.firestore {
         && request.resource.data.rol in ['FIELD', 'GOALKEEPER']
         && uid() in matchData(request.resource.data.partidoId).jugadores
         && request.resource.data.evaluadoId in matchData(request.resource.data.partidoId).jugadores;
+      allow delete: if false;
+    }
+
+    // ---------------------------------------------------------------- Comentarios e IA
+
+    // Comentarios: comentarios/{partidoId}_{autorId}_{jugadorId}. Solo comenta quien
+    // jugó ese partido, sobre un compañero de ese partido, y solo edita los suyos.
+    match /comentarios/{commentId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && request.resource.data.autorId == uid()
+        && request.resource.data.jugadorId != uid()
+        && commentId == request.resource.data.partidoId + '_' + uid() + '_' + request.resource.data.jugadorId
+        && request.resource.data.texto is string
+        && request.resource.data.texto.size() > 0
+        && request.resource.data.texto.size() <= 200
+        && uid() in matchData(request.resource.data.partidoId).jugadores
+        && request.resource.data.jugadorId in matchData(request.resource.data.partidoId).jugadores;
+      allow delete: if signedIn() && (resource == null || resource.data.autorId == uid());
+    }
+
+    // Reportes de comentarios: solo se crean desde la app; se revisan en la consola.
+    match /reportes/{reportId} {
+      allow read, delete: if false;
+      allow create, update: if signedIn()
+        && request.resource.data.reportadoPor == uid()
+        && reportId == request.resource.data.comentarioId + '_' + uid()
+        && commentExists(request.resource.data.comentarioId);
+    }
+
+    // Resumen de IA guardado: resumenesIA/{jugadorId}. Debe apuntar a un
+    // comentario real de ese jugador y tener un tamaño razonable.
+    match /resumenesIA/{playerId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && request.resource.data.texto is string
+        && request.resource.data.texto.size() > 0
+        && request.resource.data.texto.size() <= 1500
+        && request.resource.data.cantidad is int
+        && commentExists(request.resource.data.ultimoComentarioId)
+        && commentData(request.resource.data.ultimoComentarioId).jugadorId == playerId;
       allow delete: if false;
     }
 

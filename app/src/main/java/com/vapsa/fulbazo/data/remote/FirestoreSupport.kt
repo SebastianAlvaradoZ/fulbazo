@@ -27,6 +27,9 @@ object Collections {
     const val GROUPS = "grupos"
     const val STATS = "estadisticas"
     const val RATINGS = "calificaciones"
+    const val COMMENTS = "comentarios"
+    const val REPORTS = "reportes"
+    const val AI_SUMMARIES = "resumenesIA"
 }
 
 /**
