@@ -38,6 +38,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -100,6 +102,7 @@ private const val MAP_LOAD_TIMEOUT_MILLIS = 12_000L
 
 /** Etiqueta de la lista de partidos cercanos, para las pruebas automáticas. */
 const val MAP_MATCHES_LIST_TAG = "map_matches_list"
+const val OFFLINE_COURTS_TAG = "offline_courts"
 
 /** Etiqueta del mapa de Google, para las pruebas automáticas. */
 const val GOOGLE_MAP_TAG = "google_map"
@@ -150,6 +153,7 @@ fun MapRoute(
             onOpenMatch = onOpenMatch,
             onOpenCourt = viewModel::openCourt,
             onFilterCourt = viewModel::onFilterCourt,
+            onRetryCourts = viewModel::retryCourts,
             onRequestLocation = {
                 if (opensSettings) context.openAppSettings() else permissionLauncher.launch(LOCATION_PERMISSIONS)
             },
@@ -196,6 +200,8 @@ data class MapActions(
     val onFilterCourt: (courtId: String?) -> Unit = {},
     /** Vuelve a pedir el permiso de ubicación (o abre Ajustes si ya no se puede). */
     val onRequestLocation: () -> Unit = {},
+    /** Vuelve a descargar las losas después de un error de conexión. */
+    val onRetryCourts: () -> Unit = {},
 )
 
 @Composable
@@ -306,11 +312,17 @@ private fun NearbyMatchesList(
                 )
             }
         }
+        if (uiState.showingSavedCourts) {
+            item { OfflineCourtsBanner(onRetry = actions.onRetryCourts) }
+        }
         if (uiState.courts.isNotEmpty()) {
             item { CourtFilter(uiState, actions) }
         }
         when {
-            uiState.isLoading -> item { LoadingState(Modifier.fillMaxWidth()) }
+            uiState.isLoading || uiState.courtsLoading -> item { LoadingState(Modifier.fillMaxWidth()) }
+            uiState.courtsUnavailable -> item {
+                ErrorState(stringResource(R.string.map_courts_offline_error), onRetry = actions.onRetryCourts)
+            }
             uiState.loadFailed -> item { ErrorState(stringResource(R.string.map_load_error)) }
             uiState.matches.isEmpty() -> item {
                 EmptyState(
@@ -323,6 +335,29 @@ private fun NearbyMatchesList(
             else -> items(uiState.matches, key = { it.matchId }) { item ->
                 MatchCard(item, onClick = { actions.onOpenMatch(item.matchId) }, modifier = Modifier.animateItem())
             }
+        }
+    }
+}
+
+/** Aviso de que las losas son las guardadas en el teléfono porque no hay conexión. */
+@Composable
+private fun OfflineCourtsBanner(onRetry: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(OFFLINE_COURTS_TAG),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                stringResource(R.string.map_courts_offline),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = onRetry) { Text(stringResource(R.string.action_retry)) }
         }
     }
 }

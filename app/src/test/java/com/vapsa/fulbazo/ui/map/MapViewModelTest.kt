@@ -6,7 +6,13 @@ import com.vapsa.fulbazo.data.repository.FakeAuthRepository
 import com.vapsa.fulbazo.data.repository.FakeCourtRepository
 import com.vapsa.fulbazo.data.repository.FakeMatchRepository
 import com.vapsa.fulbazo.data.repository.FakePlayerRepository
+import com.vapsa.fulbazo.domain.model.Court
 import com.vapsa.fulbazo.domain.model.GeoPoint
+import com.vapsa.fulbazo.domain.repository.CourtRepository
+import com.vapsa.fulbazo.domain.repository.CourtSyncStatus
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
@@ -198,6 +204,56 @@ class MapViewModelTest {
         val loaded = viewModel.uiState.filter { !it.isLoading }.first()
         assertFalse(loaded.mapsAvailable)
         assertEquals(3, loaded.matches.size)
+    }
+
+    /** Losas que se pueden "desconectar" para probar el aviso de sin conexión. */
+    private class OfflineCourts(private val saved: List<Court>) : CourtRepository {
+        override fun observeCourts(): Flow<List<Court>> = flowOf(saved)
+        override val syncStatus = MutableStateFlow(CourtSyncStatus.OFFLINE)
+        var refreshCalls = 0
+        override suspend fun refresh(): Result<Unit> {
+            refreshCalls++
+            syncStatus.value = CourtSyncStatus.UP_TO_DATE
+            return Result.success(Unit)
+        }
+    }
+
+    private fun viewModelWithCourts(courts: CourtRepository): MapViewModel {
+        val authRepository = FakeAuthRepository(latencyMillis = 0)
+        return MapViewModel(
+            authRepository,
+            courts,
+            FakeMatchRepository(latencyMillis = 0),
+            FakePlayerRepository(authRepository),
+            FakeLocationRepository(),
+        )
+    }
+
+    @Test
+    fun offlineWithSavedCourts_showsBanner_andRetryRefreshes() = runTest {
+        val courts = OfflineCourts(FakeCourtRepository.COURTS)
+        val viewModel = viewModelWithCourts(courts)
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.showingSavedCourts)
+        assertFalse(viewModel.uiState.value.courtsUnavailable)
+
+        viewModel.retryCourts()
+        advanceUntilIdle()
+
+        assertEquals(1, courts.refreshCalls)
+        assertFalse(viewModel.uiState.value.showingSavedCourts)
+    }
+
+    @Test
+    fun offlineWithoutSavedCourts_showsError() = runTest {
+        val viewModel = viewModelWithCourts(OfflineCourts(emptyList()))
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.courtsUnavailable)
+        assertFalse(viewModel.uiState.value.showingSavedCourts)
     }
 
     private companion object {

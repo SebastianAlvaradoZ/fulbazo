@@ -9,6 +9,7 @@ import com.vapsa.fulbazo.domain.model.MatchStatus
 import com.vapsa.fulbazo.domain.model.location
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.repository.CourtRepository
+import com.vapsa.fulbazo.domain.repository.CourtSyncStatus
 import com.vapsa.fulbazo.domain.repository.LocationRepository
 import com.vapsa.fulbazo.domain.repository.MatchRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
@@ -58,7 +59,18 @@ data class MapUiState(
     val userLocation: GeoPoint? = null,
     /** `false` si falta la clave de Google Maps: se muestra un aviso en lugar del mapa. */
     val mapsAvailable: Boolean = true,
+    /** Estado de la descarga de losas (con caché local). */
+    val courtSync: CourtSyncStatus = CourtSyncStatus.UP_TO_DATE,
 ) {
+    /** Sin conexión, pero con losas guardadas: se muestran con un aviso. */
+    val showingSavedCourts: Boolean get() = courtSync == CourtSyncStatus.OFFLINE && courts.isNotEmpty()
+
+    /** Primera vez sin conexión: no hay losas guardadas que mostrar. */
+    val courtsUnavailable: Boolean get() = courtSync == CourtSyncStatus.OFFLINE && courts.isEmpty()
+
+    /** Descargando las losas por primera vez. */
+    val courtsLoading: Boolean get() = courtSync == CourtSyncStatus.SYNCING && courts.isEmpty()
+
     /** Ids de las losas que tienen al menos un partido próximo. */
     val courtIdsWithMatches: Set<String>
         get() = matchCountByCourt.filterValues { it > 0 }.keys
@@ -73,7 +85,7 @@ data class MapUiState(
 @HiltViewModel
 class MapViewModel(
     authRepository: AuthRepository,
-    courtRepository: CourtRepository,
+    private val courtRepository: CourtRepository,
     matchRepository: MatchRepository,
     playerRepository: PlayerRepository,
     private val locationRepository: LocationRepository,
@@ -135,8 +147,10 @@ class MapViewModel(
         selectedCourtId,
         openedCourtId,
         permission,
-    ) { state, selected, opened, permission ->
+        courtRepository.syncStatus,
+    ) { state, selected, opened, permission, courtSync ->
         state.copy(
+            courtSync = courtSync,
             matches = if (selected == null) state.matches else state.matches.filter { it.courtId == selected },
             selectedCourtId = selected,
             openedCourtId = opened,
@@ -167,6 +181,11 @@ class MapViewModel(
     }
 
     /** Filtra "Partidos cercanos" por losa; tocar la misma losa otra vez quita el filtro. */
+    /** "Reintentar" del aviso de losas sin conexión. */
+    fun retryCourts() {
+        viewModelScope.launch { courtRepository.refresh() }
+    }
+
     fun onFilterCourt(courtId: String?) {
         selectedCourtId.update { current -> if (courtId == current) null else courtId }
     }

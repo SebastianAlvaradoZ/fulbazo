@@ -364,4 +364,8 @@
     <string name="teams_b">Equipo B</string>
     <string name="teams_goalkeeper_member">%1$s (arquero)</string>
     <string name="teams_regenerate">Volver a armar</string>
+
+    <!-- Losas sin conexión -->
+    <string name="map_courts_offline">Sin conexión: mostrando las losas guardadas.</string>
+    <string name="map_courts_offline_error">No se pudieron cargar las losas. Revisa tu conexión e inténtalo de nuevo.</string>
 </resources>
