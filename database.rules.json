@@ -1,0 +1,13 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "losas": {
+      ".read": true,
+      ".write": false,
+      ".indexOn": [
+        "distrito"
+      ]
+    }
+  }
+}

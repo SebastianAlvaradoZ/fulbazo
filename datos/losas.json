@@ -1,0 +1,68 @@
+{
+  "losas": {
+    "losa-umacollo": {
+      "nombre": "Losa Deportiva Umacollo",
+      "distrito": "Yanahuara",
+      "lat": -16.3935,
+      "lng": -71.548,
+      "direccion": "Av. Ejército, Umacollo",
+      "iluminacion": true
+    },
+    "losa-selva-alegre": {
+      "nombre": "Losa del Parque Selva Alegre",
+      "distrito": "Arequipa (Cercado)",
+      "lat": -16.388,
+      "lng": -71.531,
+      "direccion": "Parque Selva Alegre",
+      "iluminacion": true
+    },
+    "losa-cayma": {
+      "nombre": "Losa Deportiva Cayma",
+      "distrito": "Cayma",
+      "lat": -16.372,
+      "lng": -71.545,
+      "direccion": "Plaza de Cayma",
+      "iluminacion": false
+    },
+    "losa-zamacola": {
+      "nombre": "Losa Deportiva Zamácola",
+      "distrito": "Cerro Colorado",
+      "lat": -16.365,
+      "lng": -71.568,
+      "direccion": "Urb. Zamácola",
+      "iluminacion": true
+    },
+    "losa-melgar": {
+      "nombre": "Losa Deportiva Mariano Melgar",
+      "distrito": "Mariano Melgar",
+      "lat": -16.403,
+      "lng": -71.513,
+      "direccion": "Av. Simón Bolívar",
+      "iluminacion": false
+    },
+    "losa-paucarpata": {
+      "nombre": "Losa Deportiva Paucarpata",
+      "distrito": "Paucarpata",
+      "lat": -16.428,
+      "lng": -71.505,
+      "direccion": "Plaza de Paucarpata",
+      "iluminacion": true
+    },
+    "losa-bustamante": {
+      "nombre": "Losa Deportiva Bustamante",
+      "distrito": "José Luis Bustamante y Rivero",
+      "lat": -16.425,
+      "lng": -71.527,
+      "direccion": "Av. Dolores",
+      "iluminacion": true
+    },
+    "losa-sachaca": {
+      "nombre": "Losa Deportiva Sachaca",
+      "distrito": "Sachaca",
+      "lat": -16.422,
+      "lng": -71.565,
+      "direccion": "Plaza de Sachaca",
+      "iluminacion": false
+    }
+  }
+}

@@ -2,16 +2,23 @@ package com.vapsa.fulbazo.data.repository
 
 import com.vapsa.fulbazo.domain.model.Court
 import com.vapsa.fulbazo.domain.repository.CourtRepository
+import com.vapsa.fulbazo.domain.repository.CourtSyncStatus
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 
 /**
- * Losas de ejemplo con coordenadas aproximadas en Arequipa.
- * Se reemplazarán por la lista registrada a mano (API propia + Room).
+ * Losas de ejemplo con coordenadas aproximadas en Arequipa, para las pruebas.
+ * Son las mismas que están en `datos/losas.json` (las que sirve el servidor).
  */
 class FakeCourtRepository : CourtRepository {
 
     override fun observeCourts(): Flow<List<Court>> = flowOf(COURTS)
+
+    override val syncStatus: StateFlow<CourtSyncStatus> = MutableStateFlow(CourtSyncStatus.UP_TO_DATE)
+
+    override suspend fun refresh(): Result<Unit> = Result.success(Unit)
 
     companion object {
         val COURTS = listOf(

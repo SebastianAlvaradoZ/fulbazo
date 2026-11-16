@@ -1,6 +1,5 @@
 package com.vapsa.fulbazo.di
 
-import com.vapsa.fulbazo.data.repository.FakeCourtRepository
 import com.vapsa.fulbazo.data.repository.FirestoreCommentRepository
 import com.vapsa.fulbazo.data.repository.FirestoreFriendRepository
 import com.vapsa.fulbazo.data.repository.FirestoreGroupRepository
@@ -8,6 +7,7 @@ import com.vapsa.fulbazo.data.repository.FirestoreInvitationRepository
 import com.vapsa.fulbazo.data.repository.FirestoreJoinRequestRepository
 import com.vapsa.fulbazo.data.repository.FirestoreMatchRepository
 import com.vapsa.fulbazo.data.repository.FirestorePlayerRepository
+import com.vapsa.fulbazo.data.repository.OfflineFirstCourtRepository
 import com.vapsa.fulbazo.data.repository.FirestoreStatsRepository
 import com.vapsa.fulbazo.domain.repository.CommentRepository
 import com.vapsa.fulbazo.domain.repository.CourtRepository
@@ -21,14 +21,13 @@ import com.vapsa.fulbazo.domain.repository.RatingRepository
 import com.vapsa.fulbazo.domain.repository.StatsRepository
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
  * Repositorios de datos en Cloud Firestore (la autenticación está en [AuthModule]).
- * Las losas siguen siendo una lista local hasta que lleguen de Retrofit + Room.
+ * Las losas vienen de una API con Retrofit y se guardan en Room.
  *
  * Las pruebas instrumentadas cambian este módulo por los repositorios Fake*.
  */
@@ -73,9 +72,8 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun bindCommentRepository(repository: FirestoreCommentRepository): CommentRepository
 
-    companion object {
-        @Provides
-        @Singleton
-        fun provideCourtRepository(): CourtRepository = FakeCourtRepository()
-    }
+    /** Losas: API (Retrofit) con caché local (Room). */
+    @Binds
+    @Singleton
+    abstract fun bindCourtRepository(repository: OfflineFirstCourtRepository): CourtRepository
 }
