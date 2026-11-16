@@ -1,0 +1,44 @@
+rules_version = '2';
+
+// Reglas de seguridad de Firestore para Fulbazo.
+// Se publican en la consola: Firestore Database → Reglas → pegar → Publicar.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // Perfil público del jugador: lo leen los jugadores con sesión; solo lo edita su dueño.
+    match /usuarios/{uid} {
+      allow read: if signedIn();
+      allow create, update: if isOwner(uid)
+        && request.resource.data.apodo is string
+        && request.resource.data.apodoMinusculas == request.resource.data.apodo.lower()
+        // Foto comprimida dentro del documento (máx. ~300 KB).
+        && (request.resource.data.foto == null || request.resource.data.foto.size() < 300000);
+      allow delete: if false;
+    }
+
+    // Reserva de apodos para que no se repitan. Se puede consultar sin sesión
+    // (el registro revisa el apodo antes de crear la cuenta).
+    match /apodos/{apodo} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && apodo == apodo.lower();
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // Todo lo demás queda cerrado hasta que se migre (fase 2).
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

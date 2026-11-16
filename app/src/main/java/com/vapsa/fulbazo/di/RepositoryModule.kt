@@ -1,6 +1,5 @@
 package com.vapsa.fulbazo.di
 
-import com.vapsa.fulbazo.data.repository.FakeAuthRepository
 import com.vapsa.fulbazo.data.repository.FakeCourtRepository
 import com.vapsa.fulbazo.data.repository.FakeFriendRepository
 import com.vapsa.fulbazo.data.repository.FakeGroupRepository
@@ -26,18 +25,14 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Repositorios de la app. Por ahora son los Fake* en memoria; cuando llegue
- * Firebase solo cambia este módulo.
+ * Repositorios que todavía son los Fake* en memoria. Se van pasando a Firebase
+ * uno por uno; la autenticación ya está en [AuthModule].
  *
  * Todos son @Singleton: los ViewModels comparten los mismos datos.
  */
 @Module
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {
-
-    @Provides
-    @Singleton
-    fun provideAuthRepository(): AuthRepository = FakeAuthRepository()
 
     /** Una sola instancia: las calificaciones recalculan las estadísticas "Cómo lo ven". */
     @Provides
