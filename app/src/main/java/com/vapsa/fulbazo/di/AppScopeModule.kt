@@ -1,11 +1,5 @@
 package com.vapsa.fulbazo.di
 
-import com.vapsa.fulbazo.data.repository.DemoInvitationSimulator
-import com.vapsa.fulbazo.data.repository.DemoJoinRequestSimulator
-import com.vapsa.fulbazo.domain.repository.AuthRepository
-import com.vapsa.fulbazo.domain.repository.InvitationRepository
-import com.vapsa.fulbazo.domain.repository.JoinRequestRepository
-import com.vapsa.fulbazo.domain.repository.MatchRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,21 +24,4 @@ object AppScopeModule {
     @Singleton
     @ApplicationScope
     fun provideApplicationScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-
-    /** Simula invitaciones entrantes mientras no haya backend. */
-    @Provides
-    @Singleton
-    fun provideDemoInvitationSimulator(
-        authRepository: AuthRepository,
-        invitationRepository: InvitationRepository,
-    ): DemoInvitationSimulator = DemoInvitationSimulator(authRepository, invitationRepository)
-
-    /** Simula que otros jugadores piden unirse a tus partidos mientras no haya backend. */
-    @Provides
-    @Singleton
-    fun provideDemoJoinRequestSimulator(
-        authRepository: AuthRepository,
-        matchRepository: MatchRepository,
-        joinRequestRepository: JoinRequestRepository,
-    ): DemoJoinRequestSimulator = DemoJoinRequestSimulator(authRepository, matchRepository, joinRequestRepository)
 }

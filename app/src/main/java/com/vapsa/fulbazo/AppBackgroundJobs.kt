@@ -1,7 +1,5 @@
 package com.vapsa.fulbazo
 
-import com.vapsa.fulbazo.data.repository.DemoInvitationSimulator
-import com.vapsa.fulbazo.data.repository.DemoJoinRequestSimulator
 import com.vapsa.fulbazo.di.ApplicationScope
 import com.vapsa.fulbazo.notifications.InvitationNotifier
 import kotlinx.coroutines.CoroutineScope
@@ -12,6 +10,7 @@ import javax.inject.Singleton
 
 /**
  * Trabajos que viven mientras la app está abierta, sin depender de una pantalla.
+ * Hoy es el aviso de invitaciones nuevas, que escucha Firestore en tiempo real.
  * Los arranca [FulbazoApplication]; las pruebas instrumentadas los arrancan a mano
  * porque usan la Application de prueba de Hilt.
  */
@@ -19,8 +18,6 @@ import javax.inject.Singleton
 class AppBackgroundJobs @Inject constructor(
     @ApplicationScope private val applicationScope: CoroutineScope,
     private val invitationNotifier: InvitationNotifier,
-    private val demoInvitationSimulator: DemoInvitationSimulator,
-    private val demoJoinRequestSimulator: DemoJoinRequestSimulator,
 ) {
     private val started = AtomicBoolean(false)
 
@@ -28,8 +25,5 @@ class AppBackgroundJobs @Inject constructor(
     fun start() {
         if (!started.compareAndSet(false, true)) return
         applicationScope.launch { invitationNotifier.run() }
-        // Solo mientras no haya backend: simulan invitaciones y solicitudes de otros jugadores.
-        applicationScope.launch { demoInvitationSimulator.run() }
-        applicationScope.launch { demoJoinRequestSimulator.run() }
     }
 }
