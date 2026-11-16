@@ -215,9 +215,37 @@ sin Firebase Storage. Las fechas se guardan con la hora de Perú.
 1. En la consola de Firebase, abre **AI Logic** → **Comenzar** y elige
    **Gemini Developer API** (capa gratuita, sin plan Blaze). La clave de Gemini
    la guarda Firebase: no hay ninguna clave en el código.
-2. La app todavía no usa **App Check**. Si la consola lo activó para AI Logic,
-   ve a **App Check** → **APIs** → **Firebase AI Logic** y deja la verificación
-   **sin aplicar**; si no, Gemini responde "App Check token is invalid".
+2. Configura **App Check** (ver abajo): AI Logic lo exige y sin él Gemini
+   responde "App Check token is invalid".
+
+### App Check
+
+App Check comprueba que las llamadas a Firebase (sobre todo a Gemini) vienen de
+la app de verdad y no de otro programa que use la cuota del proyecto.
+
+- **Release:** Play Integrity (`app/src/release/.../AppCheckInstaller.kt`).
+  Funciona con la app instalada desde Google Play.
+- **Debug (emulador o teléfono desde Android Studio):** proveedor de depuración
+  (`app/src/debug/.../AppCheckInstaller.kt`) con un token que se registra en la
+  consola. El código y la librería de depuración no entran en el APK de release.
+
+Pasos en la consola de Firebase:
+
+1. **Configuración del proyecto** → app Android → **Agregar huella digital**:
+   pega el **SHA-256** de `./gradlew signingReport`.
+2. **App Check** → **Apps** → `com.vapsa.fulbazo` → **Play Integrity** →
+   **Guardar**.
+3. En la misma app, **⋮** → **Administrar tokens de depuración** → **Agregar
+   token de depuración** → **Generar** → copia el token y guárdalo.
+4. Pega el token en `local.properties` (no se sube a git):
+   ```properties
+   APP_CHECK_DEBUG_TOKEN=el_token_generado
+   ```
+   Si no lo pones, la app genera uno al abrirse y lo escribe en el Logcat
+   (busca "App Check debug token") para registrarlo; ese cambia si reinstalas.
+
+El token de depuración es un secreto: no lo compartas ni lo subas al repositorio,
+y bórralo de la consola cuando ya no lo uses.
 
 Cómo resiste comentarios maliciosos: los comentarios y apodos van al prompt
 como datos dentro de etiquetas (`<comentarios>`, `<jugadores>`), se limpian
@@ -253,7 +281,8 @@ un usuario de prueba (`demo@fulbazo.com`) que ya tiene amigos, partidos y
 estadísticas. Así no necesitan internet ni escriben en la base real.
 
 La IA también es falsa en esas pruebas (`FakeAiRepository`). Para probar
-Gemini de verdad hay una prueba manual que no corre con las demás:
+Gemini de verdad (necesita el token de App Check) hay una prueba manual que no
+corre con las demás:
 
 ```bash
 ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.vapsa.fulbazo.GeminiSmokeTest -Pandroid.testInstrumentationRunnerArguments.realGemini=true
