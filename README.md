@@ -52,13 +52,14 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
   estados de carga, error y contenido, listas animadas y números que cambian
   suavemente.
 
-> Por ahora los datos son **de prueba y viven en memoria** (repositorios
-> `Fake*`). Al cerrar la app se pierden los cambios.
+> La cuenta y el perfil se guardan en **Firebase**. El resto de datos todavía
+> son **de prueba y viven en memoria** (repositorios `Fake*`): al cerrar la app
+> se pierden los cambios.
 
 ### Pendientes
 
-- **Firebase:** autenticación, base de datos (Firestore) y notificaciones push
-  reales entre dispositivos.
+- **Firestore** para partidos, solicitudes, amigos, grupos, invitaciones y
+  estadísticas (la cuenta y el perfil ya usan Firebase).
 - **Losas de Arequipa** registradas a mano, consumidas con **Retrofit** y
   guardadas en **Room** para usar la app sin conexión.
 - **IA (Gemini)** para armar equipos balanceados según las estadísticas de los
@@ -75,6 +76,7 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
 | Interfaz | Jetpack Compose, Material 3, animaciones de Compose |
 | Arquitectura | MVVM, `ViewModel`, `StateFlow`, corrutinas |
 | Inyección de dependencias | Hilt (con KSP) |
+| Backend | Firebase Authentication y Cloud Firestore |
 | Navegación | Navigation Compose |
 | Mapa y ubicación | Google Maps (`maps-compose`), Fused Location Provider |
 | Imágenes | Coil (fotos de perfil) y Photo Picker del sistema |
@@ -160,15 +162,30 @@ repositorio**. `app/build.gradle.kts` la lee de ahí y la pone en el
 valor de `local.defaults.properties` (`DEFAULT_API_KEY`) y la app no se cae:
 muestra un aviso y una vista simple de las losas, que se pueden seguir tocando.
 
-Más adelante, `google-services.json` (Firebase) irá en `app/`; también está en
-`.gitignore`.
+### Firebase (`google-services.json`)
+
+La cuenta y el perfil del jugador usan **Firebase Authentication** (correo y
+contraseña) y **Cloud Firestore**.
+
+1. En la [consola de Firebase](https://console.firebase.google.com/), crea un
+   proyecto y agrega una app Android con el paquete `com.vapsa.fulbazo` y la
+   huella SHA-1 de depuración (`./gradlew signingReport`).
+2. Descarga `google-services.json` y ponlo en `app/`. Está en `.gitignore`:
+   **no se sube al repositorio**.
+3. En **Authentication**, activa el proveedor **Correo electrónico/contraseña**.
+4. En **Firestore Database**, crea la base en modo producción (ubicación
+   `southamerica-west1`) y publica las reglas de [`firestore.rules`](firestore.rules)
+   en la pestaña **Reglas**.
+
+El perfil se guarda en `usuarios/{uid}` y cada apodo se reserva en
+`apodos/{apodo}` para que no se repita. La foto de perfil se comprime (JPEG de
+256 px) y se guarda dentro del mismo documento, sin Firebase Storage.
 
 ### Usuario de prueba
 
-Mientras se usan los datos de prueba hay un usuario ya creado, con estadísticas,
-amigos e historial de partidos. Su correo y contraseña están en
-`app/src/main/java/com/vapsa/fulbazo/data/repository/FakeAuthRepository.kt`.
-También puedes crear una cuenta nueva desde **Regístrate**.
+Crea tu cuenta desde **Regístrate**. Partidos, amigos, estadísticas e
+invitaciones todavía son datos de prueba en memoria (repositorios `Fake*`) y se
+pasan a Firestore en la siguiente fase.
 
 Para probar sin backend, la app simula a otros jugadores:
 
@@ -189,6 +206,9 @@ Para probar sin backend, la app simula a otros jugadores:
 
 Si hay varios dispositivos conectados, elige uno con `ANDROID_SERIAL`; por
 ejemplo, `ANDROID_SERIAL=emulator-5554`.
+
+Las pruebas instrumentadas no usan Firebase: con Hilt testing (`FakeAuthModule`)
+la sesión es falsa, así no necesitan internet ni crean cuentas reales.
 
 Las pruebas conceden los permisos de ubicación y notificaciones. Para la prueba
 del orden por distancia, el emulador necesita una ubicación, por ejemplo la
