@@ -62,6 +62,7 @@ import com.vapsa.fulbazo.ui.components.PhaseCrossfade
 import com.vapsa.fulbazo.ui.components.ScreenPhase
 import com.vapsa.fulbazo.ui.components.UserAvatar
 import com.vapsa.fulbazo.ui.match.formatMatchDate
+import com.vapsa.fulbazo.ui.reviews.PlayerReviewsSection
 import com.vapsa.fulbazo.ui.stats.labelRes
 
 @Composable
@@ -105,6 +106,7 @@ fun PlayerProfileRoute(
             onAcceptRequest = viewModel::acceptFriendRequest,
             onInvite = viewModel::inviteToMatch,
         ),
+        reviewsSection = { PlayerReviewsSection(playerId) },
     )
 }
 
@@ -123,6 +125,8 @@ fun PlayerProfileScreen(
     actions: PlayerProfileActions,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    /** Comentarios y resumen de IA del jugador. */
+    reviewsSection: @Composable () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -181,6 +185,7 @@ fun PlayerProfileScreen(
                     ActionButtons(uiState, actions)
                     SelfCard(uiState)
                     CommunityCard(uiState)
+                    reviewsSection()
                 }
             }
         }

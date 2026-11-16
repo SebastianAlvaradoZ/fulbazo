@@ -2,6 +2,7 @@ package com.vapsa.fulbazo.ui.match.rate
 
 import com.vapsa.fulbazo.MainDispatcherRule
 import com.vapsa.fulbazo.data.repository.FakeAuthRepository
+import com.vapsa.fulbazo.data.repository.FakeCommentRepository
 import com.vapsa.fulbazo.data.repository.FakeCourtRepository
 import com.vapsa.fulbazo.data.repository.FakeMatchRepository
 import com.vapsa.fulbazo.data.repository.FakePlayerRepository
@@ -9,6 +10,7 @@ import com.vapsa.fulbazo.data.repository.FakeStatsRepository
 import com.vapsa.fulbazo.domain.model.FieldSkill
 import com.vapsa.fulbazo.domain.model.GoalkeeperSkill
 import com.vapsa.fulbazo.domain.model.MatchRole
+import com.vapsa.fulbazo.domain.model.PlayerComment
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
@@ -31,6 +33,7 @@ class RatePlayersViewModelTest {
 
     private val authRepository = FakeAuthRepository(latencyMillis = 0)
     private val statsRepository = FakeStatsRepository(latencyMillis = 0)
+    private val commentRepository = FakeCommentRepository(latencyMillis = 0)
 
     private suspend fun TestScope.viewModel(matchId: String): RatePlayersViewModel {
         authRepository.login("demo@fulbazo.com", "demo123")
@@ -41,6 +44,7 @@ class RatePlayersViewModelTest {
             courtRepository = FakeCourtRepository(),
             playerRepository = FakePlayerRepository(authRepository),
             ratingRepository = statsRepository,
+            commentRepository = commentRepository,
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect() }
         advanceUntilIdle()
@@ -105,5 +109,48 @@ class RatePlayersViewModelTest {
         advanceUntilIdle()
 
         assertEquals(1, viewModel.uiState.value.draft?.fieldSkills?.get(FieldSkill.PASSING))
+    }
+
+    @Test
+    fun ratingWithComment_savesCommentOnTheirProfile() = runTest {
+        val viewModel = viewModel("match-past-selva")
+
+        viewModel.openRating("valeria")
+        viewModel.onCommentChange("  Gran arquera, muy puntual.  ")
+        viewModel.saveRating()
+        advanceUntilIdle()
+
+        val comments = commentRepository.observeComments("valeria").first()
+        assertEquals(listOf("Gran arquera, muy puntual."), comments.map { it.text })
+        assertEquals("demo", comments.single().authorId)
+    }
+
+    @Test
+    fun reopeningRatedPlayer_prefillsComment_andEmptyCommentDeletesIt() = runTest {
+        val viewModel = viewModel("match-past-selva")
+        viewModel.openRating("valeria")
+        viewModel.onCommentChange("Buen pase")
+        viewModel.saveRating()
+        advanceUntilIdle()
+
+        viewModel.openRating("valeria")
+        advanceUntilIdle()
+        assertEquals("Buen pase", viewModel.uiState.value.draft?.comment)
+
+        viewModel.onCommentChange("")
+        viewModel.saveRating()
+        advanceUntilIdle()
+        assertTrue(commentRepository.observeComments("valeria").first().isEmpty())
+    }
+
+    @Test
+    fun comment_isLimitedTo200Characters() = runTest {
+        val viewModel = viewModel("match-past-selva")
+        viewModel.openRating("valeria")
+
+        viewModel.onCommentChange("a".repeat(250))
+        advanceUntilIdle()
+
+        assertEquals(PlayerComment.MAX_LENGTH, viewModel.uiState.value.draft?.comment?.length)
     }
 }

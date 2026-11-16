@@ -6,10 +6,12 @@ import com.vapsa.fulbazo.domain.model.FieldSkill
 import com.vapsa.fulbazo.domain.model.GoalkeeperSkill
 import com.vapsa.fulbazo.domain.model.MatchRole
 import com.vapsa.fulbazo.domain.model.MatchStatus
+import com.vapsa.fulbazo.domain.model.PlayerComment
 import com.vapsa.fulbazo.domain.model.PlayerRating
 import com.vapsa.fulbazo.domain.model.PlayerSummary
 import com.vapsa.fulbazo.domain.model.SkillScale
 import com.vapsa.fulbazo.domain.repository.AuthRepository
+import com.vapsa.fulbazo.domain.repository.CommentRepository
 import com.vapsa.fulbazo.domain.repository.CourtRepository
 import com.vapsa.fulbazo.domain.repository.MatchRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
@@ -43,6 +45,8 @@ data class RatingDraft(
     val role: MatchRole = MatchRole.FIELD,
     val fieldSkills: Map<FieldSkill, Int> = FieldSkill.entries.associateWith { SkillScale.DEFAULT },
     val goalkeeperSkills: Map<GoalkeeperSkill, Int> = GoalkeeperSkill.entries.associateWith { SkillScale.DEFAULT },
+    /** Comentario opcional que verán en su perfil (y que lee el resumen de IA). */
+    val comment: String = "",
 )
 
 data class RatePlayersUiState(
@@ -73,6 +77,7 @@ class RatePlayersViewModel(
     courtRepository: CourtRepository,
     playerRepository: PlayerRepository,
     private val ratingRepository: RatingRepository,
+    private val commentRepository: CommentRepository,
     private val now: () -> LocalDateTime = { LocalDateTime.now() },
 ) : ViewModel() {
 
@@ -84,6 +89,7 @@ class RatePlayersViewModel(
         courtRepository: CourtRepository,
         playerRepository: PlayerRepository,
         ratingRepository: RatingRepository,
+        commentRepository: CommentRepository,
     ) : this(
         matchId = matchId,
         authRepository = authRepository,
@@ -91,6 +97,7 @@ class RatePlayersViewModel(
         courtRepository = courtRepository,
         playerRepository = playerRepository,
         ratingRepository = ratingRepository,
+        commentRepository = commentRepository,
         now = { LocalDateTime.now() },
     )
 
@@ -103,6 +110,19 @@ class RatePlayersViewModel(
 
     /** Últimas calificaciones dadas en este partido, para rellenar la hoja al editar. */
     private var myRatings: List<PlayerRating> = emptyList()
+
+    /** Comentarios que ya dejé en este partido, para rellenar la hoja al editar. */
+    private var myComments: List<PlayerComment> = emptyList()
+
+    init {
+        if (userId != null) {
+            viewModelScope.launch {
+                commentRepository.observeCommentsBy(userId, matchId)
+                    .catch { emit(emptyList()) }
+                    .collect { myComments = it }
+            }
+        }
+    }
 
     private val content = combine(
         matchRepository.observeMatches(),
@@ -145,7 +165,10 @@ class RatePlayersViewModel(
     fun openRating(playerId: String) {
         val teammate = uiState.value.teammates.firstOrNull { it.player.id == playerId } ?: return
         val previous = myRatings.firstOrNull { it.ratedId == playerId }
-        val defaults = RatingDraft(teammate.player)
+        val defaults = RatingDraft(
+            player = teammate.player,
+            comment = myComments.firstOrNull { it.playerId == playerId }?.text.orEmpty(),
+        )
         draft.value = if (previous == null) {
             defaults
         } else {
@@ -173,6 +196,10 @@ class RatePlayersViewModel(
         draft.update { it?.copy(goalkeeperSkills = it.goalkeeperSkills + (skill to SkillScale.clamp(value))) }
     }
 
+    fun onCommentChange(text: String) {
+        draft.update { it?.copy(comment = text.take(PlayerComment.MAX_LENGTH)) }
+    }
+
     fun saveRating() {
         val current = draft.value ?: return
         val rater = userId ?: return
@@ -190,7 +217,13 @@ class RatePlayersViewModel(
         isSaving.value = true
         saveFailed.value = false
         viewModelScope.launch {
-            val result = ratingRepository.submitRating(rating)
+            val previousComment = myComments.firstOrNull { it.playerId == current.player.id }?.text.orEmpty()
+            val result = ratingRepository.submitRating(rating).mapCatching {
+                // El comentario se guarda solo si cambió (vacío = se borra).
+                if (current.comment.trim() != previousComment) {
+                    commentRepository.saveComment(matchId, rater, current.player.id, current.comment).getOrThrow()
+                }
+            }
             isSaving.value = false
             if (result.isSuccess) {
                 draft.value = null

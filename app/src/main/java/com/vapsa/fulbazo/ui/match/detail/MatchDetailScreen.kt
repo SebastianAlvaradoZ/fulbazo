@@ -56,6 +56,8 @@ import com.vapsa.fulbazo.ui.components.PhaseCrossfade
 import com.vapsa.fulbazo.ui.components.ScreenPhase
 import com.vapsa.fulbazo.ui.components.UserAvatar
 import com.vapsa.fulbazo.ui.match.MatchCard
+import com.vapsa.fulbazo.ui.match.teams.TeamBuilderSection
+import com.vapsa.fulbazo.ui.reviews.RequestAiSummary
 
 @Composable
 fun MatchDetailRoute(
@@ -103,6 +105,8 @@ fun MatchDetailRoute(
             onOpenPlayer = onOpenPlayer,
             onRatePlayers = onRatePlayers,
         ),
+        requestSummary = { playerId -> RequestAiSummary(playerId) },
+        teamsSection = { TeamBuilderSection(matchId = matchId, playerCount = uiState.playersCount) },
     )
 }
 
@@ -123,6 +127,10 @@ fun MatchDetailScreen(
     actions: MatchDetailActions,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    /** Resumen de IA del jugador que pide unirse (lo ve el anfitrión). */
+    requestSummary: @Composable (playerId: String) -> Unit = {},
+    /** "Armar equipos con IA" (solo el anfitrión). */
+    teamsSection: @Composable () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -195,14 +203,10 @@ fun MatchDetailScreen(
                                 canAccept = !uiState.isFull,
                                 onRespond = actions.onRespond,
                                 onOpenPlayer = actions.onOpenPlayer,
+                                summary = { requestSummary(request.player.id) },
                             )
                         }
-                        item {
-                            // Lugar reservado para la IA que arma equipos balanceados.
-                            OutlinedButton(onClick = {}, enabled = false, modifier = Modifier.fillMaxWidth()) {
-                                Text(stringResource(R.string.match_detail_teams_soon))
-                            }
-                        }
+                        item { teamsSection() }
                     }
     
                     item { HorizontalDivider() }
@@ -288,6 +292,7 @@ private fun RequestCard(
     canAccept: Boolean,
     onRespond: (String, Boolean) -> Unit,
     onOpenPlayer: (String) -> Unit,
+    summary: @Composable () -> Unit = {},
 ) {
     Card(modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -296,6 +301,7 @@ private fun RequestCard(
                 subtitle = stringResource(R.string.match_detail_wants_to_join),
                 onClick = { onOpenPlayer(request.player.id) },
             )
+            summary()
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),

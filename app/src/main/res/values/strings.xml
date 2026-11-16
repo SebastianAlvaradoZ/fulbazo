@@ -7,6 +7,7 @@
     <string name="action_back">Volver</string>
     <string name="action_retry">Reintentar</string>
     <string name="action_cancel">Cancelar</string>
+    <string name="action_close">Cerrar</string>
     <string name="action_save">Guardar</string>
     <string name="action_delete">Eliminar</string>
     <string name="action_accept">Aceptar</string>
@@ -64,7 +65,6 @@
     <string name="match_detail_no_requests">Aún no hay solicitudes para unirse</string>
     <string name="match_detail_wants_to_join">Quiere unirse al partido</string>
     <string name="match_detail_full_note">El partido está lleno: no puedes aceptar más jugadores</string>
-    <string name="match_detail_teams_soon">Armar equipos con IA (próximamente)</string>
     <string name="match_detail_request_sent">Solicitud enviada</string>
     <string name="match_detail_request_cancelled">Solicitud cancelada</string>
     <string name="match_detail_left">Saliste del partido</string>
@@ -337,4 +337,31 @@
     <string name="error_nickname_in_use">Ese apodo ya está en uso, prueba con otro</string>
     <string name="error_network">Sin conexión. Revisa tu internet e inténtalo de nuevo</string>
     <string name="error_unknown">Ocurrió un error inesperado. Inténtalo de nuevo</string>
+
+    <!-- Comentarios y resumen con IA -->
+    <string name="rate_comment_label">Comentario (opcional)</string>
+    <string name="rate_comment_hint">¿Cómo jugó? Lo verán en su perfil.</string>
+    <string name="reviews_title">Comentarios (%1$d)</string>
+    <string name="reviews_empty">Todavía no le dejaron comentarios.</string>
+    <string name="reviews_report">Reportar</string>
+    <string name="reviews_reported">Reportado</string>
+    <string name="reviews_report_sent">Gracias, revisaremos el comentario.</string>
+    <string name="reviews_report_error">No se pudo enviar el reporte. Inténtalo de nuevo.</string>
+    <string name="ai_summary_label">Resumen generado por IA</string>
+    <string name="ai_summary_loading">Generando resumen…</string>
+    <string name="ai_summary_not_enough">Aún no hay suficientes comentarios para un resumen (mínimo %1$d).</string>
+    <string name="ai_summary_error">No se pudo generar el resumen.</string>
+
+    <!-- Equipos con IA -->
+    <string name="teams_build">Armar equipos con IA</string>
+    <string name="teams_need_players">Se necesitan al menos %1$d jugadores.</string>
+    <string name="teams_loading">Armando equipos parejos…</string>
+    <string name="teams_error">La IA no pudo armar los equipos.</string>
+    <string name="teams_use_local">Usar reparto automático</string>
+    <string name="teams_ai_label">Equipos sugeridos por IA</string>
+    <string name="teams_local_label">Reparto automático (sin IA)</string>
+    <string name="teams_a">Equipo A</string>
+    <string name="teams_b">Equipo B</string>
+    <string name="teams_goalkeeper_member">%1$s (arquero)</string>
+    <string name="teams_regenerate">Volver a armar</string>
 </resources>

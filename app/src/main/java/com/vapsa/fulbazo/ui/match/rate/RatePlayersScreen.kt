@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -51,6 +52,7 @@ import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.FieldSkill
 import com.vapsa.fulbazo.domain.model.GoalkeeperSkill
 import com.vapsa.fulbazo.domain.model.MatchRole
+import com.vapsa.fulbazo.domain.model.PlayerComment
 import com.vapsa.fulbazo.ui.components.EmptyState
 import com.vapsa.fulbazo.ui.components.ErrorState
 import com.vapsa.fulbazo.ui.components.LoadingState
@@ -91,6 +93,7 @@ fun RatePlayersRoute(
             onRoleChange = viewModel::onRoleChange,
             onFieldSkillChange = viewModel::onFieldSkillChange,
             onGoalkeeperSkillChange = viewModel::onGoalkeeperSkillChange,
+            onCommentChange = viewModel::onCommentChange,
             onSave = viewModel::saveRating,
         ),
     )
@@ -103,6 +106,7 @@ data class RatePlayersActions(
     val onRoleChange: (MatchRole) -> Unit = {},
     val onFieldSkillChange: (FieldSkill, Int) -> Unit = { _, _ -> },
     val onGoalkeeperSkillChange: (GoalkeeperSkill, Int) -> Unit = { _, _ -> },
+    val onCommentChange: (String) -> Unit = {},
     val onSave: () -> Unit = {},
 )
 
@@ -241,6 +245,19 @@ private fun RatingSheet(draft: RatingDraft, isSaving: Boolean, actions: RatePlay
                     )
                 }
             }
+            OutlinedTextField(
+                value = draft.comment,
+                onValueChange = actions.onCommentChange,
+                label = { Text(stringResource(R.string.rate_comment_label)) },
+                placeholder = { Text(stringResource(R.string.rate_comment_hint)) },
+                supportingText = {
+                    Text("${draft.comment.length} / ${PlayerComment.MAX_LENGTH}")
+                },
+                enabled = !isSaving,
+                minLines = 2,
+                maxLines = 4,
+                modifier = Modifier.fillMaxWidth(),
+            )
             Button(
                 onClick = actions.onSave,
                 enabled = !isSaving,
