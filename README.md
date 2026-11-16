@@ -21,6 +21,10 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
 - **Mapa (pantalla principal):** **Google Maps** centrado en Arequipa con un
   marcador por losa (verde si tiene partidos próximos) y la lista de partidos
   próximos, con filtro por losa; botón flotante para crear un partido.
+- **Losas sin conexión:** la lista de losas se descarga de una API (**Retrofit**)
+  y se guarda en el teléfono (**Room**). Sin internet se ven las losas
+  guardadas con el aviso "Sin conexión"; si es la primera vez y no hay red,
+  aparece un error con **Reintentar**.
 - **Ubicación:** con el permiso de ubicación, el mapa muestra dónde estás y los
   partidos se ordenan **del más cercano al más lejano** ("a 2.4 km"). Si no lo
   das, un aviso explica para qué sirve y permite activarlo (o abrir Ajustes), y
@@ -66,14 +70,14 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
 
 > Cuentas, partidos, solicitudes, amigos, grupos, invitaciones y estadísticas
 > se guardan en **Firebase** y se actualizan en tiempo real entre teléfonos. Las
-> losas todavía son una lista local hasta que lleguen de Retrofit + Room.
+> losas vienen de Firebase Realtime Database por REST y se guardan en Room.
 
 ### Pendientes
 
 - **Notificaciones push** con la app cerrada (FCM). Hoy la invitación llega
   como notificación mientras la app está abierta.
-- **Losas de Arequipa** registradas a mano, consumidas con **Retrofit** y
-  guardadas en **Room** para usar la app sin conexión.
+- **Más losas de Arequipa** registradas a mano (hoy hay 8 de ejemplo en
+  `datos/losas.json`).
 - **Diseño propio** ("verde cancha") con Material 3 Expressive.
 
 ---
@@ -92,7 +96,8 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
 | Imágenes | Coil (fotos de perfil) y Photo Picker del sistema |
 | Notificaciones | `NotificationCompat` con permiso `POST_NOTIFICATIONS` |
 | Inteligencia artificial | Gemini (`gemini-flash-lite-latest`, capa gratuita) con Firebase AI Logic y salida JSON con esquema |
-| Pruebas | JUnit 4, `kotlinx-coroutines-test` y pruebas instrumentadas de Compose |
+| Datos de losas | Retrofit + OkHttp + kotlinx.serialization (API) y Room (caché sin conexión) |
+| Pruebas | JUnit 4, `kotlinx-coroutines-test`, MockWebServer y pruebas instrumentadas de Compose |
 
 ---
 
@@ -112,8 +117,8 @@ La app sigue **MVVM** por capas:
 ```
 app/src/main/java/com/vapsa/fulbazo/
 ├── data/
-│   ├── local/            # Room (pendiente)
-│   ├── remote/           # Utilidades de Firestore (colecciones, fechas, Flows)
+│   ├── local/            # Room (losas guardadas) y foto de perfil
+│   ├── remote/           # API de losas (Retrofit) y utilidades de Firestore
 │   └── repository/       # Firebase*/Firestore* (app) y Fake* (pruebas)
 ├── di/                   # Módulos de Hilt (repositorios y scope de la app)
 ├── domain/
@@ -209,6 +214,29 @@ Colecciones de Firestore (las reglas de `firestore.rules` revisan cada escritura
 
 La foto de perfil se comprime (JPEG de 256 px) y se guarda dentro del perfil,
 sin Firebase Storage. Las fechas se guardan con la hora de Perú.
+
+### Losas (Realtime Database + Retrofit + Room)
+
+Las losas se sirven como JSON desde **Firebase Realtime Database** y la app las
+lee con Retrofit en `https://<tu-base>/losas.json`.
+
+1. En la consola de Firebase, abre **Realtime Database** → **Crear base de
+   datos** (modo bloqueado).
+2. En la pestaña **Datos**, **⋮** → **Importar JSON** → elige
+   [`datos/losas.json`](datos/losas.json).
+3. En la pestaña **Reglas**, pega [`database.rules.json`](database.rules.json):
+   cualquiera puede leer `/losas` y nadie puede escribir.
+4. Copia la dirección de la base (arriba en la pestaña Datos, por ejemplo
+   `https://fulbazo-default-rtdb.firebaseio.com/`) y agrégala a `local.properties`:
+   ```properties
+   COURTS_BASE_URL=https://tu-base.firebaseio.com/
+   ```
+   (Si vuelves a descargar `google-services.json` después de crear la base, la
+   app la toma de ahí y no hace falta esa línea.)
+
+La app muestra lo guardado en Room y actualiza en segundo plano
+(`OfflineFirstCourtRepository`). Para agregar una losa, edita el JSON y vuelve a
+importarlo.
 
 ### Gemini (Firebase AI Logic)
 
