@@ -1,6 +1,8 @@
 package com.vapsa.fulbazo
 
+import com.vapsa.fulbazo.data.repository.FakeAiRepository
 import com.vapsa.fulbazo.data.repository.FakeAuthRepository
+import com.vapsa.fulbazo.data.repository.FakeCommentRepository
 import com.vapsa.fulbazo.data.repository.FakeCourtRepository
 import com.vapsa.fulbazo.data.repository.FakeFriendRepository
 import com.vapsa.fulbazo.data.repository.FakeGroupRepository
@@ -9,9 +11,12 @@ import com.vapsa.fulbazo.data.repository.FakeJoinRequestRepository
 import com.vapsa.fulbazo.data.repository.FakeMatchRepository
 import com.vapsa.fulbazo.data.repository.FakePlayerRepository
 import com.vapsa.fulbazo.data.repository.FakeStatsRepository
+import com.vapsa.fulbazo.di.AiModule
 import com.vapsa.fulbazo.di.AuthModule
 import com.vapsa.fulbazo.di.RepositoryModule
+import com.vapsa.fulbazo.domain.repository.AiRepository
 import com.vapsa.fulbazo.domain.repository.AuthRepository
+import com.vapsa.fulbazo.domain.repository.CommentRepository
 import com.vapsa.fulbazo.domain.repository.CourtRepository
 import com.vapsa.fulbazo.domain.repository.FriendRepository
 import com.vapsa.fulbazo.domain.repository.GroupRepository
@@ -30,10 +35,11 @@ import javax.inject.Singleton
 /**
  * En las pruebas instrumentadas todos los datos son los Fake* en memoria (usuario
  * demo@fulbazo.com / demo123 con amigos, partidos y estadísticas de prueba): no
- * dependen de internet ni escriben en Firebase. Cada prueba empieza con datos nuevos.
+ * dependen de internet ni escriben en Firebase. La IA también es falsa (no llama
+ * a Gemini). Cada prueba empieza con datos nuevos.
  */
 @Module
-@TestInstallIn(components = [SingletonComponent::class], replaces = [AuthModule::class, RepositoryModule::class])
+@TestInstallIn(components = [SingletonComponent::class], replaces = [AuthModule::class, RepositoryModule::class, AiModule::class])
 object FakeRepositoryModule {
 
     @Provides
@@ -78,4 +84,12 @@ object FakeRepositoryModule {
     @Provides
     @Singleton
     fun provideJoinRequestRepository(): JoinRequestRepository = FakeJoinRequestRepository()
+
+    @Provides
+    @Singleton
+    fun provideCommentRepository(): CommentRepository = FakeCommentRepository()
+
+    @Provides
+    @Singleton
+    fun provideAiRepository(): AiRepository = FakeAiRepository()
 }
