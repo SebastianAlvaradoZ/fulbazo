@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 /**
@@ -25,6 +26,20 @@ val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY", "DEFAULT_AP
  * Firebase y se guarda en local.properties, que no se sube a git.
  */
 val appCheckDebugToken: String = localProperties.getProperty("APP_CHECK_DEBUG_TOKEN", "").trim()
+
+/**
+ * Dirección de Firebase Realtime Database, de donde se descargan las losas.
+ * Se toma de COURTS_BASE_URL en local.properties o, si no está, de
+ * app/google-services.json (firebase_url). No es secreta, pero así no queda fija en el código.
+ */
+val courtsBaseUrl: String = localProperties.getProperty("COURTS_BASE_URL", "").trim().ifEmpty {
+    val servicesJson = file("google-services.json")
+    if (servicesJson.exists()) {
+        Regex("\"firebase_url\"\\s*:\\s*\"([^\"]+)\"").find(servicesJson.readText())?.groupValues?.get(1).orEmpty()
+    } else {
+        ""
+    }
+}.let { if (it.isEmpty() || it.endsWith("/")) it else "$it/" }
 
 android {
     namespace = "com.vapsa.fulbazo"
@@ -48,6 +63,7 @@ android {
             "HAS_MAPS_API_KEY",
             (mapsApiKey.isNotBlank() && mapsApiKey != "DEFAULT_API_KEY").toString(),
         )
+        buildConfigField("String", "COURTS_BASE_URL", "\"$courtsBaseUrl\"")
     }
 
     buildTypes {
@@ -63,6 +79,10 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+    testOptions {
+        // android.util.Log y similares devuelven valores vacíos en las pruebas unitarias.
+        unitTests.isReturnDefaultValues = true
     }
     buildFeatures {
         compose = true
@@ -96,10 +116,18 @@ dependencies {
     implementation(libs.firebase.ai)
     // App Check: Play Integrity en release; en debug (emulador) un token de depuración.
     implementation(libs.firebase.appcheck.playintegrity)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization)
+    implementation(libs.okhttp)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
     debugImplementation(libs.firebase.appcheck.debug)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.org.json)
+    testImplementation(libs.okhttp.mockwebserver)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
