@@ -7,7 +7,7 @@ import dagger.hilt.android.testing.HiltTestApplication
 
 /**
  * Ejecuta las pruebas instrumentadas con [HiltTestApplication], para que los
- * módulos de prueba (como [FakeAuthModule]) reemplacen a Firebase.
+ * módulos de prueba (como [FakeRepositoryModule]) reemplacen a Firebase.
  */
 class HiltTestRunner : AndroidJUnitRunner() {
     override fun newApplication(cl: ClassLoader?, className: String?, context: Context?): Application =

@@ -15,11 +15,15 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.vapsa.fulbazo.domain.repository.JoinRequestRepository
+import com.vapsa.fulbazo.domain.repository.MatchRepository
 import com.vapsa.fulbazo.ui.map.MAP_MATCHES_LIST_TAG
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -40,6 +44,12 @@ class MatchDetailFlowTest {
 
     @Inject
     lateinit var backgroundJobs: AppBackgroundJobs
+
+    @Inject
+    lateinit var matchRepository: MatchRepository
+
+    @Inject
+    lateinit var joinRequestRepository: JoinRequestRepository
 
     @Before
     fun setUp() {
@@ -84,13 +94,20 @@ class MatchDetailFlowTest {
     }
 
     @Test
-    fun host_receivesSimulatedRequest_andAcceptsIt() {
+    fun host_receivesRequests_andAcceptsOne() {
         loginAsDemo()
         createMatchAt("Losa Deportiva Bustamante · José Luis Bustamante y Rivero")
+
+        // Otros dos jugadores piden unirse al partido recién creado.
+        runBlocking {
+            val match = matchRepository.observeMatches().first()
+                .first { it.hostId == "demo" && it.courtId == "losa-bustamante" }
+            joinRequestRepository.sendRequest(match.id, "rodrigo")
+            joinRequestRepository.sendRequest(match.id, "luis")
+        }
         openMatchCard("Losa Deportiva Bustamante")
 
-        // El simulador envía dos solicitudes unos segundos después de crear el partido.
-        waitForText("Solicitudes (2)", timeoutMillis = 15_000)
+        waitForText("Solicitudes (2)")
         composeRule.onNodeWithText("rodri").assertIsDisplayed()
         composeRule.onAllNodes(hasText("Aceptar") and hasClickAction())[0].performClick()
 

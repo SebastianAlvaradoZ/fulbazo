@@ -14,11 +14,14 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.vapsa.fulbazo.data.repository.FakeMatchRepository
+import com.vapsa.fulbazo.domain.repository.InvitationRepository
 import com.vapsa.fulbazo.ui.map.MAP_MATCHES_LIST_TAG
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -39,6 +42,9 @@ class SocialFlowTest {
 
     @Inject
     lateinit var backgroundJobs: AppBackgroundJobs
+
+    @Inject
+    lateinit var invitationRepository: InvitationRepository
 
     @Before
     fun setUp() {
@@ -130,10 +136,13 @@ class SocialFlowTest {
     }
 
     @Test
-    fun simulatedInvitation_canBeAcceptedFromInbox() {
+    fun receivedInvitation_canBeAcceptedFromInbox() {
         loginAsDemo()
-        // El simulador envía la invitación unos segundos después de iniciar sesión.
-        composeRule.waitUntil(15_000) {
+        // carlitos10 invita al usuario a su partido.
+        runBlocking {
+            invitationRepository.sendInvitations(FakeMatchRepository.SEED_MATCH_ID, "carlos", listOf("demo"))
+        }
+        composeRule.waitUntil(5_000) {
             composeRule.onAllNodes(hasText("1") and !hasClickAction(), useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
