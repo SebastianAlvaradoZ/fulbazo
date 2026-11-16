@@ -1,14 +1,13 @@
 package com.vapsa.fulbazo.di
 
 import com.vapsa.fulbazo.data.repository.FakeCourtRepository
-import com.vapsa.fulbazo.data.repository.FakeFriendRepository
-import com.vapsa.fulbazo.data.repository.FakeGroupRepository
-import com.vapsa.fulbazo.data.repository.FakeInvitationRepository
-import com.vapsa.fulbazo.data.repository.FakeJoinRequestRepository
-import com.vapsa.fulbazo.data.repository.FakeMatchRepository
-import com.vapsa.fulbazo.data.repository.FakePlayerRepository
-import com.vapsa.fulbazo.data.repository.FakeStatsRepository
-import com.vapsa.fulbazo.domain.repository.AuthRepository
+import com.vapsa.fulbazo.data.repository.FirestoreFriendRepository
+import com.vapsa.fulbazo.data.repository.FirestoreGroupRepository
+import com.vapsa.fulbazo.data.repository.FirestoreInvitationRepository
+import com.vapsa.fulbazo.data.repository.FirestoreJoinRequestRepository
+import com.vapsa.fulbazo.data.repository.FirestoreMatchRepository
+import com.vapsa.fulbazo.data.repository.FirestorePlayerRepository
+import com.vapsa.fulbazo.data.repository.FirestoreStatsRepository
 import com.vapsa.fulbazo.domain.repository.CourtRepository
 import com.vapsa.fulbazo.domain.repository.FriendRepository
 import com.vapsa.fulbazo.domain.repository.GroupRepository
@@ -18,6 +17,7 @@ import com.vapsa.fulbazo.domain.repository.MatchRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
 import com.vapsa.fulbazo.domain.repository.RatingRepository
 import com.vapsa.fulbazo.domain.repository.StatsRepository
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,52 +25,51 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Repositorios que todavía son los Fake* en memoria. Se van pasando a Firebase
- * uno por uno; la autenticación ya está en [AuthModule].
+ * Repositorios de datos en Cloud Firestore (la autenticación está en [AuthModule]).
+ * Las losas siguen siendo una lista local hasta que lleguen de Retrofit + Room.
  *
- * Todos son @Singleton: los ViewModels comparten los mismos datos.
+ * Las pruebas instrumentadas cambian este módulo por los repositorios Fake*.
  */
 @Module
 @InstallIn(SingletonComponent::class)
-object RepositoryModule {
+abstract class RepositoryModule {
 
-    /** Una sola instancia: las calificaciones recalculan las estadísticas "Cómo lo ven". */
-    @Provides
+    @Binds
     @Singleton
-    fun provideFakeStatsRepository(): FakeStatsRepository = FakeStatsRepository()
+    abstract fun bindPlayerRepository(repository: FirestorePlayerRepository): PlayerRepository
 
-    @Provides
-    fun provideStatsRepository(repository: FakeStatsRepository): StatsRepository = repository
-
-    @Provides
-    fun provideRatingRepository(repository: FakeStatsRepository): RatingRepository = repository
-
-    @Provides
+    @Binds
     @Singleton
-    fun provideCourtRepository(): CourtRepository = FakeCourtRepository()
+    abstract fun bindMatchRepository(repository: FirestoreMatchRepository): MatchRepository
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideMatchRepository(): MatchRepository = FakeMatchRepository()
+    abstract fun bindJoinRequestRepository(repository: FirestoreJoinRequestRepository): JoinRequestRepository
 
-    @Provides
+    @Binds
     @Singleton
-    fun providePlayerRepository(authRepository: AuthRepository): PlayerRepository =
-        FakePlayerRepository(authRepository)
+    abstract fun bindInvitationRepository(repository: FirestoreInvitationRepository): InvitationRepository
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideFriendRepository(): FriendRepository = FakeFriendRepository()
+    abstract fun bindFriendRepository(repository: FirestoreFriendRepository): FriendRepository
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideGroupRepository(): GroupRepository = FakeGroupRepository()
+    abstract fun bindGroupRepository(repository: FirestoreGroupRepository): GroupRepository
 
-    @Provides
+    /** Autoevaluación y calificaciones están en la misma clase. */
+    @Binds
     @Singleton
-    fun provideInvitationRepository(): InvitationRepository = FakeInvitationRepository()
+    abstract fun bindStatsRepository(repository: FirestoreStatsRepository): StatsRepository
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideJoinRequestRepository(): JoinRequestRepository = FakeJoinRequestRepository()
+    abstract fun bindRatingRepository(repository: FirestoreStatsRepository): RatingRepository
+
+    companion object {
+        @Provides
+        @Singleton
+        fun provideCourtRepository(): CourtRepository = FakeCourtRepository()
+    }
 }

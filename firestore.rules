@@ -9,19 +9,47 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(uid) {
-      return signedIn() && request.auth.uid == uid;
+    function uid() {
+      return request.auth.uid;
     }
 
-    // Perfil público del jugador: lo leen los jugadores con sesión; solo lo edita su dueño.
-    match /usuarios/{uid} {
+    function isOwner(userId) {
+      return signedIn() && uid() == userId;
+    }
+
+    function matchData(matchId) {
+      return get(/databases/$(database)/documents/partidos/$(matchId)).data;
+    }
+
+    function invitationExists(invitationId) {
+      return exists(/databases/$(database)/documents/invitaciones/$(invitationId));
+    }
+
+    function friendRequestExists(requestId) {
+      return exists(/databases/$(database)/documents/solicitudesAmistad/$(requestId));
+    }
+
+    // Solo cambian los campos indicados.
+    function onlyChanges(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+
+    // ---------------------------------------------------------------- Jugadores
+
+    // Perfil público: lo leen los jugadores con sesión; solo lo edita su dueño.
+    match /usuarios/{userId} {
       allow read: if signedIn();
-      allow create, update: if isOwner(uid)
+      allow create, update: if isOwner(userId)
         && request.resource.data.apodo is string
         && request.resource.data.apodoMinusculas == request.resource.data.apodo.lower()
         // Foto comprimida dentro del documento (máx. ~300 KB).
-        && (request.resource.data.foto == null || request.resource.data.foto.size() < 300000);
+        && (request.resource.data.get('foto', null) == null || request.resource.data.foto.size() < 300000);
       allow delete: if false;
+
+      // Celular, correo y fecha de nacimiento: solo los ve su dueño.
+      match /privado/{docId} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     // Reserva de apodos para que no se repitan. Se puede consultar sin sesión
@@ -30,13 +58,190 @@ service cloud.firestore {
       allow get: if true;
       allow list: if false;
       allow create: if signedIn()
-        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.uid == uid()
         && apodo == apodo.lower();
-      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      allow delete: if signedIn() && resource.data.uid == uid();
       allow update: if false;
     }
 
-    // Todo lo demás queda cerrado hasta que se migre (fase 2).
+    // ---------------------------------------------------------------- Partidos
+
+    match /partidos/{matchId} {
+      allow read: if signedIn();
+
+      // Quien lo crea es el anfitrión y el primer jugador.
+      allow create: if signedIn()
+        && request.resource.data.anfitrionId == uid()
+        && request.resource.data.jugadores == [uid()]
+        && request.resource.data.estado == 'OPEN'
+        && request.resource.data.cupos is int
+        && request.resource.data.cupos >= 2 && request.resource.data.cupos <= 22
+        && request.resource.data.descripcion.size() <= 200;
+
+      // Solo cambian los jugadores (y el estado), sin pasarse de los cupos:
+      // - el anfitrión agrega a quien aceptó o saca jugadores;
+      // - un jugador invitado se agrega a sí mismo;
+      // - un jugador (que no es el anfitrión) sale del partido.
+      allow update: if signedIn()
+        && onlyChanges(['jugadores', 'estado'])
+        && request.resource.data.jugadores.size() <= resource.data.cupos
+        && (
+          uid() == resource.data.anfitrionId
+          || (
+            request.resource.data.jugadores.toSet() == resource.data.jugadores.toSet().union([uid()].toSet())
+            && request.resource.data.jugadores.size() == resource.data.jugadores.size() + 1
+            && invitationExists(matchId + '_' + uid())
+          )
+          || (
+            uid() != resource.data.anfitrionId
+            && request.resource.data.jugadores.toSet() == resource.data.jugadores.toSet().difference([uid()].toSet())
+          )
+        );
+
+      allow delete: if false;
+    }
+
+    // Solicitudes para unirse: solicitudes/{partidoId}_{usuarioId}.
+    match /solicitudes/{requestId} {
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+        && request.resource.data.usuarioId == uid()
+        && requestId == request.resource.data.partidoId + '_' + uid()
+        && request.resource.data.estado == 'PENDING'
+        && request.resource.data.anfitrionId == matchData(request.resource.data.partidoId).anfitrionId;
+
+      allow update: if signedIn() && (
+        // El jugador vuelve a enviar una solicitud rechazada.
+        (
+          resource.data.usuarioId == uid()
+          && request.resource.data.estado == 'PENDING'
+          && request.resource.data.usuarioId == resource.data.usuarioId
+          && request.resource.data.partidoId == resource.data.partidoId
+          && request.resource.data.anfitrionId == resource.data.anfitrionId
+        )
+        // El anfitrión acepta o rechaza una solicitud pendiente.
+        || (
+          resource.data.anfitrionId == uid()
+          && resource.data.estado == 'PENDING'
+          && onlyChanges(['estado'])
+          && request.resource.data.estado in ['ACCEPTED', 'REJECTED']
+        )
+      );
+
+      // El jugador retira su solicitud mientras está pendiente.
+      allow delete: if signedIn()
+        && resource.data.usuarioId == uid()
+        && resource.data.estado == 'PENDING';
+    }
+
+    // Invitaciones: invitaciones/{partidoId}_{invitadoId}.
+    match /invitaciones/{invitationId} {
+      // Cualquier jugador puede ver si alguien ya fue invitado a un partido
+      // (para no invitarlo dos veces), pero solo lista las suyas.
+      allow get: if signedIn();
+      allow list: if signedIn()
+        && (resource.data.paraId == uid() || resource.data.deId == uid());
+
+      // Solo invita quien juega en el partido.
+      allow create: if signedIn()
+        && request.resource.data.deId == uid()
+        && invitationId == request.resource.data.partidoId + '_' + request.resource.data.paraId
+        && request.resource.data.estado == 'PENDING'
+        && uid() in matchData(request.resource.data.partidoId).jugadores;
+
+      // El invitado acepta o rechaza.
+      allow update: if signedIn()
+        && resource.data.paraId == uid()
+        && onlyChanges(['estado'])
+        && request.resource.data.estado in ['ACCEPTED', 'DECLINED'];
+
+      allow delete: if false;
+    }
+
+    // ---------------------------------------------------------------- Amigos
+
+    // Solicitudes de amistad: solicitudesAmistad/{deId}_{paraId}.
+    match /solicitudesAmistad/{requestId} {
+      allow get: if signedIn()
+        && (resource == null || uid() in [resource.data.deId, resource.data.paraId]);
+      allow list: if signedIn()
+        && (resource.data.deId == uid() || resource.data.paraId == uid());
+
+      allow create: if signedIn()
+        && request.resource.data.deId == uid()
+        && requestId == uid() + '_' + request.resource.data.paraId
+        && request.resource.data.estado == 'PENDING';
+
+      allow update: if signedIn() && (
+        // Quien la envió la vuelve a enviar.
+        (
+          resource.data.deId == uid()
+          && request.resource.data.deId == resource.data.deId
+          && request.resource.data.paraId == resource.data.paraId
+          && request.resource.data.estado == 'PENDING'
+        )
+        // Quien la recibió la acepta o la rechaza.
+        || (
+          resource.data.paraId == uid()
+          && onlyChanges(['estado'])
+          && request.resource.data.estado in ['ACCEPTED', 'REJECTED']
+        )
+      );
+
+      allow delete: if signedIn()
+        && (resource == null || uid() in [resource.data.deId, resource.data.paraId]);
+    }
+
+    // Amistades aceptadas: amistades/{a}_{b}.
+    match /amistades/{pairId} {
+      allow get: if signedIn()
+        && (resource == null || uid() in resource.data.miembros);
+      allow list: if signedIn() && uid() in resource.data.miembros;
+
+      // La crea quien acepta una solicitud que de verdad le enviaron.
+      allow create: if signedIn()
+        && request.resource.data.paraId == uid()
+        && request.resource.data.miembros == [request.resource.data.deId, uid()]
+        && (pairId == request.resource.data.deId + '_' + uid() || pairId == uid() + '_' + request.resource.data.deId)
+        && friendRequestExists(request.resource.data.deId + '_' + uid());
+
+      allow update: if false;
+      allow delete: if signedIn()
+        && (resource == null || uid() in resource.data.miembros);
+    }
+
+    // Grupos de amigos: solo los ve y edita su dueño.
+    match /grupos/{groupId} {
+      allow read, update, delete: if signedIn() && resource.data.duenoId == uid();
+      allow create: if signedIn()
+        && request.resource.data.duenoId == uid()
+        && request.resource.data.nombre.size() <= 30;
+    }
+
+    // ---------------------------------------------------------------- Estadísticas
+
+    // Autoevaluación ("Cómo me veo"): la ven todos, la edita su dueño.
+    match /estadisticas/{userId} {
+      allow read: if signedIn();
+      allow write: if isOwner(userId);
+    }
+
+    // Calificaciones: calificaciones/{partidoId}_{evaluadorId}_{evaluadoId}.
+    // Solo califica quien jugó el partido, a un compañero de ese partido.
+    match /calificaciones/{ratingId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && request.resource.data.evaluadorId == uid()
+        && request.resource.data.evaluadoId != uid()
+        && ratingId == request.resource.data.partidoId + '_' + uid() + '_' + request.resource.data.evaluadoId
+        && request.resource.data.rol in ['FIELD', 'GOALKEEPER']
+        && uid() in matchData(request.resource.data.partidoId).jugadores
+        && request.resource.data.evaluadoId in matchData(request.resource.data.partidoId).jugadores;
+      allow delete: if false;
+    }
+
+    // Todo lo demás queda cerrado.
     match /{document=**} {
       allow read, write: if false;
     }
