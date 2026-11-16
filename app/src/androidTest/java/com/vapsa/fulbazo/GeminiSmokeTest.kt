@@ -3,6 +3,7 @@ package com.vapsa.fulbazo
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.vapsa.fulbazo.appcheck.AppCheckInstaller
 import com.vapsa.fulbazo.data.repository.GeminiAiRepository
 import com.vapsa.fulbazo.domain.model.CommunityStats
 import com.vapsa.fulbazo.domain.model.PlayerComment
@@ -21,7 +22,8 @@ import org.junit.runner.RunWith
  * Prueba manual contra Gemini de verdad (usa internet y la cuota de Firebase AI
  * Logic). No corre con las demás: hay que pedirla con
  * `-Pandroid.testInstrumentationRunnerArguments.realGemini=true`.
- * Usa datos inventados y no escribe nada en Firestore.
+ * Usa datos inventados y no escribe nada en Firestore. Necesita el token de
+ * depuración de App Check registrado (APP_CHECK_DEBUG_TOKEN en local.properties).
  */
 @RunWith(AndroidJUnit4::class)
 class GeminiSmokeTest {
@@ -32,6 +34,8 @@ class GeminiSmokeTest {
     fun onlyWhenRequested() {
         val args = InstrumentationRegistry.getArguments()
         assumeTrue("Prueba manual: realGemini=true", args.getString("realGemini") == "true")
+        // La Application de prueba de Hilt no activa App Check: se hace aquí.
+        AppCheckInstaller.install(InstrumentationRegistry.getInstrumentation().targetContext)
     }
 
     @Test
