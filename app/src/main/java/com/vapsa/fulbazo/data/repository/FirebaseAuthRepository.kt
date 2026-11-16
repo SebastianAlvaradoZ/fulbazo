@@ -7,9 +7,11 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.vapsa.fulbazo.data.local.ProfilePhotoEncoder
+import com.vapsa.fulbazo.data.remote.Collections
 import com.vapsa.fulbazo.domain.model.AuthError
 import com.vapsa.fulbazo.domain.model.AuthResult
 import com.vapsa.fulbazo.domain.model.NewUser
@@ -26,9 +28,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Autenticación con Firebase Auth (correo y contraseña). El perfil del jugador
- * vive en Firestore en `usuarios/{uid}`, y cada apodo se reserva en
- * `apodos/{apodo en minúsculas}` para que no se repita.
+ * Autenticación con Firebase Auth (correo y contraseña). El perfil público del
+ * jugador vive en Firestore en `usuarios/{uid}` y sus datos privados (celular,
+ * correo, fecha de nacimiento) en `usuarios/{uid}/privado/datos`. Cada apodo se
+ * reserva en `apodos/{apodo en minúsculas}` para que no se repita.
  */
 @Singleton
 class FirebaseAuthRepository @Inject constructor(
@@ -45,7 +48,7 @@ class FirebaseAuthRepository @Inject constructor(
 
     override suspend fun login(email: String, password: String): AuthResult = runCatchingAuth(isRegister = false) {
         val uid = requireNotNull(auth.signInWithEmailAndPassword(email.trim(), password).await().user).uid
-        val user = users.document(uid).get().await().toUser()
+        val user = loadUser(uid)
             // Cuenta sin perfil (p. ej. si el registro se cortó a la mitad).
             ?: return AuthResult.Failure(AuthError.UNKNOWN).also { auth.signOut() }
         _currentUser.value = user
@@ -78,7 +81,8 @@ class FirebaseAuthRepository @Inject constructor(
                 val nicknameRef = nicknames.document(nicknameKey)
                 if (tx.get(nicknameRef).exists()) return@runTransaction false
                 tx.set(nicknameRef, mapOf(FIELD_UID to user.id))
-                tx.set(users.document(user.id), user.toDocument())
+                tx.set(users.document(user.id), user.toPublicDocument())
+                tx.set(privateDoc(user.id), user.toPrivateDocument())
                 true
             }.await()
         } catch (e: Exception) {
@@ -114,7 +118,8 @@ class FirebaseAuthRepository @Inject constructor(
                 tx.set(newRef, mapOf(FIELD_UID to current.id))
                 tx.delete(nicknames.document(oldKey))
             }
-            tx.set(users.document(current.id), updated.toDocument())
+            tx.set(users.document(current.id), updated.toPublicDocument())
+            tx.set(privateDoc(current.id), updated.toPrivateDocument())
             true
         }.await()
         if (!saved) return AuthResult.Failure(AuthError.NICKNAME_ALREADY_IN_USE)
@@ -148,37 +153,73 @@ class FirebaseAuthRepository @Inject constructor(
         else -> AuthError.UNKNOWN
     }
 
-    private fun User.toDocument(): Map<String, Any?> = mapOf(
+    private fun privateDoc(uid: String) =
+        users.document(uid).collection(Collections.PRIVATE).document(Collections.PRIVATE_DOC)
+
+    /**
+     * Lee el perfil completo: la parte pública y la privada. Las cuentas creadas
+     * antes de separar los datos privados se migran aquí.
+     */
+    private suspend fun loadUser(uid: String): User? {
+        val publicSnap = users.document(uid).get().await()
+        if (!publicSnap.exists()) return null
+        val privateSnap = privateDoc(uid).get().await()
+        if (!privateSnap.exists() && publicSnap.contains(FIELD_PHONE)) {
+            val user = toUser(publicSnap, publicSnap) ?: return null
+            firestore.runBatch { batch ->
+                batch.set(privateDoc(uid), user.toPrivateDocument())
+                batch.update(
+                    users.document(uid),
+                    mapOf(
+                        FIELD_PHONE to FieldValue.delete(),
+                        FIELD_EMAIL to FieldValue.delete(),
+                        FIELD_BIRTH_DATE to FieldValue.delete(),
+                    ),
+                )
+            }.await()
+            return user
+        }
+        return toUser(publicSnap, privateSnap)
+    }
+
+    /** Lo que ven los demás jugadores. */
+    private fun User.toPublicDocument(): Map<String, Any?> = mapOf(
         "nombre" to firstName,
         "apellido" to lastName,
         "apodo" to nickname,
         "apodoMinusculas" to nickname.lowercase(),
-        "celular" to phone,
-        "correo" to email,
-        "fechaNacimiento" to birthDate.toString(),
         "distrito" to district,
         "foto" to photoUri,
     )
 
-    private fun DocumentSnapshot.toUser(): User? {
-        if (!exists()) return null
+    /** Solo lo lee su dueño (`usuarios/{uid}/privado/datos`). */
+    private fun User.toPrivateDocument(): Map<String, Any?> = mapOf(
+        FIELD_PHONE to phone,
+        FIELD_EMAIL to email,
+        FIELD_BIRTH_DATE to birthDate.toString(),
+    )
+
+    private fun toUser(publicSnap: DocumentSnapshot, privateSnap: DocumentSnapshot): User? {
         return User(
-            id = id,
-            firstName = getString("nombre") ?: return null,
-            lastName = getString("apellido") ?: return null,
-            nickname = getString("apodo") ?: return null,
-            phone = getString("celular").orEmpty(),
-            email = getString("correo").orEmpty(),
-            birthDate = getString("fechaNacimiento")?.let(LocalDate::parse) ?: return null,
-            district = getString("distrito").orEmpty(),
-            photoUri = getString("foto"),
+            id = publicSnap.id,
+            firstName = publicSnap.getString("nombre") ?: return null,
+            lastName = publicSnap.getString("apellido") ?: return null,
+            nickname = publicSnap.getString("apodo") ?: return null,
+            phone = privateSnap.getString(FIELD_PHONE).orEmpty(),
+            email = privateSnap.getString(FIELD_EMAIL).orEmpty(),
+            birthDate = privateSnap.getString(FIELD_BIRTH_DATE)?.let(LocalDate::parse) ?: return null,
+            district = publicSnap.getString("distrito").orEmpty(),
+            photoUri = publicSnap.getString("foto"),
         )
     }
 
     private companion object {
         const val TAG = "FirebaseAuthRepository"
-        const val USERS = "usuarios"
-        const val NICKNAMES = "apodos"
+        const val USERS = Collections.USERS
+        const val NICKNAMES = Collections.NICKNAMES
         const val FIELD_UID = "uid"
+        const val FIELD_PHONE = "celular"
+        const val FIELD_EMAIL = "correo"
+        const val FIELD_BIRTH_DATE = "fechaNacimiento"
     }
 }
