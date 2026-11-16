@@ -12,23 +12,37 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import javax.inject.Inject
 
 /**
  * Prueba de punta a punta del detalle de losa desde el mapa.
  */
+@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class CourtDetailFlowTest {
 
-    @get:Rule
+    @get:Rule(order = 0)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
+    @Inject
+    lateinit var backgroundJobs: AppBackgroundJobs
+
     @Before
-    fun setUp() = grantAppPermissions()
+    fun setUp() {
+        hiltRule.inject()
+        backgroundJobs.start()
+        grantAppPermissions()
+    }
 
     private fun waitForText(text: String, timeoutMillis: Long = 5_000) {
         composeRule.waitUntil(timeoutMillis) {
