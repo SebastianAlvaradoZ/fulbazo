@@ -91,7 +91,7 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
 | Mapa y ubicación | Google Maps (`maps-compose`), Fused Location Provider |
 | Imágenes | Coil (fotos de perfil) y Photo Picker del sistema |
 | Notificaciones | `NotificationCompat` con permiso `POST_NOTIFICATIONS` |
-| Inteligencia artificial | Gemini (`gemini-2.5-flash`) con Firebase AI Logic y salida JSON con esquema |
+| Inteligencia artificial | Gemini (`gemini-flash-lite-latest`, capa gratuita) con Firebase AI Logic y salida JSON con esquema |
 | Pruebas | JUnit 4, `kotlinx-coroutines-test` y pruebas instrumentadas de Compose |
 
 ---
