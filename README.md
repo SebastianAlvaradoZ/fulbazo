@@ -316,6 +316,14 @@ corre con las demás:
 ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.vapsa.fulbazo.GeminiSmokeTest -Pandroid.testInstrumentationRunnerArguments.realGemini=true
 ```
 
+Y otra para las losas reales sin conexión (descarga de Realtime Database, activa
+el modo avión del emulador, comprueba que quedan las guardadas en Room y vuelve
+a conectar):
+
+```bash
+./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.vapsa.fulbazo.CourtsOfflineSmokeTest -Pandroid.testInstrumentationRunnerArguments.realCourts=true
+```
+
 Las pruebas conceden los permisos de ubicación y notificaciones. Para la prueba
 del orden por distancia, el emulador necesita una ubicación, por ejemplo la
 plaza de Cayma:
