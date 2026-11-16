@@ -12,13 +12,19 @@ plugins {
  * Lee MAPS_API_KEY de local.properties (que no se sube a git). Si no está, usa el
  * valor de local.defaults.properties, y la app muestra un aviso en vez del mapa.
  */
-val mapsApiKey: String = Properties().run {
+val localProperties = Properties().apply {
     listOf("local.defaults.properties", "local.properties")
         .map(rootProject::file)
         .filter { it.exists() }
         .forEach { file -> file.inputStream().use(::load) }
-    getProperty("MAPS_API_KEY", "DEFAULT_API_KEY").trim()
 }
+val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY", "DEFAULT_API_KEY").trim()
+
+/**
+ * Token de depuración de App Check (solo builds debug). Se genera en la consola de
+ * Firebase y se guarda en local.properties, que no se sube a git.
+ */
+val appCheckDebugToken: String = localProperties.getProperty("APP_CHECK_DEBUG_TOKEN", "").trim()
 
 android {
     namespace = "com.vapsa.fulbazo"
@@ -45,6 +51,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "APP_CHECK_DEBUG_TOKEN", "\"$appCheckDebugToken\"")
+        }
         release {
             optimization {
                 enable = false
@@ -85,6 +94,9 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.ai)
+    // App Check: Play Integrity en release; en debug (emulador) un token de depuración.
+    implementation(libs.firebase.appcheck.playintegrity)
+    debugImplementation(libs.firebase.appcheck.debug)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.org.json)
