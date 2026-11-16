@@ -6,6 +6,7 @@ import com.google.firebase.ai.GenerativeModel
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.Schema
+import com.google.firebase.ai.type.ServerException
 import com.google.firebase.ai.type.content
 import com.google.firebase.ai.type.generationConfig
 import com.vapsa.fulbazo.domain.ai.AiPrompts
@@ -16,6 +17,7 @@ import com.vapsa.fulbazo.domain.model.TeamPlayer
 import com.vapsa.fulbazo.domain.model.TeamSplit
 import com.vapsa.fulbazo.domain.repository.AiRepository
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -70,19 +72,41 @@ class GeminiAiRepository @Inject constructor() : AiRepository {
         TeamSplitParser.parse(json, players).getOrThrow()
     }
 
-    private inline fun <T> callGemini(block: () -> T): Result<T> = try {
-        Result.success(block())
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: Exception) {
-        Log.w(TAG, "Error de Gemini", e)
-        Result.failure(e)
+    /**
+     * Llama a Gemini y devuelve el error como [Result]. Si el servidor está
+     * saturado (pasa a veces con picos de uso), reintenta un par de veces.
+     */
+    private suspend fun <T> callGemini(block: suspend () -> T): Result<T> {
+        repeat(MAX_ATTEMPTS) { attempt ->
+            try {
+                return Result.success(block())
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: ServerException) {
+                val busy = e.message.orEmpty().contains("high demand", ignoreCase = true)
+                if (!busy || attempt == MAX_ATTEMPTS - 1) {
+                    Log.w(TAG, "Error de Gemini", e)
+                    return Result.failure(e)
+                }
+                delay(RETRY_DELAY_MILLIS * (attempt + 1))
+            } catch (e: Exception) {
+                Log.w(TAG, "Error de Gemini", e)
+                return Result.failure(e)
+            }
+        }
+        error("Sin intentos")
     }
 
     private companion object {
         const val TAG = "GeminiAiRepository"
+        const val MAX_ATTEMPTS = 3
+        const val RETRY_DELAY_MILLIS = 2_000L
 
-        /** Modelo rápido y estable, disponible en la capa gratuita de la Gemini Developer API. */
-        const val MODEL = "gemini-2.5-flash"
+        /**
+         * Modelo flash ligero con cuota en la capa gratuita de la Gemini Developer API.
+         * gemini-2.5-flash ya no está disponible para proyectos nuevos y los flash
+         * completos agotan la cuota gratuita enseguida.
+         */
+        const val MODEL = "gemini-flash-lite-latest"
     }
 }
