@@ -72,6 +72,10 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
 - **Animaciones de Compose:** transiciones entre pantallas, fundido entre
   estados de carga, error y contenido, listas animadas y números que cambian
   suavemente.
+- **Diseño "verde cancha":** tema propio de Material 3 con verde césped
+  (`#2E7D32`) y acento naranja (`#FF8F00`), modo claro y oscuro, esquinas
+  redondeadas y un logo propio (pelota con lupa) como ícono adaptable, con
+  versión monocromática para los íconos temáticos de Android 13+.
 
 > Cuentas, partidos, solicitudes, amigos, grupos, invitaciones y estadísticas
 > se guardan en **Firebase** y se actualizan en tiempo real entre teléfonos. Las
@@ -83,7 +87,6 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
   como notificación mientras la app está abierta.
 - **Más losas de Arequipa** registradas a mano (hoy hay 8 de ejemplo en
   `datos/losas.json`).
-- **Diseño propio** ("verde cancha") con Material 3 Expressive.
 
 ---
 
@@ -347,7 +350,22 @@ adb emu geo fix -71.545 -16.372
 
 ## Capturas
 
-_Próximamente._
+<p align="center"><img src="capturas/logo.png" width="120" alt="Logo de Fulbazo" /></p>
+
+| Inicio de sesión | Mapa | Detalle del partido | Perfil de un jugador |
+|---|---|---|---|
+| <img src="capturas/login_claro.png" width="200" /> | <img src="capturas/mapa_claro.png" width="200" /> | <img src="capturas/detalle_partido_claro.png" width="200" /> | <img src="capturas/perfil_jugador_claro.png" width="200" /> |
+| <img src="capturas/login_oscuro.png" width="200" /> | <img src="capturas/mapa_oscuro.png" width="200" /> | <img src="capturas/detalle_partido_oscuro.png" width="200" /> | <img src="capturas/perfil_jugador_oscuro.png" width="200" /> |
+
+Las capturas de las pantallas internas se generan con los datos de prueba
+(usuario demo, sin Firebase):
+
+```bash
+./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.vapsa.fulbazo.ScreenshotsTest -Pandroid.testInstrumentationRunnerArguments.screenshots=claro
+```
+
+Quedan en `/sdcard/Android/media/com.vapsa.fulbazo/capturas/` (con `screenshots=oscuro`
+y el emulador en modo oscuro, las versiones oscuras).
 
 ## Video de demostración
 
