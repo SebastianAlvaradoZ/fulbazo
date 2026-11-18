@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ilustración para listas vacías: un arco con su red y una pelota esperando. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp"
+    android:height="120dp"
+    android:viewportWidth="160"
+    android:viewportHeight="120">
+    <!-- Césped -->
+    <path
+        android:fillColor="#FFDCEFD6"
+        android:pathData="M16,100 A64,12 0 1,0 144,100 A64,12 0 1,0 16,100 Z" />
+    <!-- Red -->
+    <path
+        android:strokeColor="#FFB9C4B4"
+        android:strokeWidth="1.2"
+        android:pathData="M44,44V98 M55,44V98 M66,44V98 M77,44V98 M88,44V98 M99,44V98 M110,44V98 M121,44V98 M36,54H124 M36,64H124 M36,74H124 M36,84H124 M36,94H124" />
+    <!-- Arco -->
+    <path
+        android:strokeColor="#FF5E6A5B"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M34,99V40H126V99" />
+    <!-- Pelota -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:strokeColor="#FF1B2B1E"
+        android:strokeWidth="2"
+        android:pathData="M86,90 A13,13 0 1,0 112,90 A13,13 0 1,0 86,90 Z" />
+    <path
+        android:fillColor="#FF1B2B1E"
+        android:pathData="M99,84.5L104.2,88.3L102.2,94.4H95.8L93.8,88.3Z" />
+    <path
+        android:strokeColor="#FF1B2B1E"
+        android:strokeWidth="1.4"
+        android:strokeLineCap="round"
+        android:pathData="M99,84.5V78.4 M104.2,88.3L110,86.4 M102.2,94.4L105.8,99.2 M95.8,94.4L92.2,99.2 M93.8,88.3L88,86.4" />
+</vector>

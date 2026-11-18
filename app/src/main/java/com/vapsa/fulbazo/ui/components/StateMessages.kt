@@ -1,16 +1,20 @@
 package com.vapsa.fulbazo.ui.components
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,27 +33,41 @@ fun LoadingState(modifier: Modifier = Modifier) {
     }
 }
 
-/** Mensaje para listas vacías, con un icono opcional. */
+/**
+ * Mensaje para listas vacías con una ilustración (un arco esperando la pelota).
+ * [iconRes] agrega un ícono pequeño que dice de qué es la lista (partidos, amigos…).
+ */
 @Composable
 fun EmptyState(message: String, modifier: Modifier = Modifier, iconRes: Int? = null) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(32.dp),
+            .padding(horizontal = 32.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        iconRes?.let {
-            Icon(
-                painter = painterResource(it),
+        Box(contentAlignment = Alignment.BottomEnd) {
+            Image(
+                painter = painterResource(R.drawable.ill_empty),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.size(48.dp),
+                modifier = Modifier.size(width = 160.dp, height = 120.dp),
             )
+            iconRes?.let {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(36.dp),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(painterResource(it), contentDescription = null, modifier = Modifier.size(20.dp))
+                    }
+                }
+            }
         }
         Text(
             text = message,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
@@ -66,15 +84,14 @@ fun ErrorState(message: String, modifier: Modifier = Modifier, onRetry: (() -> U
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_error),
+        Image(
+            painter = painterResource(R.drawable.ill_error),
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(width = 160.dp, height = 120.dp),
         )
-        Text(text = message, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+        Text(text = message, style = MaterialTheme.typography.titleSmall, textAlign = TextAlign.Center)
         onRetry?.let {
-            OutlinedButton(onClick = it) { Text(stringResource(R.string.action_retry)) }
+            Button(onClick = it) { Text(stringResource(R.string.action_retry)) }
         }
     }
 }

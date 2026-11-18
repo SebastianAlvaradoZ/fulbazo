@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ilustración de error: una pelota desinflada con un signo de exclamación. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp"
+    android:height="120dp"
+    android:viewportWidth="160"
+    android:viewportHeight="120">
+    <!-- Fondo -->
+    <path
+        android:fillColor="#FFFFE3D0"
+        android:pathData="M32,62 A48,48 0 1,0 128,62 A48,48 0 1,0 32,62 Z" />
+    <!-- Sombra -->
+    <path
+        android:fillColor="#33000000"
+        android:pathData="M50,98 A30,5 0 1,0 110,98 A30,5 0 1,0 50,98 Z" />
+    <!-- Pelota desinflada -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:strokeColor="#FF1B2B1E"
+        android:strokeWidth="2"
+        android:pathData="M52,84 C52,72 64,66 80,66 C96,66 108,72 108,84 C108,94 96,97 80,97 C64,97 52,94 52,84 Z" />
+    <path
+        android:fillColor="#FF1B2B1E"
+        android:pathData="M80,76L86.5,80.2L84,86.6H76L73.5,80.2Z" />
+    <path
+        android:strokeColor="#FF1B2B1E"
+        android:strokeWidth="1.4"
+        android:strokeLineCap="round"
+        android:pathData="M80,76V68.5 M86.5,80.2L95,78 M84,86.6L88,93.5 M76,86.6L72,93.5 M73.5,80.2L65,78" />
+    <!-- Signo de exclamación -->
+    <path
+        android:fillColor="#FFFF8F00"
+        android:pathData="M76,18h8a2,2 0 0,1 2,2v24a2,2 0 0,1 -2,2h-8a2,2 0 0,1 -2,-2v-24a2,2 0 0,1 2,-2z" />
+    <path
+        android:fillColor="#FFFF8F00"
+        android:pathData="M74.5,55.5 A5.5,5.5 0 1,0 85.5,55.5 A5.5,5.5 0 1,0 74.5,55.5 Z" />
+</vector>
