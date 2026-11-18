@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -94,5 +95,10 @@ class ScreenshotsTest {
         composeRule.onNodeWithText("Perfil").performClick()
         waitForText("Editar perfil")
         capture("mi_perfil")
+
+        // Bandeja de invitaciones vacía: estado vacío con ilustración.
+        composeRule.onNodeWithContentDescription("Ver invitaciones").performClick()
+        waitForText("Invitaciones")
+        capture("estado_vacio")
     }
 }
