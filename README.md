@@ -79,7 +79,11 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
   **Poppins** y textos en **Inter** (incluidas en la app, licencia OFL en
   `licencias/`), tarjetas blancas con sombra suave, avatares con las iniciales
   del jugador y tarjetas de partido con la fecha en grande, chips de hora,
-  distancia y nivel (con color) y una barra de cupos.
+  distancia y nivel (con color) y una barra de cupos. Barra superior con
+  degradado verde y el logo, perfiles con portada verde, puntajes dentro de un
+  anillo de 1 a 5, habilidades en dos columnas, jugadores del partido en una
+  grilla de avatares con el botón para unirse fijo abajo, y estados vacíos y de
+  error con ilustraciones propias.
 
 > Cuentas, partidos, solicitudes, amigos, grupos, invitaciones y estadísticas
 > se guardan en **Firebase** y se actualizan en tiempo real entre teléfonos. Las
@@ -360,6 +364,11 @@ adb emu geo fix -71.545 -16.372
 |---|---|---|---|
 | <img src="capturas/login_claro.png" width="200" /> | <img src="capturas/mapa_claro.png" width="200" /> | <img src="capturas/detalle_partido_claro.png" width="200" /> | <img src="capturas/perfil_jugador_claro.png" width="200" /> |
 | <img src="capturas/login_oscuro.png" width="200" /> | <img src="capturas/mapa_oscuro.png" width="200" /> | <img src="capturas/detalle_partido_oscuro.png" width="200" /> | <img src="capturas/perfil_jugador_oscuro.png" width="200" /> |
+
+| Mi perfil | Estado vacío |
+|---|---|
+| <img src="capturas/mi_perfil_claro.png" width="200" /> | <img src="capturas/estado_vacio_claro.png" width="200" /> |
+| <img src="capturas/mi_perfil_oscuro.png" width="200" /> | <img src="capturas/estado_vacio_oscuro.png" width="200" /> |
 
 Las capturas de las pantallas internas se generan con los datos de prueba
 (usuario demo, sin Firebase):
