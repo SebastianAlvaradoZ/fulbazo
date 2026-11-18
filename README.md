@@ -21,6 +21,11 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
 - **Mapa (pantalla principal):** **Google Maps** centrado en Arequipa con un
   marcador por losa (verde si tiene partidos próximos) y la lista de partidos
   próximos, con filtro por losa; botón flotante para crear un partido.
+- **Sin internet:** un aviso "Sin conexión" arriba de todas las pantallas. El
+  inicio de sesión y el registro avisan al instante, las acciones (unirse,
+  crear partido, calificar, comentar…) fallan enseguida con un mensaje claro en
+  lugar de quedarse cargando, y la IA muestra "Sin conexión" con **Reintentar**.
+  Lo que ya se descargó de Firestore se sigue viendo gracias a su caché.
 - **Losas sin conexión:** la lista de losas se descarga de una API (**Retrofit**)
   y se guarda en el teléfono (**Room**). Sin internet se ven las losas
   guardadas con el aviso "Sin conexión"; si es la primera vez y no hay red,
@@ -233,6 +238,12 @@ lee con Retrofit en `https://<tu-base>/losas.json`.
    ```
    (Si vuelves a descargar `google-services.json` después de crear la base, la
    app la toma de ahí y no hace falta esa línea.)
+
+Sin conexión, `AndroidConnectivityMonitor` (ConnectivityManager) avisa a toda la
+app: `FirestoreWriter` no intenta escribir sin red (Firestore guardaría la
+escritura y la pantalla se quedaría esperando) y corta a los 15 segundos si el
+servidor no responde; Firebase Auth y Gemini también avisan "Sin conexión" sin
+intentarlo.
 
 La app muestra lo guardado en Room y actualiza en segundo plano
 (`OfflineFirstCourtRepository`). Para agregar una losa, edita el JSON y vuelve a
