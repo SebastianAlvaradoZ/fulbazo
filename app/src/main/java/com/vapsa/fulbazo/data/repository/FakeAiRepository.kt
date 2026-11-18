@@ -6,15 +6,18 @@ import com.vapsa.fulbazo.domain.model.PlayerComment
 import com.vapsa.fulbazo.domain.model.TeamPlayer
 import com.vapsa.fulbazo.domain.model.TeamSplit
 import com.vapsa.fulbazo.domain.repository.AiRepository
+import com.vapsa.fulbazo.domain.repository.NoConnectionException
 import kotlinx.coroutines.delay
 
 /**
  * IA falsa para las pruebas: responde al instante, sin red. Con [fail] en `true`
- * simula que Gemini no responde.
+ * simula que Gemini no responde, y con [offline] que no hay internet.
  */
 class FakeAiRepository(
     private val latencyMillis: Long = 300,
     var fail: Boolean = false,
+    /** Simula que no hay internet. */
+    var offline: Boolean = false,
 ) : AiRepository {
 
     /** Cuántas veces se pidió un resumen (para comprobar que se usa el guardado). */
@@ -28,12 +31,14 @@ class FakeAiRepository(
     ): Result<String> {
         delay(latencyMillis)
         summaryCalls++
+        if (offline) return Result.failure(NoConnectionException())
         if (fail) return Result.failure(IllegalStateException("Gemini no respondió"))
         return Result.success("Sus compañeros destacan a $nickname por su velocidad y puntualidad.")
     }
 
     override suspend fun buildTeams(players: List<TeamPlayer>): Result<TeamSplit> {
         delay(latencyMillis)
+        if (offline) return Result.failure(NoConnectionException())
         if (fail) return Result.failure(IllegalStateException("Gemini no respondió"))
         return Result.success(
             LocalTeamBalancer.split(players).copy(explanation = "Equipos parejos en nivel y con un arquero cada uno.", generatedByAi = true),

@@ -9,6 +9,7 @@ import com.vapsa.fulbazo.domain.model.TeamPlayer
 import com.vapsa.fulbazo.domain.model.TeamSplit
 import com.vapsa.fulbazo.domain.repository.AiRepository
 import com.vapsa.fulbazo.domain.repository.MatchRepository
+import com.vapsa.fulbazo.domain.repository.NoConnectionException
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
 import com.vapsa.fulbazo.domain.repository.StatsRepository
 import dagger.assisted.Assisted
@@ -42,8 +43,11 @@ sealed interface TeamsUiState {
         val generatedByAi: Boolean,
     ) : TeamsUiState
 
-    /** Gemini falló; se puede reintentar o usar el reparto automático. */
-    data object Error : TeamsUiState
+    /**
+     * Gemini falló; se puede reintentar o usar el reparto automático (marcado "sin IA").
+     * [offline] si fue por falta de internet.
+     */
+    data class Error(val offline: Boolean = false) : TeamsUiState
 }
 
 /**
@@ -75,17 +79,17 @@ class TeamBuilderViewModel @AssistedInject constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _uiState.value = TeamsUiState.Error
+                _uiState.value = TeamsUiState.Error()
                 return@launch
             }
             lastPlayers = players
             if (players.size < MIN_PLAYERS) {
-                _uiState.value = TeamsUiState.Error
+                _uiState.value = TeamsUiState.Error()
                 return@launch
             }
             _uiState.value = aiRepository.buildTeams(players).fold(
                 onSuccess = { it.toUiState(players) },
-                onFailure = { TeamsUiState.Error },
+                onFailure = { TeamsUiState.Error(offline = it is NoConnectionException) },
             )
         }
     }

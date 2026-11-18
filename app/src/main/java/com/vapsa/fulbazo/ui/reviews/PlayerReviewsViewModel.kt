@@ -8,6 +8,7 @@ import com.vapsa.fulbazo.domain.model.CommunityStats
 import com.vapsa.fulbazo.domain.model.PlayerComment
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.repository.CommentRepository
+import com.vapsa.fulbazo.domain.repository.NoConnectionException
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
 import com.vapsa.fulbazo.domain.repository.StatsRepository
 import dagger.assisted.Assisted
@@ -37,7 +38,8 @@ sealed interface AiSummaryState {
 
     data class Ready(val text: String) : AiSummaryState
 
-    data object Error : AiSummaryState
+    /** No se pudo generar; [offline] si fue por falta de internet. */
+    data class Error(val offline: Boolean = false) : AiSummaryState
 }
 
 data class CommentItem(
@@ -118,7 +120,7 @@ class PlayerReviewsViewModel @AssistedInject constructor(
                 when (outcome) {
                     is SummaryOutcome.Ready -> AiSummaryState.Ready(outcome.summary.text)
                     is SummaryOutcome.NotEnough -> AiSummaryState.NotEnough
-                    is SummaryOutcome.Failed -> AiSummaryState.Error
+                    is SummaryOutcome.Failed -> AiSummaryState.Error(offline = outcome.error is NoConnectionException)
                 },
             )
         }
@@ -137,7 +139,7 @@ class PlayerReviewsViewModel @AssistedInject constructor(
             message = currentMessage,
         )
     }
-        .catch { emit(PlayerReviewsUiState(isLoading = false, loadFailed = true, summary = AiSummaryState.Error)) }
+        .catch { emit(PlayerReviewsUiState(isLoading = false, loadFailed = true, summary = AiSummaryState.Error())) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),

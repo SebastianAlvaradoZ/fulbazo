@@ -12,7 +12,7 @@
     <string name="action_delete">Eliminar</string>
     <string name="action_accept">Aceptar</string>
     <string name="action_decline">Rechazar</string>
-    <string name="generic_error">Algo salió mal. Inténtalo de nuevo</string>
+    <string name="generic_error">No se pudo completar. Revisa tu conexión e inténtalo de nuevo</string>
 
     <!-- Mapa y partidos cercanos -->
     <string name="map_unavailable_label">Mapa no disponible: falta configurar la clave de Google Maps (MAPS_API_KEY). Se muestra una vista simple de las losas.</string>
@@ -124,7 +124,7 @@
     <string name="rate_role_goalkeeper">Arquero</string>
     <string name="rate_save">Guardar evaluación</string>
     <string name="rate_saved">Evaluaste a %1$s</string>
-    <string name="rate_save_error">No se pudo guardar la evaluación</string>
+    <string name="rate_save_error">No se pudo guardar la evaluación. Revisa tu conexión e inténtalo de nuevo</string>
     <string name="rate_open">Evaluar jugadores</string>
 
     <!-- Editar perfil y cerrar sesión -->
@@ -368,4 +368,8 @@
     <!-- Losas sin conexión -->
     <string name="map_courts_offline">Sin conexión: mostrando las losas guardadas.</string>
     <string name="map_courts_offline_error">No se pudieron cargar las losas. Revisa tu conexión e inténtalo de nuevo.</string>
+
+    <!-- Sin conexión -->
+    <string name="offline_banner">Sin conexión. Algunos datos pueden no estar al día.</string>
+    <string name="ai_offline">Sin conexión. Conéctate a internet e inténtalo de nuevo.</string>
 </resources>

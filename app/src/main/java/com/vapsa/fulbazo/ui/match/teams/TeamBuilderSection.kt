@@ -88,11 +88,14 @@ fun TeamBuilderContent(
                 Spacer(Modifier.width(12.dp))
                 Text(stringResource(R.string.teams_loading))
             }
-            TeamsUiState.Error -> Card(
+            is TeamsUiState.Error -> Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(stringResource(R.string.teams_error), style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        stringResource(if (current.offline) R.string.ai_offline else R.string.teams_error),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         TextButton(onClick = onBuild) { Text(stringResource(R.string.action_retry)) }
                         TextButton(onClick = onUseLocal) { Text(stringResource(R.string.teams_use_local)) }

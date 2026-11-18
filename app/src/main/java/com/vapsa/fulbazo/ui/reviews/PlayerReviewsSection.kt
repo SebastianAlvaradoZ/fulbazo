@@ -125,9 +125,9 @@ fun AiSummaryCard(
                         stringResource(R.string.ai_summary_not_enough, PlayerReviewSummarizer.MIN_COMMENTS),
                         style = MaterialTheme.typography.bodyMedium,
                     )
-                    AiSummaryState.Error -> Row(verticalAlignment = Alignment.CenterVertically) {
+                    is AiSummaryState.Error -> Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            stringResource(R.string.ai_summary_error),
+                            stringResource(if (current.offline) R.string.ai_offline else R.string.ai_summary_error),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f),
                         )

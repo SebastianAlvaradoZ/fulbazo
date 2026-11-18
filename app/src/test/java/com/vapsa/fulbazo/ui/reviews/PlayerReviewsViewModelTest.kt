@@ -71,13 +71,20 @@ class PlayerReviewsViewModelTest {
     fun aiError_canBeRetried() = runTest {
         aiRepository.fail = true
         val viewModel = viewModel("carlos")
-        assertEquals(AiSummaryState.Error, viewModel.uiState.value.summary)
+        assertEquals(AiSummaryState.Error(offline = false), viewModel.uiState.value.summary)
 
         aiRepository.fail = false
         viewModel.retrySummary()
         advanceUntilIdle()
 
         assertTrue(viewModel.uiState.value.summary is AiSummaryState.Ready)
+    }
+
+    @Test
+    fun withoutInternet_showsOfflineSummaryError() = runTest {
+        aiRepository.offline = true
+
+        assertEquals(AiSummaryState.Error(offline = true), viewModel("carlos").uiState.value.summary)
     }
 
     @Test

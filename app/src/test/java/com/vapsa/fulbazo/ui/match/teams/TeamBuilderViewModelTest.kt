@@ -57,13 +57,24 @@ class TeamBuilderViewModelTest {
 
         viewModel.buildTeams()
         advanceUntilIdle()
-        assertEquals(TeamsUiState.Error, viewModel.uiState.value)
+        assertEquals(TeamsUiState.Error(offline = false), viewModel.uiState.value)
 
         viewModel.useLocalSplit()
 
         val state = viewModel.uiState.value as TeamsUiState.Ready
         assertFalse(state.generatedByAi)
         assertEquals(3, state.teamA.size + state.teamB.size)
+    }
+
+    @Test
+    fun withoutInternet_showsOfflineError() = runTest {
+        aiRepository.offline = true
+        val viewModel = viewModel()
+
+        viewModel.buildTeams()
+        advanceUntilIdle()
+
+        assertEquals(TeamsUiState.Error(offline = true), viewModel.uiState.value)
     }
 
     @Test
