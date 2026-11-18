@@ -247,6 +247,9 @@ fun MapScreen(
             onClick = actions.onCreateMatch,
             icon = { Icon(painterResource(R.drawable.ic_add), contentDescription = null) },
             text = { Text(stringResource(R.string.map_create_match)) },
+            // Acento naranja de la marca para la acción principal.
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),

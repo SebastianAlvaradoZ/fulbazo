@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Fulbazo" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Fondo claro de la paleta "verde cancha" mientras abre la app. -->
+    <style name="Theme.Fulbazo" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/fulbazo_background</item>
+    </style>
 </resources>
