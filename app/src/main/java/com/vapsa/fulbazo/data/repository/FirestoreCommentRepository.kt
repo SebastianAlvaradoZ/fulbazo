@@ -5,7 +5,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.vapsa.fulbazo.data.remote.Collections
-import com.vapsa.fulbazo.data.remote.firestoreResult
+import com.vapsa.fulbazo.data.remote.FirestoreWriter
 import com.vapsa.fulbazo.data.remote.snapshotFlow
 import com.vapsa.fulbazo.domain.model.PlayerComment
 import com.vapsa.fulbazo.domain.model.ReviewSummary
@@ -26,6 +26,7 @@ import javax.inject.Singleton
 @Singleton
 class FirestoreCommentRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
+    private val writer: FirestoreWriter,
 ) : CommentRepository {
 
     private val comments get() = firestore.collection(Collections.COMMENTS)
@@ -45,7 +46,7 @@ class FirestoreCommentRepository @Inject constructor(
         authorId: String,
         playerId: String,
         text: String,
-    ): Result<Unit> = firestoreResult(TAG) {
+    ): Result<Unit> = writer.write(TAG) {
         val ref = comments.document("${matchId}_${authorId}_$playerId")
         val clean = text.trim().take(PlayerComment.MAX_LENGTH)
         if (clean.isEmpty()) {
@@ -63,7 +64,7 @@ class FirestoreCommentRepository @Inject constructor(
         }
     }
 
-    override suspend fun reportComment(commentId: String, reporterId: String): Result<Unit> = firestoreResult(TAG) {
+    override suspend fun reportComment(commentId: String, reporterId: String): Result<Unit> = writer.write(TAG) {
         firestore.collection(Collections.REPORTS).document("${commentId}_$reporterId").set(
             mapOf(
                 "comentarioId" to commentId,
@@ -90,7 +91,7 @@ class FirestoreCommentRepository @Inject constructor(
         null
     }
 
-    override suspend fun saveSummary(summary: ReviewSummary): Result<Unit> = firestoreResult(TAG) {
+    override suspend fun saveSummary(summary: ReviewSummary): Result<Unit> = writer.write(TAG) {
         firestore.collection(Collections.AI_SUMMARIES).document(summary.playerId).set(
             mapOf(
                 "texto" to summary.text,

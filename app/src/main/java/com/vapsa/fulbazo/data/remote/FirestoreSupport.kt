@@ -1,12 +1,10 @@
 package com.vapsa.fulbazo.data.remote
 
-import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -61,16 +59,6 @@ fun DocumentReference.snapshotFlow(): Flow<DocumentSnapshot> = callbackFlow {
 /** Lee un enum guardado con su nombre; si el valor es desconocido usa [default]. */
 inline fun <reified E : Enum<E>> DocumentSnapshot.getEnum(field: String, default: E): E =
     getString(field)?.let { name -> enumValues<E>().firstOrNull { it.name == name } } ?: default
-
-/** Ejecuta una escritura y devuelve el error como [Result] (sin tragarse la cancelación). */
-inline fun <T> firestoreResult(tag: String, block: () -> T): Result<T> = try {
-    Result.success(block())
-} catch (e: CancellationException) {
-    throw e
-} catch (e: Exception) {
-    Log.w(tag, "Error de Firestore", e)
-    Result.failure(e)
-}
 
 /** Id de un par de jugadores sin importar el orden (`a_b` con a < b). */
 fun pairId(a: String, b: String): String = if (a < b) "${a}_$b" else "${b}_$a"

@@ -4,7 +4,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.vapsa.fulbazo.data.remote.Collections
-import com.vapsa.fulbazo.data.remote.firestoreResult
+import com.vapsa.fulbazo.data.remote.FirestoreWriter
 import com.vapsa.fulbazo.data.remote.getEnum
 import com.vapsa.fulbazo.data.remote.snapshotFlow
 import com.vapsa.fulbazo.domain.model.CommunityStatsCalculator
@@ -34,6 +34,7 @@ import javax.inject.Singleton
 @Singleton
 class FirestoreStatsRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
+    private val writer: FirestoreWriter,
 ) : StatsRepository, RatingRepository {
 
     private val stats get() = firestore.collection(Collections.STATS)
@@ -51,7 +52,7 @@ class FirestoreStatsRepository @Inject constructor(
     }
 
     override suspend fun saveSelfAssessment(userId: String, assessment: SelfAssessment): Result<Unit> =
-        firestoreResult(TAG) {
+        writer.write(TAG) {
             stats.document(userId).set(
                 mapOf(
                     "pierna" to assessment.dominantFoot.name,
@@ -74,7 +75,7 @@ class FirestoreStatsRepository @Inject constructor(
             return Result.failure(IllegalArgumentException("No puedes calificarte a ti mismo"))
         }
         if (!rating.isComplete) return Result.failure(IllegalArgumentException("Calificación incompleta"))
-        return firestoreResult(TAG) {
+        return writer.write(TAG) {
             // El id fijo hace que volver a calificar reemplace la calificación anterior.
             ratings.document("${rating.matchId}_${rating.raterId}_${rating.ratedId}").set(
                 mapOf(

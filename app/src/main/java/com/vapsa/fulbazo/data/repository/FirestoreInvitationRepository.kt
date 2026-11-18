@@ -4,7 +4,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.vapsa.fulbazo.data.remote.Collections
-import com.vapsa.fulbazo.data.remote.firestoreResult
+import com.vapsa.fulbazo.data.remote.FirestoreWriter
 import com.vapsa.fulbazo.data.remote.getEnum
 import com.vapsa.fulbazo.data.remote.snapshotFlow
 import com.vapsa.fulbazo.domain.model.InvitationStatus
@@ -24,6 +24,7 @@ import javax.inject.Singleton
 @Singleton
 class FirestoreInvitationRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
+    private val writer: FirestoreWriter,
 ) : InvitationRepository {
 
     private val invitations get() = firestore.collection(Collections.INVITATIONS)
@@ -37,9 +38,9 @@ class FirestoreInvitationRepository @Inject constructor(
         matchId: String,
         fromUserId: String,
         toUserIds: Collection<String>,
-    ): Result<Unit> = firestoreResult(TAG) {
+    ): Result<Unit> = writer.write(TAG) {
         val targets = toUserIds.filter { it != fromUserId }.distinct()
-        if (targets.isEmpty()) return@firestoreResult
+        if (targets.isEmpty()) return@write
         firestore.runTransaction<Unit> { tx ->
             // Primero todas las lecturas (Firestore lo exige), luego las escrituras.
             val refs = targets.map { invitations.document("${matchId}_$it") }
@@ -60,7 +61,7 @@ class FirestoreInvitationRepository @Inject constructor(
         }.await()
     }
 
-    override suspend fun respond(invitationId: String, accept: Boolean): Result<Unit> = firestoreResult(TAG) {
+    override suspend fun respond(invitationId: String, accept: Boolean): Result<Unit> = writer.write(TAG) {
         val status = if (accept) InvitationStatus.ACCEPTED else InvitationStatus.DECLINED
         invitations.document(invitationId).update("estado", status.name).await()
     }

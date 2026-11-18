@@ -4,7 +4,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.vapsa.fulbazo.data.remote.Collections
-import com.vapsa.fulbazo.data.remote.firestoreResult
+import com.vapsa.fulbazo.data.remote.FirestoreWriter
 import com.vapsa.fulbazo.data.remote.getEnum
 import com.vapsa.fulbazo.data.remote.snapshotFlow
 import com.vapsa.fulbazo.domain.model.JoinRequest
@@ -24,6 +24,7 @@ import javax.inject.Singleton
 @Singleton
 class FirestoreJoinRequestRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
+    private val writer: FirestoreWriter,
 ) : JoinRequestRepository {
 
     private val requests get() = firestore.collection(Collections.JOIN_REQUESTS)
@@ -38,7 +39,7 @@ class FirestoreJoinRequestRepository @Inject constructor(
             snapshot.documents.mapNotNull { it.toJoinRequest() }.sortedByDescending { it.createdAt }
         }
 
-    override suspend fun sendRequest(matchId: String, userId: String): Result<Unit> = firestoreResult(TAG) {
+    override suspend fun sendRequest(matchId: String, userId: String): Result<Unit> = writer.write(TAG) {
         val hostId = firestore.collection(Collections.MATCHES).document(matchId).get().await()
             .getString("anfitrionId") ?: throw NoSuchElementException("El partido no existe")
         firestore.runTransaction<Unit> { tx ->
@@ -62,7 +63,7 @@ class FirestoreJoinRequestRepository @Inject constructor(
         }.await()
     }
 
-    override suspend fun cancelRequest(requestId: String): Result<Unit> = firestoreResult(TAG) {
+    override suspend fun cancelRequest(requestId: String): Result<Unit> = writer.write(TAG) {
         firestore.runTransaction<Unit> { tx ->
             val ref = requests.document(requestId)
             check(tx.get(ref).getString("estado") == JoinRequestStatus.PENDING.name) {
@@ -73,7 +74,7 @@ class FirestoreJoinRequestRepository @Inject constructor(
         }.await()
     }
 
-    override suspend fun respond(requestId: String, accept: Boolean): Result<Unit> = firestoreResult(TAG) {
+    override suspend fun respond(requestId: String, accept: Boolean): Result<Unit> = writer.write(TAG) {
         firestore.runTransaction<Unit> { tx ->
             val ref = requests.document(requestId)
             check(tx.get(ref).getString("estado") == JoinRequestStatus.PENDING.name) {

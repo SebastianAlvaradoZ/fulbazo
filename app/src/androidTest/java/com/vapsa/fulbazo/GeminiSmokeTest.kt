@@ -9,7 +9,9 @@ import com.vapsa.fulbazo.domain.model.CommunityStats
 import com.vapsa.fulbazo.domain.model.PlayerComment
 import com.vapsa.fulbazo.domain.model.Position
 import com.vapsa.fulbazo.domain.model.TeamPlayer
+import com.vapsa.fulbazo.domain.repository.ConnectivityMonitor
 import java.time.LocalDateTime
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -28,7 +30,12 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GeminiSmokeTest {
 
-    private val gemini = GeminiAiRepository()
+    /** En esta prueba hay internet: la llamada va directo a Gemini. */
+    private val gemini = GeminiAiRepository(
+        object : ConnectivityMonitor {
+            override val isOnline = MutableStateFlow(true)
+        },
+    )
 
     @Before
     fun onlyWhenRequested() {

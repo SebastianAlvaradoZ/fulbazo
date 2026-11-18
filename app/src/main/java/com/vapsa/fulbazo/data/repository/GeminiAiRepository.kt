@@ -16,8 +16,11 @@ import com.vapsa.fulbazo.domain.model.PlayerComment
 import com.vapsa.fulbazo.domain.model.TeamPlayer
 import com.vapsa.fulbazo.domain.model.TeamSplit
 import com.vapsa.fulbazo.domain.repository.AiRepository
+import com.vapsa.fulbazo.domain.repository.ConnectivityMonitor
+import com.vapsa.fulbazo.domain.repository.NoConnectionException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,7 +29,9 @@ import javax.inject.Singleton
  * Firebase: la app no tiene ninguna clave de Gemini en el código.
  */
 @Singleton
-class GeminiAiRepository @Inject constructor() : AiRepository {
+class GeminiAiRepository @Inject constructor(
+    private val connectivity: ConnectivityMonitor,
+) : AiRepository {
 
     private val ai by lazy { Firebase.ai(backend = GenerativeBackend.googleAI()) }
 
@@ -77,6 +82,8 @@ class GeminiAiRepository @Inject constructor() : AiRepository {
      * saturado (pasa a veces con picos de uso), reintenta un par de veces.
      */
     private suspend fun <T> callGemini(block: suspend () -> T): Result<T> {
+        // Sin internet ni se intenta: la pantalla muestra "Sin conexión" con Reintentar.
+        if (!connectivity.isOnline.value) return Result.failure(NoConnectionException())
         repeat(MAX_ATTEMPTS) { attempt ->
             try {
                 return Result.success(block())
@@ -89,9 +96,13 @@ class GeminiAiRepository @Inject constructor() : AiRepository {
                     return Result.failure(e)
                 }
                 delay(RETRY_DELAY_MILLIS * (attempt + 1))
+            } catch (e: IOException) {
+                // Se cortó la red a mitad de la llamada (o no hay DNS).
+                Log.w(TAG, "Gemini sin conexión", e)
+                return Result.failure(NoConnectionException())
             } catch (e: Exception) {
                 Log.w(TAG, "Error de Gemini", e)
-                return Result.failure(e)
+                return Result.failure(if (e.cause is IOException) NoConnectionException() else e)
             }
         }
         error("Sin intentos")

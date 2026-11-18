@@ -4,7 +4,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.vapsa.fulbazo.data.remote.Collections
-import com.vapsa.fulbazo.data.remote.firestoreResult
+import com.vapsa.fulbazo.data.remote.FirestoreWriter
 import com.vapsa.fulbazo.data.remote.getEnum
 import com.vapsa.fulbazo.data.remote.pairId
 import com.vapsa.fulbazo.data.remote.snapshotFlow
@@ -26,6 +26,7 @@ import javax.inject.Singleton
 @Singleton
 class FirestoreFriendRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
+    private val writer: FirestoreWriter,
 ) : FriendRepository {
 
     private val requests get() = firestore.collection(Collections.FRIEND_REQUESTS)
@@ -51,13 +52,13 @@ class FirestoreFriendRepository @Inject constructor(
     override suspend fun sendRequest(fromUserId: String, toUserId: String): Result<Unit> {
         if (fromUserId == toUserId) return Result.failure(IllegalArgumentException("No puedes agregarte"))
         // Si el otro ya me había enviado una solicitud, la acepto directamente.
-        val reverse = firestoreResult(TAG) { requests.document("${toUserId}_$fromUserId").get().await() }
+        val reverse = writer.write(TAG) { requests.document("${toUserId}_$fromUserId").get().await() }
             .getOrElse { return Result.failure(it) }
         if (reverse.exists() && reverse.getString("estado") == FriendRequestStatus.PENDING.name) {
             return respondToRequest(reverse.id, accept = true)
         }
-        return firestoreResult(TAG) {
-            if (friendships.document(pairId(fromUserId, toUserId)).get().await().exists()) return@firestoreResult
+        return writer.write(TAG) {
+            if (friendships.document(pairId(fromUserId, toUserId)).get().await().exists()) return@write
             requests.document("${fromUserId}_$toUserId").set(
                 mapOf(
                     "deId" to fromUserId,
@@ -69,7 +70,7 @@ class FirestoreFriendRepository @Inject constructor(
         }
     }
 
-    override suspend fun respondToRequest(requestId: String, accept: Boolean): Result<Unit> = firestoreResult(TAG) {
+    override suspend fun respondToRequest(requestId: String, accept: Boolean): Result<Unit> = writer.write(TAG) {
         val request = requests.document(requestId).get().await().toFriendRequest()
             ?: throw NoSuchElementException("La solicitud no existe")
         val status = if (accept) FriendRequestStatus.ACCEPTED else FriendRequestStatus.REJECTED
@@ -90,7 +91,7 @@ class FirestoreFriendRepository @Inject constructor(
         }.await()
     }
 
-    override suspend fun removeFriend(userId: String, friendId: String): Result<Unit> = firestoreResult(TAG) {
+    override suspend fun removeFriend(userId: String, friendId: String): Result<Unit> = writer.write(TAG) {
         firestore.runBatch { batch ->
             batch.delete(friendships.document(pairId(userId, friendId)))
             // Se borran las solicitudes viejas para que puedan volver a ser amigos.

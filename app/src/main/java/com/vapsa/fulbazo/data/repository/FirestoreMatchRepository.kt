@@ -5,7 +5,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.vapsa.fulbazo.data.remote.Collections
-import com.vapsa.fulbazo.data.remote.firestoreResult
+import com.vapsa.fulbazo.data.remote.FirestoreWriter
 import com.vapsa.fulbazo.data.remote.getEnum
 import com.vapsa.fulbazo.data.remote.snapshotFlow
 import com.vapsa.fulbazo.data.remote.toLocalDateTime
@@ -28,6 +28,7 @@ import javax.inject.Singleton
 @Singleton
 class FirestoreMatchRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
+    private val writer: FirestoreWriter,
 ) : MatchRepository {
 
     private val matches get() = firestore.collection(Collections.MATCHES)
@@ -35,7 +36,7 @@ class FirestoreMatchRepository @Inject constructor(
     override fun observeMatches(): Flow<List<Match>> =
         matches.snapshotFlow().map { snapshot -> snapshot.documents.mapNotNull { it.toMatch() } }
 
-    override suspend fun createMatch(hostId: String, newMatch: NewMatch): Result<Match> = firestoreResult(TAG) {
+    override suspend fun createMatch(hostId: String, newMatch: NewMatch): Result<Match> = writer.write(TAG) {
         val ref = matches.document()
         val match = Match(
             id = ref.id,
@@ -64,7 +65,7 @@ class FirestoreMatchRepository @Inject constructor(
         match
     }
 
-    override suspend fun joinMatch(matchId: String, userId: String): Result<Unit> = firestoreResult(TAG) {
+    override suspend fun joinMatch(matchId: String, userId: String): Result<Unit> = writer.write(TAG) {
         firestore.runTransaction<Unit> { tx ->
             val ref = matches.document(matchId)
             val match = tx.get(ref).toMatch() ?: throw NoSuchElementException("El partido no existe")
@@ -82,7 +83,7 @@ class FirestoreMatchRepository @Inject constructor(
         }.await()
     }
 
-    override suspend fun leaveMatch(matchId: String, userId: String): Result<Unit> = firestoreResult(TAG) {
+    override suspend fun leaveMatch(matchId: String, userId: String): Result<Unit> = writer.write(TAG) {
         firestore.runTransaction<Unit> { tx ->
             val ref = matches.document(matchId)
             val match = tx.get(ref).toMatch() ?: throw NoSuchElementException("El partido no existe")

@@ -18,6 +18,7 @@ import com.vapsa.fulbazo.domain.model.NewUser
 import com.vapsa.fulbazo.domain.model.ProfileUpdate
 import com.vapsa.fulbazo.domain.model.User
 import com.vapsa.fulbazo.domain.repository.AuthRepository
+import com.vapsa.fulbazo.domain.repository.ConnectivityMonitor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,6 +39,7 @@ class FirebaseAuthRepository @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     private val photoEncoder: ProfilePhotoEncoder,
+    private val connectivity: ConnectivityMonitor,
 ) : AuthRepository {
 
     private val users get() = firestore.collection(USERS)
@@ -132,9 +134,12 @@ class FirebaseAuthRepository @Inject constructor(
         _currentUser.value = null
     }
 
-    /** Traduce los errores de Firebase a [AuthError]; la pantalla muestra el texto en español. */
+    /**
+     * Traduce los errores de Firebase a [AuthError]; la pantalla muestra el texto en
+     * español. Sin internet ni lo intenta: avisa enseguida "Sin conexión".
+     */
     private inline fun runCatchingAuth(isRegister: Boolean, block: () -> AuthResult): AuthResult = try {
-        block()
+        if (!connectivity.isOnline.value) AuthResult.Failure(AuthError.NETWORK) else block()
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
