@@ -372,4 +372,5 @@
     <!-- Sin conexión -->
     <string name="offline_banner">Sin conexión. Algunos datos pueden no estar al día.</string>
     <string name="ai_offline">Sin conexión. Conéctate a internet e inténtalo de nuevo.</string>
+    <string name="score_out_of">de %1$d</string>
 </resources>
