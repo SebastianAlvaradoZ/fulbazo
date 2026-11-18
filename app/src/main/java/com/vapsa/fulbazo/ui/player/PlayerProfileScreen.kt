@@ -2,6 +2,7 @@ package com.vapsa.fulbazo.ui.player
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -33,6 +34,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,6 +44,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -57,13 +60,18 @@ import com.vapsa.fulbazo.domain.model.SkillScale
 import com.vapsa.fulbazo.ui.components.EmptyState
 import com.vapsa.fulbazo.ui.components.ErrorState
 import com.vapsa.fulbazo.ui.components.FulbazoCard
+import com.vapsa.fulbazo.ui.components.IconTag
 import com.vapsa.fulbazo.ui.components.LoadingState
 import com.vapsa.fulbazo.ui.components.PhaseCrossfade
+import com.vapsa.fulbazo.ui.components.ProfileHeader
+import com.vapsa.fulbazo.ui.components.ScoreRing
 import com.vapsa.fulbazo.ui.components.ScreenPhase
-import com.vapsa.fulbazo.ui.components.UserAvatar
 import com.vapsa.fulbazo.ui.match.formatMatchDate
 import com.vapsa.fulbazo.ui.reviews.PlayerReviewsSection
 import com.vapsa.fulbazo.ui.stats.labelRes
+import com.vapsa.fulbazo.ui.theme.OnBrand
+import com.vapsa.fulbazo.ui.theme.Spacing
+import com.vapsa.fulbazo.ui.theme.brandGradient
 
 @Composable
 fun PlayerProfileRoute(
@@ -132,6 +140,7 @@ fun PlayerProfileScreen(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
+            // Verde, para que siga sin cortes en la portada del perfil.
             TopAppBar(
                 title = { Text(stringResource(R.string.player_title)) },
                 navigationIcon = {
@@ -139,6 +148,12 @@ fun PlayerProfileScreen(
                         Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.action_back))
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = OnBrand,
+                    navigationIconContentColor = OnBrand,
+                ),
+                modifier = Modifier.background(brandGradient()),
             )
         },
     ) { innerPadding ->
@@ -162,21 +177,20 @@ fun PlayerProfileScreen(
                 )
                 ScreenPhase.EMPTY -> EmptyState(stringResource(R.string.player_not_found), contentModifier)
                 ScreenPhase.CONTENT -> if (player != null) Column(
-                    modifier = contentModifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(20.dp),
+                    modifier = contentModifier.verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    UserAvatar(photoUri = player.photoUri, contentDescription = null, name = player.fullName)
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(player.nickname, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                        Text(
-                            "${player.fullName} · ${player.district}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+                    ProfileHeader(
+                        nickname = player.nickname,
+                        subtitle = "${player.fullName} · ${player.district}",
+                        photoUri = player.photoUri,
+                        name = player.fullName,
+                    )
+                    Column(
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = Spacing.md),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                    ) {
                     PositionChips(uiState)
                     Text(
                         stringResource(R.string.player_matches_together, uiState.matchesTogether),
@@ -186,6 +200,7 @@ fun PlayerProfileScreen(
                     SelfCard(uiState)
                     CommunityCard(uiState)
                     reviewsSection()
+                    }
                 }
             }
         }
@@ -196,14 +211,15 @@ fun PlayerProfileScreen(
 @Composable
 private fun PositionChips(uiState: PlayerProfileUiState) {
     val self = uiState.self ?: return
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
-        AssistChip(onClick = {}, label = { Text(stringResource(self.mainPosition.labelRes)) })
-        self.secondaryPosition?.let { AssistChip(onClick = {}, label = { Text(stringResource(it.labelRes)) }) }
-        AssistChip(
-            onClick = {},
-            label = {
-                Text(stringResource(R.string.player_foot, stringResource(self.dominantFoot.labelRes).lowercase()))
-            },
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        IconTag(R.drawable.ic_sports_soccer, stringResource(self.mainPosition.labelRes))
+        self.secondaryPosition?.let { IconTag(R.drawable.ic_sports_soccer, stringResource(it.labelRes)) }
+        IconTag(
+            R.drawable.ic_directions_run,
+            stringResource(R.string.player_foot, stringResource(self.dominantFoot.labelRes).lowercase()),
         )
     }
 }
@@ -340,13 +356,22 @@ private fun <S : Enum<S>> RatingsSection(
     label: @Composable (S) -> String,
 ) {
     OverallRow(title, ratings.overall, stringResource(R.string.profile_votes, ratings.votes))
-    ratings.averages.forEach { (skill, value) ->
-        Column {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(label(skill), style = MaterialTheme.typography.bodyMedium)
-                Text(stringResource(R.string.skill_value_decimal, value), style = MaterialTheme.typography.bodyMedium)
+    // Dos habilidades por fila: la tarjeta queda más compacta y se compara mejor.
+    ratings.averages.entries.chunked(2).forEach { pair ->
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+            pair.forEach { (skill, value) ->
+                Column(Modifier.weight(1f)) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(label(skill), style = MaterialTheme.typography.bodySmall, maxLines = 1)
+                        Text(
+                            stringResource(R.string.skill_value_decimal, value),
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
+                    AnimatedSkillBar(fraction = (value / SkillScale.MAX).toFloat())
+                }
             }
-            AnimatedSkillBar(fraction = (value / SkillScale.MAX).toFloat())
+            if (pair.size == 1) Spacer(Modifier.weight(1f))
         }
     }
 }
@@ -374,12 +399,7 @@ private fun OverallRow(label: String, value: Double, detail: String? = null) {
                 Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        Text(
-            stringResource(R.string.stats_overall_value, value),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-        )
+        ScoreRing(value)
     }
 }
 

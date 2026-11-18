@@ -3,6 +3,8 @@ package com.vapsa.fulbazo.ui.profile
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,9 +40,12 @@ import com.vapsa.fulbazo.domain.model.CommunityStats
 import com.vapsa.fulbazo.domain.model.SelfAssessment
 import com.vapsa.fulbazo.domain.model.User
 import com.vapsa.fulbazo.ui.components.FulbazoCard
-import com.vapsa.fulbazo.ui.components.UserAvatar
+import com.vapsa.fulbazo.ui.components.IconTag
+import com.vapsa.fulbazo.ui.components.ProfileHeader
+import com.vapsa.fulbazo.ui.components.ScoreRing
 import com.vapsa.fulbazo.ui.stats.labelRes
 import com.vapsa.fulbazo.ui.theme.FulbazoTheme
+import com.vapsa.fulbazo.ui.theme.Spacing
 import java.time.LocalDate
 
 @Composable
@@ -87,26 +92,21 @@ fun ProfileScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(20.dp),
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        UserAvatar(photoUri = user.photoUri, contentDescription = null, name = user.fullName)
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            // El apodo es el nombre principal del jugador.
-            Text(
-                text = user.nickname,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(
-                text = "${user.fullName} · ${user.district}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
+        // Portada verde con el avatar; el apodo es el nombre principal del jugador.
+        ProfileHeader(
+            nickname = user.nickname,
+            subtitle = "${user.fullName} · ${user.district}",
+            photoUri = user.photoUri,
+            name = user.fullName,
+        )
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = Spacing.md),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
         SelfStatsCard(self)
         CommunityStatsCard(community)
 
@@ -125,6 +125,7 @@ fun ProfileScreen(
             colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
         ) {
             Text(stringResource(R.string.profile_logout))
+        }
         }
     }
 
@@ -146,6 +147,7 @@ fun ProfileScreen(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SelfStatsCard(self: SelfAssessment?) {
     StatsCard(title = stringResource(R.string.profile_how_i_see_me)) {
@@ -156,14 +158,13 @@ private fun SelfStatsCard(self: SelfAssessment?) {
             )
             return@StatsCard
         }
-        Text(
-            text = stringResource(
-                R.string.profile_position_line,
-                stringResource(self.mainPosition.labelRes),
-                stringResource(self.dominantFoot.labelRes).lowercase(),
-            ),
-            style = MaterialTheme.typography.bodyLarge,
-        )
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            IconTag(R.drawable.ic_sports_soccer, stringResource(self.mainPosition.labelRes))
+            IconTag(
+                R.drawable.ic_directions_run,
+                stringResource(R.string.player_foot, stringResource(self.dominantFoot.labelRes).lowercase()),
+            )
+        }
         OverallRow(stringResource(R.string.stats_overall_field), self.fieldOverall)
         self.goalkeeperOverall?.let { OverallRow(stringResource(R.string.stats_overall_goalkeeper), it) }
     }
@@ -228,12 +229,7 @@ private fun OverallRow(label: String, value: Double, detail: String? = null) {
                 )
             }
         }
-        Text(
-            text = stringResource(R.string.stats_overall_value, value),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-        )
+        ScoreRing(value)
     }
 }
 
