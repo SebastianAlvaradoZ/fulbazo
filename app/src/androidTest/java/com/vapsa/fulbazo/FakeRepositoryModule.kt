@@ -13,10 +13,12 @@ import com.vapsa.fulbazo.data.repository.FakePlayerRepository
 import com.vapsa.fulbazo.data.repository.FakeStatsRepository
 import com.vapsa.fulbazo.di.AiModule
 import com.vapsa.fulbazo.di.AuthModule
+import com.vapsa.fulbazo.di.ConnectivityModule
 import com.vapsa.fulbazo.di.RepositoryModule
 import com.vapsa.fulbazo.domain.repository.AiRepository
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.repository.CommentRepository
+import com.vapsa.fulbazo.domain.repository.ConnectivityMonitor
 import com.vapsa.fulbazo.domain.repository.CourtRepository
 import com.vapsa.fulbazo.domain.repository.FriendRepository
 import com.vapsa.fulbazo.domain.repository.GroupRepository
@@ -39,7 +41,10 @@ import javax.inject.Singleton
  * a Gemini). Cada prueba empieza con datos nuevos.
  */
 @Module
-@TestInstallIn(components = [SingletonComponent::class], replaces = [AuthModule::class, RepositoryModule::class, AiModule::class])
+@TestInstallIn(
+    components = [SingletonComponent::class],
+    replaces = [AuthModule::class, RepositoryModule::class, AiModule::class, ConnectivityModule::class],
+)
 object FakeRepositoryModule {
 
     @Provides
@@ -92,4 +97,12 @@ object FakeRepositoryModule {
     @Provides
     @Singleton
     fun provideAiRepository(): AiRepository = FakeAiRepository()
+
+    /** Hay internet salvo que la prueba lo apague con [FakeConnectivityMonitor.isOnline]. */
+    @Provides
+    @Singleton
+    fun provideFakeConnectivityMonitor(): FakeConnectivityMonitor = FakeConnectivityMonitor()
+
+    @Provides
+    fun provideConnectivityMonitor(monitor: FakeConnectivityMonitor): ConnectivityMonitor = monitor
 }
