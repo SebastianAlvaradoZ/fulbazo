@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Logo de Fulbazo para la pantalla de inicio de sesión. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#FF2E7D32" android:pathData="M4.00,54.00 A50,50 0 1,1 104.00,54.00 A50,50 0 1,1 4.00,54.00 Z" />
+    <!-- La pelota y la lupa, más grandes que en el ícono (aquí no hay zona segura). -->
+    <group android:pivotX="54" android:pivotY="54" android:scaleX="1.35" android:scaleY="1.35" android:translateX="2" android:translateY="2">
+        <group>
+            <clip-path android:pathData="M29.00,49.00 A20,20 0 1,1 69.00,49.00 A20,20 0 1,1 29.00,49.00 Z" />
+            <path android:fillColor="#FFFFFFFF" android:pathData="M29.00,49.00 A20,20 0 1,1 69.00,49.00 A20,20 0 1,1 29.00,49.00 Z" />
+            <path android:fillColor="#FF1B2B1E" android:pathData="M49.00,43.40 L54.33,47.27 L52.29,53.53 L45.71,53.53 L43.67,47.27 Z" />
+            <path android:fillColor="#FF1B2B1E" android:pathData="M49.00,34.70 L44.05,31.11 L45.94,25.29 L52.06,25.29 L53.95,31.11 Z M62.60,44.58 L64.49,38.77 L70.60,38.77 L72.49,44.58 L67.55,48.17 Z M57.41,60.57 L63.52,60.57 L65.41,66.38 L60.46,69.98 L55.52,66.38 Z M40.59,60.57 L42.48,66.38 L37.54,69.98 L32.59,66.38 L34.48,60.57 Z M35.40,44.58 L30.45,48.17 L25.51,44.58 L27.40,38.77 L33.51,38.77 Z" />
+            <path android:strokeColor="#FF1B2B1E" android:strokeWidth="1.6" android:strokeLineCap="round" android:pathData="M49.00,43.40 L49.00,34.70 M54.33,47.27 L62.60,44.58 M52.29,53.53 L57.41,60.57 M45.71,53.53 L40.59,60.57 M43.67,47.27 L35.40,44.58" />
+        </group>
+        <path android:strokeColor="#FF1B2B1E" android:strokeWidth="1.8" android:pathData="M29.00,49.00 A20,20 0 1,1 69.00,49.00 A20,20 0 1,1 29.00,49.00 Z" />
+        <path android:fillColor="#B3FFFFFF" android:pathData="M58.00,67.00 A9,9 0 1,1 76.00,67.00 A9,9 0 1,1 58.00,67.00 Z" />
+        <path android:strokeColor="#FFFF8F00" android:strokeWidth="3.4" android:pathData="M58.00,67.00 A9,9 0 1,1 76.00,67.00 A9,9 0 1,1 58.00,67.00 Z" />
+        <path android:strokeColor="#FFFF8F00" android:strokeWidth="5" android:strokeLineCap="round" android:pathData="M74.98,74.98 L76.5,76.5" />
+    </group>
+</vector>
