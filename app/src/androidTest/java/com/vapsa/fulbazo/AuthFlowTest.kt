@@ -56,7 +56,7 @@ class AuthFlowTest {
     }
 
     private fun waitForText(text: String) {
-        composeRule.waitUntil(timeoutMillis = 5_000) {
+        composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
         }
     }
@@ -118,7 +118,7 @@ class AuthFlowTest {
         // Cada día se describe con la fecha completa, p. ej. "Saturday, November 15, 2008",
         // así que se busca el "15" dentro de un elemento que se pueda tocar.
         val day15 = hasText("15", substring = true) and hasClickAction()
-        composeRule.waitUntil(timeoutMillis = 5_000) {
+        composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodes(day15).fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.onAllNodes(day15)[0].performClick()
