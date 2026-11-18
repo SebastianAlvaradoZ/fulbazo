@@ -1,19 +1,26 @@
 package com.vapsa.fulbazo.ui.match.detail
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -27,9 +34,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,10 +48,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,6 +70,9 @@ import com.vapsa.fulbazo.ui.components.UserAvatar
 import com.vapsa.fulbazo.ui.match.MatchCard
 import com.vapsa.fulbazo.ui.match.teams.TeamBuilderSection
 import com.vapsa.fulbazo.ui.reviews.RequestAiSummary
+import com.vapsa.fulbazo.ui.theme.OnBrand
+import com.vapsa.fulbazo.ui.theme.Spacing
+import com.vapsa.fulbazo.ui.theme.brandGradient
 
 @Composable
 fun MatchDetailRoute(
@@ -143,7 +158,28 @@ fun MatchDetailScreen(
                         Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.action_back))
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = OnBrand,
+                    navigationIconContentColor = OnBrand,
+                ),
+                modifier = Modifier.background(brandGradient()),
             )
+        },
+        // El botón principal (unirse, cancelar, salir) queda fijo abajo.
+        bottomBar = {
+            if (uiState.match != null && !uiState.isFinished && uiState.role != ViewerRole.HOST) {
+                Surface(shadowElevation = 8.dp, tonalElevation = 2.dp) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                    ) {
+                        ViewerActions(uiState, actions)
+                    }
+                }
+            }
         },
     ) { innerPadding ->
         val contentModifier = Modifier
@@ -165,9 +201,16 @@ fun MatchDetailScreen(
                     contentModifier,
                     iconRes = R.drawable.ic_matches,
                 )
-                ScreenPhase.CONTENT -> if (match != null) LazyColumn(
-                    modifier = contentModifier,
-                    contentPadding = PaddingValues(16.dp),
+                ScreenPhase.CONTENT -> if (match != null) Box(contentModifier) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(72.dp)
+                        .background(brandGradient()),
+                )
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(Spacing.md),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     item { MatchCard(match) }
@@ -181,8 +224,6 @@ fun MatchDetailScreen(
                                 }
                             }
                         }
-                    } else {
-                        item { ViewerActions(uiState, actions) }
                     }
     
                     if (uiState.role == ViewerRole.HOST && !uiState.isFinished) {
@@ -213,9 +254,54 @@ fun MatchDetailScreen(
                     item {
                         SectionTitle(stringResource(R.string.match_detail_players, uiState.playersCount, match.slots))
                     }
-                    items(uiState.players, key = { it.player.id }) { item ->
-                        PlayerRow(item.player, onClick = { actions.onOpenPlayer(item.player.id) }) {
-                            if (item.isHost) AssistChip(onClick = {}, label = { Text(stringResource(R.string.match_detail_host_tag)) })
+                    item { PlayersGrid(uiState.players, onOpenPlayer = actions.onOpenPlayer) }
+                }
+                }
+            }
+        }
+    }
+}
+
+/** Jugadores inscritos en una grilla de tres columnas: avatar, apodo y si es el anfitrión. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun PlayersGrid(players: List<PlayerItem>, onOpenPlayer: (String) -> Unit) {
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val tileWidth = maxWidth / 3
+        FlowRow(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+            players.forEach { item ->
+                Column(
+                    modifier = Modifier
+                        .width(tileWidth)
+                        .clip(MaterialTheme.shapes.medium)
+                        .clickable { onOpenPlayer(item.player.id) }
+                        .padding(vertical = Spacing.sm),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+                ) {
+                    UserAvatar(
+                        photoUri = item.player.photoUri,
+                        contentDescription = null,
+                        size = 56.dp,
+                        name = item.player.fullName,
+                    )
+                    Text(
+                        item.player.nickname,
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    if (item.isHost) {
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                        ) {
+                            Text(
+                                stringResource(R.string.match_detail_host_tag),
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.padding(horizontal = Spacing.sm, vertical = 2.dp),
+                            )
                         }
                     }
                 }
