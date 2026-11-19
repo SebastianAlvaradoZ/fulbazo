@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +49,7 @@ import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.PlayerRelation
 import com.vapsa.fulbazo.domain.model.PlayerSummary
 import com.vapsa.fulbazo.ui.components.EmptyState
+import com.vapsa.fulbazo.ui.components.FulbazoCard
 import com.vapsa.fulbazo.ui.components.LoadingState
 import com.vapsa.fulbazo.ui.components.UserAvatar
 
@@ -233,7 +233,7 @@ private fun RequestsList(uiState: FriendsUiState, actions: FriendsActions) {
     ) {
         items(uiState.incomingRequests, key = { it.requestId }) { request ->
             val busy = request.requestId in uiState.busyIds
-            Card(
+            FulbazoCard(
                 Modifier
                     .fillMaxWidth()
                     .animateItem(),
@@ -278,7 +278,7 @@ private fun GroupsList(uiState: FriendsUiState, actions: FriendsActions) {
             item { EmptyState(stringResource(R.string.friends_groups_empty), iconRes = R.drawable.ic_group) }
         }
         items(uiState.groups, key = { it.id }) { group ->
-            Card(
+            FulbazoCard(
                 Modifier
                     .fillMaxWidth()
                     .animateItem()
@@ -337,7 +337,7 @@ private fun PlayerLazyList(
 @Composable
 private fun PlayerRow(player: PlayerSummary, subtitle: String, modifier: Modifier = Modifier) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-        UserAvatar(photoUri = player.photoUri, contentDescription = null, size = 44.dp)
+        UserAvatar(photoUri = player.photoUri, contentDescription = null, size = 44.dp, name = player.fullName)
         Spacer(Modifier.width(12.dp))
         Column {
             Text(player.nickname, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)

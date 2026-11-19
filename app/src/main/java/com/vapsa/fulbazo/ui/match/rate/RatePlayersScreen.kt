@@ -171,7 +171,7 @@ fun RatePlayersScreen(
 @Composable
 private fun TeammateRow(teammate: TeammateItem, onRate: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        UserAvatar(photoUri = teammate.player.photoUri, contentDescription = null, size = 44.dp)
+        UserAvatar(photoUri = teammate.player.photoUri, contentDescription = null, size = 44.dp, name = teammate.player.fullName)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(teammate.player.nickname, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)

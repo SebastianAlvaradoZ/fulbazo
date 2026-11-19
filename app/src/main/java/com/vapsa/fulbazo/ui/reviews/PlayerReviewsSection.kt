@@ -143,7 +143,7 @@ fun AiSummaryCard(
 @Composable
 private fun CommentRow(comment: CommentItem, reported: Boolean, onReport: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-        UserAvatar(photoUri = comment.authorPhotoUri, contentDescription = null, size = 36.dp)
+        UserAvatar(photoUri = comment.authorPhotoUri, contentDescription = null, size = 36.dp, name = comment.authorNickname)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(

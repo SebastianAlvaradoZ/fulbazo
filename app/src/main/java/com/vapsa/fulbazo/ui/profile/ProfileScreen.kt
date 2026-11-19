@@ -14,7 +14,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -38,6 +37,7 @@ import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.CommunityStats
 import com.vapsa.fulbazo.domain.model.SelfAssessment
 import com.vapsa.fulbazo.domain.model.User
+import com.vapsa.fulbazo.ui.components.FulbazoCard
 import com.vapsa.fulbazo.ui.components.UserAvatar
 import com.vapsa.fulbazo.ui.stats.labelRes
 import com.vapsa.fulbazo.ui.theme.FulbazoTheme
@@ -92,7 +92,7 @@ fun ProfileScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        UserAvatar(photoUri = user.photoUri, contentDescription = null)
+        UserAvatar(photoUri = user.photoUri, contentDescription = null, name = user.fullName)
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             // El apodo es el nombre principal del jugador.
             Text(
@@ -200,7 +200,7 @@ private fun CommunityStatsCard(community: CommunityStats) {
 
 @Composable
 private fun StatsCard(title: String, content: @Composable () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    FulbazoCard(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),

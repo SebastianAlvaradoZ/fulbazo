@@ -178,7 +178,7 @@ fun GroupEditorScreen(
                 ) {
                     Checkbox(checked = checked, onCheckedChange = null, enabled = enabled)
                     Spacer(Modifier.width(8.dp))
-                    UserAvatar(photoUri = friend.photoUri, contentDescription = null, size = 40.dp)
+                    UserAvatar(photoUri = friend.photoUri, contentDescription = null, size = 40.dp, name = friend.fullName)
                     Spacer(Modifier.width(12.dp))
                     Column {
                         Text(friend.nickname, style = MaterialTheme.typography.titleMedium)

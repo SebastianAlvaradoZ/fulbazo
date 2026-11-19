@@ -19,7 +19,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -57,6 +56,7 @@ import com.vapsa.fulbazo.domain.model.PlayerRelation
 import com.vapsa.fulbazo.domain.model.SkillScale
 import com.vapsa.fulbazo.ui.components.EmptyState
 import com.vapsa.fulbazo.ui.components.ErrorState
+import com.vapsa.fulbazo.ui.components.FulbazoCard
 import com.vapsa.fulbazo.ui.components.LoadingState
 import com.vapsa.fulbazo.ui.components.PhaseCrossfade
 import com.vapsa.fulbazo.ui.components.ScreenPhase
@@ -168,7 +168,7 @@ fun PlayerProfileScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    UserAvatar(photoUri = player.photoUri, contentDescription = null)
+                    UserAvatar(photoUri = player.photoUri, contentDescription = null, name = player.fullName)
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(player.nickname, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                         Text(
@@ -353,7 +353,7 @@ private fun <S : Enum<S>> RatingsSection(
 
 @Composable
 private fun StatsCard(title: String, content: @Composable () -> Unit) {
-    Card(Modifier.fillMaxWidth()) {
+    FulbazoCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             content()

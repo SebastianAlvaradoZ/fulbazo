@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,6 +37,7 @@ import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.InvitationStatus
 import com.vapsa.fulbazo.ui.components.EmptyState
 import com.vapsa.fulbazo.ui.components.ErrorState
+import com.vapsa.fulbazo.ui.components.FulbazoCard
 import com.vapsa.fulbazo.ui.components.LoadingState
 import com.vapsa.fulbazo.ui.components.PhaseCrossfade
 import com.vapsa.fulbazo.ui.components.ScreenPhase
@@ -160,7 +160,7 @@ private fun InvitationCardContent(
     )
     val match = item.match
     if (match == null) {
-        Card(Modifier.fillMaxWidth()) {
+        FulbazoCard(Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.invitations_match_gone), Modifier.padding(16.dp))
         }
         return

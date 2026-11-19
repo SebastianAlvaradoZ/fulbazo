@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -51,6 +50,7 @@ import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.PlayerSummary
 import com.vapsa.fulbazo.ui.components.EmptyState
 import com.vapsa.fulbazo.ui.components.ErrorState
+import com.vapsa.fulbazo.ui.components.FulbazoCard
 import com.vapsa.fulbazo.ui.components.LoadingState
 import com.vapsa.fulbazo.ui.components.PhaseCrossfade
 import com.vapsa.fulbazo.ui.components.ScreenPhase
@@ -294,7 +294,7 @@ private fun RequestCard(
     onOpenPlayer: (String) -> Unit,
     summary: @Composable () -> Unit = {},
 ) {
-    Card(modifier.fillMaxWidth()) {
+    FulbazoCard(modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             PlayerRow(
                 request.player,
@@ -330,7 +330,7 @@ private fun PlayerRow(
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        UserAvatar(photoUri = player.photoUri, contentDescription = null, size = 44.dp)
+        UserAvatar(photoUri = player.photoUri, contentDescription = null, size = 44.dp, name = player.fullName)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(player.nickname, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
