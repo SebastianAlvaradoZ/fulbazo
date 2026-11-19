@@ -72,7 +72,7 @@ class ScreenshotsTest {
         composeRule.onNode(hasText("Contraseña") and hasSetTextAction()).performTextInput("demo123")
         composeRule.onNodeWithText("Iniciar sesión").performClick()
         waitForText("Partidos cercanos")
-        Thread.sleep(4_000) // Que cargue el mapa.
+        Thread.sleep(9_000) // Que cargue el mapa.
         capture("mapa")
 
         composeRule.onNode(hasTestTag(MAP_MATCHES_LIST_TAG)).performScrollToNode(hasText("Losa Deportiva Umacollo"))

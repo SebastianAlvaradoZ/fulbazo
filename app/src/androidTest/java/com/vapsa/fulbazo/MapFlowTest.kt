@@ -40,7 +40,7 @@ class MapFlowTest {
     @Inject
     lateinit var backgroundJobs: AppBackgroundJobs
 
-    private val distanceRegex = Regex("""· a \d+([.,]\d)? (km|m)$""")
+    private val distanceRegex = Regex("""^a \d+([.,]\d)? (km|m)$""")
     private val hasDistance = SemanticsMatcher("muestra la distancia") { node ->
         node.config.getOrNull(SemanticsProperties.Text).orEmpty().any { distanceRegex.containsMatchIn(it.text) }
     }
@@ -73,7 +73,7 @@ class MapFlowTest {
         waitForText("Ordenados por distancia", timeoutMillis = 20_000)
         composeRule.onAllNodesWithText("Activa tu ubicación", substring = true).fetchSemanticsNodes()
             .let { check(it.isEmpty()) { "Con permiso no debe aparecer el aviso de ubicación" } }
-        // Cada tarjeta muestra la distancia, p. ej. "· a 2.4 km" o "· a 850 m".
+        // Cada tarjeta muestra la distancia en un chip, p. ej. "a 2.4 km" o "a 850 m".
         composeRule.waitUntil(5_000) {
             composeRule.onAllNodes(hasDistance).fetchSemanticsNodes().isNotEmpty()
         }
