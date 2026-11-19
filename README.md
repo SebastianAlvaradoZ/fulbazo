@@ -75,7 +75,11 @@ Proyecto final del curso de Desarrollo de Aplicaciones Móviles.
 - **Diseño "verde cancha":** tema propio de Material 3 con verde césped
   (`#2E7D32`) y acento naranja (`#FF8F00`), modo claro y oscuro, esquinas
   redondeadas y un logo propio (pelota con lupa) como ícono adaptable, con
-  versión monocromática para los íconos temáticos de Android 13+.
+  versión monocromática para los íconos temáticos de Android 13+. Títulos en
+  **Poppins** y textos en **Inter** (incluidas en la app, licencia OFL en
+  `licencias/`), tarjetas blancas con sombra suave, avatares con las iniciales
+  del jugador y tarjetas de partido con la fecha en grande, chips de hora,
+  distancia y nivel (con color) y una barra de cupos.
 
 > Cuentas, partidos, solicitudes, amigos, grupos, invitaciones y estadísticas
 > se guardan en **Firebase** y se actualizan en tiempo real entre teléfonos. Las
