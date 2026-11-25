@@ -373,4 +373,24 @@
     <string name="offline_banner">Sin conexión. Algunos datos pueden no estar al día.</string>
     <string name="ai_offline">Sin conexión. Conéctate a internet e inténtalo de nuevo.</string>
     <string name="score_out_of">de %1$d</string>
+
+    <!-- Widget de la pantalla de inicio -->
+    <string name="widget_name">Mi próximo partido</string>
+    <string name="widget_description">Tu próximo partido, sus cupos libres y accesos para crear un partido o ver tus invitaciones</string>
+    <string name="widget_loading">Cargando tu próximo partido…</string>
+    <string name="widget_signed_out">Inicia sesión para ver tu próximo partido</string>
+    <string name="widget_empty">No tienes partidos próximos</string>
+    <string name="widget_today">Hoy</string>
+    <string name="widget_tomorrow">Mañana</string>
+    <string name="widget_updated">Actualizado %1$s</string>
+    <string name="widget_refresh">Actualizar</string>
+    <string name="widget_invitations_pending">Invitaciones pendientes: %1$d</string>
+    <string name="widget_match_description">Próximo partido en %1$s, %2$s a las %3$s. Cupos libres: %4$d</string>
+    <!-- Ejemplo que se ve en el selector de widgets -->
+    <string name="widget_preview_weekday">SÁB</string>
+    <string name="widget_preview_day">28</string>
+    <string name="widget_preview_month">NOV</string>
+    <string name="widget_preview_court">Losa Deportiva Umacollo</string>
+    <string name="widget_preview_time">Mañana, 19:00</string>
+    <string name="widget_preview_spots">3 de 10 cupos libres</string>
 </resources>

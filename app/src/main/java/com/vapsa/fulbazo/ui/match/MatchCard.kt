@@ -234,10 +234,10 @@ private fun SpotsBar(item: MatchItem, spotsLeft: Int, finished: Boolean) {
     }
 }
 
-private val peru = Locale.forLanguageTag("es-PE")
-private val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", peru)
-private val weekdayFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE", peru)
-private val monthFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM", peru)
+internal val peru: Locale = Locale.forLanguageTag("es-PE")
+internal val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", peru)
+internal val weekdayFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE", peru)
+internal val monthFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM", peru)
 
 /** "jue." a "JUE". */
-private fun String.shortLabel(): String = trimEnd('.').uppercase(peru)
+internal fun String.shortLabel(): String = trimEnd('.').uppercase(peru)

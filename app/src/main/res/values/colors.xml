@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="fulbazo_background">#FFF7FBF1</color>
+
+    <!-- Vista previa del widget: los mismos tonos que ui/theme/Color.kt. -->
+    <color name="widget_surface">#FFF7FBF1</color>
+    <color name="widget_on_surface">#FF181D17</color>
+    <color name="widget_on_surface_variant">#FF424940</color>
+    <color name="widget_surface_variant">#FFDEE5D8</color>
+    <color name="widget_primary">#FF2E7D32</color>
+    <color name="widget_on_primary">#FFFFFFFF</color>
+    <color name="widget_primary_container">#FFB6F2AF</color>
+    <color name="widget_on_primary_container">#FF002204</color>
+    <color name="widget_secondary_container">#FFD5E8CF</color>
+    <color name="widget_on_secondary_container">#FF101F10</color>
 </resources>
