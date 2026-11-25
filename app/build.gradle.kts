@@ -123,6 +123,11 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
+    // Widget de la pantalla de inicio: Glance, refresco periódico y último estado guardado.
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.datastore.preferences)
     debugImplementation(libs.firebase.appcheck.debug)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
