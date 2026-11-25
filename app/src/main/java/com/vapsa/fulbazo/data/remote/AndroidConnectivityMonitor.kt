@@ -43,6 +43,12 @@ class AndroidConnectivityMonitor @Inject constructor(
             override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
                 trySend(hasInternet())
             }
+
+            // Android le corta la red a la app en segundo plano y se la devuelve al abrirla:
+            // la red es la misma, así que onAvailable no vuelve a avisar.
+            override fun onBlockedStatusChanged(network: Network, blocked: Boolean) {
+                trySend(!blocked && hasInternet(network))
+            }
         }
         manager.registerDefaultNetworkCallback(callback)
         trySend(hasInternet())
@@ -51,8 +57,8 @@ class AndroidConnectivityMonitor @Inject constructor(
         .distinctUntilChanged()
         .stateIn(scope, SharingStarted.Eagerly, hasInternet())
 
-    private fun hasInternet(): Boolean {
-        val capabilities = manager.getNetworkCapabilities(manager.activeNetwork) ?: return false
+    private fun hasInternet(network: Network? = manager.activeNetwork): Boolean {
+        val capabilities = manager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 }
