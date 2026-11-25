@@ -7,9 +7,11 @@ import com.vapsa.fulbazo.domain.model.ProfileUpdate
 import com.vapsa.fulbazo.domain.model.User
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
@@ -43,6 +45,11 @@ class FakeAuthRepository(
 
     private val _currentUser = MutableStateFlow<User?>(null)
     override val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
+
+    override fun observeSessionUserId(): Flow<String?> = currentUser.map { it?.id }
+
+    /** En memoria no hay sesión guardada: solo sigue la de esta ejecución. */
+    override suspend fun restoreSession(): User? = _currentUser.value
 
     override suspend fun login(email: String, password: String): AuthResult {
         delay(latencyMillis)

@@ -8,27 +8,30 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.vapsa.fulbazo.notifications.InvitationNotifier
 import com.vapsa.fulbazo.ui.FulbazoApp
+import com.vapsa.fulbazo.ui.navigation.LaunchTarget
 import com.vapsa.fulbazo.ui.theme.FulbazoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    /** Se pone en `true` cuando la app se abre desde una notificación de invitación. */
-    private var openInvitations by mutableStateOf(false)
+    /** Pantalla que pidió la notificación o el widget con el que se abrió la app. */
+    private var requestedRoute by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        openInvitations = intent.wantsInvitations()
+        // Al girar la pantalla o volver desde Recientes, Android entrega otra vez el mismo
+        // Intent: ahí ya no se navega de nuevo.
+        val fromHistory = intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0
+        if (savedInstanceState == null && !fromHistory) requestedRoute = LaunchTarget.routeFrom(intent)
 
         setContent {
             FulbazoTheme {
                 FulbazoApp(
-                    openInvitationsRequested = openInvitations,
-                    onInvitationsOpened = { openInvitations = false },
+                    requestedRoute = requestedRoute,
+                    onRouteOpened = { requestedRoute = null },
                 )
             }
         }
@@ -36,9 +39,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent.wantsInvitations()) openInvitations = true
+        LaunchTarget.routeFrom(intent)?.let { requestedRoute = it }
     }
-
-    private fun Intent?.wantsInvitations(): Boolean =
-        this?.getBooleanExtra(InvitationNotifier.EXTRA_OPEN_INVITATIONS, false) == true
 }

@@ -5,13 +5,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.vapsa.fulbazo.MainActivity
 import com.vapsa.fulbazo.R
 import com.vapsa.fulbazo.domain.model.InvitationStatus
 import com.vapsa.fulbazo.domain.model.MatchInvitation
@@ -21,6 +19,7 @@ import com.vapsa.fulbazo.domain.repository.InvitationRepository
 import com.vapsa.fulbazo.domain.repository.MatchRepository
 import com.vapsa.fulbazo.domain.repository.PlayerRepository
 import com.vapsa.fulbazo.ui.match.formatMatchDate
+import com.vapsa.fulbazo.ui.navigation.LaunchTarget
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -72,14 +71,10 @@ class InvitationNotifier @Inject constructor(
         val match = matchRepository.observeMatches().first().firstOrNull { it.id == invitation.matchId }
         val court = match?.let { m -> courtRepository.observeCourts().first().firstOrNull { it.id == m.courtId } }
 
-        val openIntent = Intent(appContext, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra(EXTRA_OPEN_INVITATIONS, true)
-        }
         val pendingIntent = PendingIntent.getActivity(
             appContext,
             invitation.id.hashCode(),
-            openIntent,
+            LaunchTarget.intent(appContext, LaunchTarget.Invitations),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
@@ -126,10 +121,7 @@ class InvitationNotifier @Inject constructor(
         appContext.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
 
-    companion object {
-        private const val CHANNEL_ID = "match_invitations"
-
-        /** Extra del Intent que pide abrir la bandeja de invitaciones. */
-        const val EXTRA_OPEN_INVITATIONS = "open_invitations"
+    private companion object {
+        const val CHANNEL_ID = "match_invitations"
     }
 }

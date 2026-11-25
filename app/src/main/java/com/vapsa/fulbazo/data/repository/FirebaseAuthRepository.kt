@@ -10,6 +10,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.Source
 import com.vapsa.fulbazo.data.local.ProfilePhotoEncoder
 import com.vapsa.fulbazo.data.remote.Collections
 import com.vapsa.fulbazo.domain.model.AuthError
@@ -20,10 +21,15 @@ import com.vapsa.fulbazo.domain.model.User
 import com.vapsa.fulbazo.domain.repository.AuthRepository
 import com.vapsa.fulbazo.domain.repository.ConnectivityMonitor
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeoutOrNull
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -47,6 +53,48 @@ class FirebaseAuthRepository @Inject constructor(
 
     private val _currentUser = MutableStateFlow<User?>(null)
     override val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
+
+    /** Firebase guarda la sesión en el teléfono; el listener avisa al entrar y al salir. */
+    override fun observeSessionUserId(): Flow<String?> = callbackFlow {
+        val listener = FirebaseAuth.AuthStateListener { trySend(it.currentUser?.uid) }
+        auth.addAuthStateListener(listener)
+        awaitClose { auth.removeAuthStateListener(listener) }
+    }.distinctUntilChanged()
+
+    /**
+     * Con internet lee el perfil del servidor; sin red (o si tarda demasiado), el que
+     * Firestore dejó guardado, para que la app abra igual.
+     */
+    override suspend fun restoreSession(): User? {
+        _currentUser.value?.let { return it }
+        val uid = auth.currentUser?.uid ?: return null
+        val user = try {
+            if (connectivity.isOnline.value) {
+                withTimeoutOrNull(RESTORE_TIMEOUT_MILLIS) { loadUser(uid) } ?: loadCachedUser(uid)
+            } else {
+                loadCachedUser(uid)
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: FirebaseFirestoreException) {
+            Log.w(TAG, "No se pudo leer el perfil al abrir la app", e)
+            // Solo si falló la red; una cuenta sin permiso vuelve al Login.
+            if (e.code == FirebaseFirestoreException.Code.UNAVAILABLE) loadCachedUser(uid) else null
+        } catch (e: Exception) {
+            Log.w(TAG, "No se pudo recuperar la sesión", e)
+            null
+        }
+        if (user != null) _currentUser.value = user
+        return user
+    }
+
+    /** Perfil guardado por Firestore en el teléfono, o `null` si no está. */
+    private suspend fun loadCachedUser(uid: String): User? = try {
+        loadUser(uid, Source.CACHE)
+    } catch (e: FirebaseFirestoreException) {
+        Log.w(TAG, "El perfil no está guardado en el teléfono", e)
+        null
+    }
 
     override suspend fun login(email: String, password: String): AuthResult = runCatchingAuth(isRegister = false) {
         val uid = requireNotNull(auth.signInWithEmailAndPassword(email.trim(), password).await().user).uid
@@ -165,12 +213,14 @@ class FirebaseAuthRepository @Inject constructor(
      * Lee el perfil completo: la parte pública y la privada. Las cuentas creadas
      * antes de separar los datos privados se migran aquí.
      */
-    private suspend fun loadUser(uid: String): User? {
-        val publicSnap = users.document(uid).get().await()
+    private suspend fun loadUser(uid: String, source: Source = Source.DEFAULT): User? {
+        val publicSnap = users.document(uid).get(source).await()
         if (!publicSnap.exists()) return null
-        val privateSnap = privateDoc(uid).get().await()
+        val privateSnap = privateDoc(uid).get(source).await()
         if (!privateSnap.exists() && publicSnap.contains(FIELD_PHONE)) {
             val user = toUser(publicSnap, publicSnap) ?: return null
+            // Sin red no se migra: la escritura se quedaría esperando.
+            if (source == Source.CACHE) return user
             firestore.runBatch { batch ->
                 batch.set(privateDoc(uid), user.toPrivateDocument())
                 batch.update(
@@ -220,6 +270,9 @@ class FirebaseAuthRepository @Inject constructor(
 
     private companion object {
         const val TAG = "FirebaseAuthRepository"
+
+        /** Lo máximo que la app espera al servidor antes de abrir con lo guardado. */
+        const val RESTORE_TIMEOUT_MILLIS = 6_000L
         const val USERS = Collections.USERS
         const val NICKNAMES = Collections.NICKNAMES
         const val FIELD_UID = "uid"

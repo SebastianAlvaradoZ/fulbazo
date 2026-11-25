@@ -16,11 +16,13 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -71,15 +73,54 @@ import com.vapsa.fulbazo.ui.theme.OnBrand
 import com.vapsa.fulbazo.ui.theme.brandGradient
 
 /**
- * Contenedor principal: TopAppBar, NavigationBar y el grafo de navegación.
+ * Raíz de la app. Si hay una sesión guardada abre directo en el Mapa; si no, en el
+ * Login. Mientras la busca se ve el logo.
  *
- * @param openInvitationsRequested `true` cuando se tocó una notificación de invitación.
+ * @param requestedRoute pantalla que pidió una notificación o el widget.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FulbazoApp(
-    openInvitationsRequested: Boolean = false,
-    onInvitationsOpened: () -> Unit = {},
+    requestedRoute: String? = null,
+    onRouteOpened: () -> Unit = {},
+    sessionViewModel: SessionViewModel = hiltViewModel(),
+) {
+    val sessionStart by sessionViewModel.start.collectAsStateWithLifecycle()
+    if (sessionStart == SessionStart.CHECKING) {
+        StartScreen()
+    } else {
+        FulbazoContent(
+            startDestination = if (sessionStart == SessionStart.SIGNED_IN) AppRoutes.MAP else AppRoutes.LOGIN,
+            requestedRoute = requestedRoute,
+            onRouteOpened = onRouteOpened,
+        )
+    }
+}
+
+/** El logo sobre el verde de la marca mientras se recupera la sesión. */
+@Composable
+private fun StartScreen() {
+    StatusBarIcons(lightIcons = true)
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(brandGradient()),
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            painter = painterResource(R.drawable.ic_fulbazo_logo),
+            contentDescription = stringResource(R.string.app_name),
+            modifier = Modifier.size(112.dp),
+        )
+    }
+}
+
+/** Contenedor principal: TopAppBar, NavigationBar y el grafo de navegación. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FulbazoContent(
+    startDestination: String,
+    requestedRoute: String?,
+    onRouteOpened: () -> Unit,
     badgeViewModel: InvitationBadgeViewModel = hiltViewModel(),
     connectivityViewModel: ConnectivityViewModel = hiltViewModel(),
 ) {
@@ -101,11 +142,18 @@ fun FulbazoApp(
 
     NotificationPermissionRequest(enabled = isLoggedIn)
 
-    // Al tocar la notificación se abre la bandeja (solo si hay sesión).
-    LaunchedEffect(openInvitationsRequested, isLoggedIn) {
-        if (openInvitationsRequested && isLoggedIn) {
-            navController.navigate(AppRoutes.INVITATIONS) { launchSingleTop = true }
-            onInvitationsOpened()
+    // Al tocar la notificación o el widget se abre su pantalla; si no había sesión,
+    // espera a que se inicie. Login y Registro son las únicas pantallas sin sesión.
+    val hasSession = currentDestination != null &&
+        currentDestination.route !in setOf(AppRoutes.LOGIN, AppRoutes.REGISTER)
+    LaunchedEffect(requestedRoute, hasSession) {
+        if (requestedRoute != null && hasSession) {
+            navController.navigate(requestedRoute) {
+                // Queda sobre la pantalla principal: Atrás vuelve al Mapa.
+                popUpTo(AppRoutes.MAP)
+                launchSingleTop = true
+            }
+            onRouteOpened()
         }
     }
 
@@ -193,7 +241,11 @@ fun FulbazoApp(
                 .consumeWindowInsets(innerPadding),
         ) {
             OfflineBanner(visible = !isOnline)
-            AppNavHost(navController = navController, modifier = Modifier.weight(1f))
+            AppNavHost(
+                navController = navController,
+                modifier = Modifier.weight(1f),
+                startDestination = startDestination,
+            )
         }
     }
 }
